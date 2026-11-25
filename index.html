@@ -1,0 +1,2541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HARD MAKER - FM-7/77 (F-BASIC V3.0) 完全再現版</title>
+<style>
+  :root {
+    --bezel-bg: #1e2026;
+    --bezel-border: #3a3f4b;
+    --accent: #38bdf8;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #182030 0%, #0b0e14 70%);
+    color: var(--text);
+    font-family: "Segoe UI", "Meiryo", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 12px 36px;
+  }
+  header {
+    width: 100%;
+    max-width: 920px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .title-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .fm7-logo {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(14,165,233,0.4);
+  }
+  .mode-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid #34d399;
+    background: rgba(16, 185, 129, 0.16);
+    color: #6ee7b7;
+  }
+  .mode-pill.original {
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.16);
+    color: #fcd34d;
+  }
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: 0.06em;
+    color: #f8fafc;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* CRTモニタ筐体 */
+  .crt-cabinet {
+    background: linear-gradient(180deg, #2a2d36 0%, #1b1d23 100%);
+    border: 2px solid #434957;
+    border-radius: 14px;
+    padding: 16px 18px 14px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12);
+    width: 100%;
+    max-width: 920px;
+  }
+  .crt-screen-wrap {
+    position: relative;
+    background: #000;
+    border: 4px solid #0d0f13;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 24px rgba(0,0,0,0.9), 0 0 0 1px #4b5263;
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    cursor: pointer;
+  }
+  #fm7Canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .crt-screen-wrap.scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.22) 3px,
+      rgba(0, 0, 0, 0.22) 4px
+    );
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.35);
+  }
+
+  /* トースト通知 */
+  .toast-bar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #e0f2fe;
+    border: 1px solid #38bdf8;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 5;
+  }
+  .toast-bar.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* IME日本語/カナ入力ポップアップバー（パソコン名入力時に表示） */
+  #imeBar {
+    display: none;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #0f172a;
+    border: 1px solid #38bdf8;
+    border-radius: 6px;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  #imeBar.active { display: flex; }
+  #imeBar label {
+    font-size: 12px;
+    color: #7dd3fc;
+    font-weight: 600;
+  }
+  #imeInput {
+    flex: 1;
+    min-width: 180px;
+    background: #020617;
+    color: #fff;
+    border: 1px solid #475569;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-family: monospace;
+  }
+  #imeSubmit {
+    background: #0284c7;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  #imeSubmit:hover { background: #0369a1; }
+
+  /* モニタ下部コントロールバー */
+  .controls-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #323744;
+    font-size: 12px;
+  }
+  .ctrl-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  button.ctrl-btn {
+    background: #2b3140;
+    color: #e2e8f0;
+    border: 1px solid #4b5563;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  button.ctrl-btn:hover {
+    background: #3b4458;
+    border-color: #64748b;
+  }
+  button.ctrl-btn.on {
+    background: #1d4ed8;
+    border-color: #60a5fa;
+    color: #fff;
+  }
+  button.ctrl-btn.fix-on {
+    background: #065f46;
+    border-color: #34d399;
+    color: #ecfdf5;
+  }
+  button.ctrl-btn.orig-on {
+    background: #78350f;
+    border-color: #f59e0b;
+    color: #fef3c7;
+  }
+  button.ctrl-btn.danger {
+    background: #7f1d1d;
+    border-color: #ef4444;
+  }
+  button.ctrl-btn.danger:hover {
+    background: #991b1b;
+  }
+  .vol-wrap {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--muted);
+  }
+  input[type="range"] {
+    width: 72px;
+    accent-color: #38bdf8;
+  }
+
+  /* クリック補助キーパッド */
+  .softkeys {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #14171f;
+    border: 1px solid #2e3442;
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .key-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .skey {
+    background: #252a36;
+    color: #f1f5f9;
+    border: 1px solid #475569;
+    border-bottom-width: 3px;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    min-width: 34px;
+    text-align: center;
+  }
+  .skey:active {
+    transform: translateY(1px);
+    border-bottom-width: 2px;
+  }
+  .skey.action {
+    background: #1e3a5f;
+    border-color: #38bdf8;
+    color: #e0f2fe;
+  }
+  .skey.warn {
+    background: #4c1d24;
+    border-color: #f87171;
+  }
+
+  /* セーブ / ロードパネル */
+  .save-panel {
+    margin-top: 12px;
+    width: 100%;
+    max-width: 920px;
+    background: #131722;
+    border: 1px solid #2b3245;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .save-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .save-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #7dd3fc;
+  }
+  .save-io-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+  }
+  .slot-card {
+    background: #1a2030;
+    border: 1px solid #2e3852;
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .slot-card.autosave {
+    border-color: #3b82f6;
+    background: #172136;
+  }
+  .slot-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+  .slot-meta {
+    font-size: 11px;
+    color: #94a3b8;
+    min-height: 30px;
+    line-height: 1.45;
+  }
+  .slot-meta strong { color: #fde047; }
+  .slot-actions {
+    display: flex;
+    gap: 5px;
+  }
+  .slot-actions button {
+    flex: 1;
+    padding: 4px 6px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: 1px solid #475569;
+    background: #252c3d;
+    color: #e2e8f0;
+    cursor: pointer;
+  }
+  .slot-actions button:hover:not(:disabled) {
+    background: #334155;
+    border-color: #64748b;
+  }
+  .slot-actions button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .slot-actions button.save-btn {
+    background: #0f4c81;
+    border-color: #38bdf8;
+    color: #e0f2fe;
+  }
+  .slot-actions button.load-btn {
+    background: #065f46;
+    border-color: #34d399;
+    color: #ecfdf5;
+  }
+  .slot-actions button.del-btn {
+    flex: 0 0 auto;
+    background: #4c1d24;
+    border-color: #f87171;
+  }
+
+  /* マニュアル（誌面108-109ページ再現） */
+  details.manual {
+    margin-top: 12px;
+    width: 100%;
+    max-width: 920px;
+    background: #131722;
+    border: 1px solid #2b3245;
+    border-radius: 10px;
+    padding: 10px 16px;
+  }
+  details.manual summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: #7dd3fc;
+    font-size: 14px;
+    user-select: none;
+  }
+  .manual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #cbd5e1;
+  }
+  .manual-card {
+    background: #1a2030;
+    border: 1px solid #2e3852;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .manual-card h3 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: #fde047;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 4px;
+  }
+  .manual-card ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .kbd {
+    display: inline-block;
+    background: #0f172a;
+    border: 1px solid #475569;
+    border-radius: 3px;
+    padding: 0 5px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #f8fafc;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-badge">
+    <span class="fm7-logo">FM-7 / 77 F-BASIC V3.0</span>
+    <h1>HARD MAKER</h1>
+    <span id="modePill" class="mode-pill">バグ修正モード</span>
+  </div>
+  <div class="subtitle">MORIYA GAMES (1989) ／ マイコンBASICマガジン 1990年3月号 P.108-110 完全再現版</div>
+</header>
+
+<div class="crt-cabinet">
+  <div id="screenWrap" class="crt-screen-wrap scanlines" tabindex="0" title="クリックしてキーボード入力を有効化">
+    <canvas id="fm7Canvas" width="640" height="400"></canvas>
+    <div id="toastBar" class="toast-bar"></div>
+  </div>
+
+  <!-- パソコン名入力時の日本語/半角カナ自動変換入力バー -->
+  <div id="imeBar">
+    <label for="imeInput">パソコン名入力 (ひらがな/カタカナ自動変換・最大10文字):</label>
+    <input id="imeInput" type="text" maxlength="20" placeholder="例: ｶｹﾞmk2 / かげmk2">
+    <button id="imeSubmit" type="button">決定 (Enter)</button>
+  </div>
+
+  <div class="controls-bar">
+    <div class="ctrl-group">
+      <button id="btnBgm" class="ctrl-btn on" type="button">BGM: ON</button>
+      <button id="btnSfx" class="ctrl-btn on" type="button">効果音: ON</button>
+      <button id="btnTone" class="ctrl-btn on" type="button" title="FM-77のS13M512エンベロープ＋スピーカー特性を再現">音色: FM-77風</button>
+      <div class="vol-wrap">
+        <span>音量</span>
+        <input id="volSlider" type="range" min="0" max="100" value="40">
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <button id="btnMode" class="ctrl-btn fix-on" type="button" title="長時間プレイでの数値暴走・決算漏れ・在庫マイナス等の原作バグを修正">モード: バグ修正</button>
+      <button id="btnSpeed" class="ctrl-btn" type="button">文字速度: 実機準拠</button>
+      <button id="btnScanline" class="ctrl-btn on" type="button">走査線: ON</button>
+      <button id="btnReset" class="ctrl-btn danger" type="button">リセット</button>
+    </div>
+  </div>
+
+  <!-- マウスでも遊べる補助キーパッド -->
+  <div class="softkeys">
+    <div class="key-row" id="numKeys">
+      <button class="skey" data-key="1">1</button>
+      <button class="skey" data-key="2">2</button>
+      <button class="skey" data-key="3">3</button>
+      <button class="skey" data-key="4">4</button>
+      <button class="skey" data-key="5">5</button>
+      <button class="skey" data-key="6">6</button>
+      <button class="skey" data-key="7">7</button>
+      <button class="skey" data-key="8">8</button>
+      <button class="skey" data-key="9">9</button>
+      <button class="skey" data-key="0">0</button>
+    </div>
+    <div class="key-row">
+      <button class="skey action" data-key=" ">SPACE</button>
+      <button class="skey action" data-key="Enter">ENTER</button>
+      <button class="skey warn" data-key="*">* (入力しなおし)</button>
+      <button class="skey" data-key="Backspace">BS</button>
+    </div>
+  </div>
+</div>
+
+<!-- セーブ / ロード パネル -->
+<section class="save-panel">
+  <div class="save-header">
+    <div class="save-title">セーブ / ロード（ブラウザ自動保存 ＋ JSONバックアップ対応）</div>
+    <div class="save-io-btns">
+      <button id="btnExportSave" class="ctrl-btn" type="button">現在の状態をファイル保存 (.json)</button>
+      <button id="btnImportSave" class="ctrl-btn" type="button">ファイルから読込 (.json)</button>
+      <input id="fileImportInput" type="file" accept=".json,application/json" style="display:none">
+    </div>
+  </div>
+  <div class="slot-grid" id="slotGrid"></div>
+</section>
+
+<details class="manual">
+  <summary>遊び方・バグ修正モードの違い・コマンド＆ステータス説明</summary>
+  <div class="manual-grid">
+    <div class="manual-card">
+      <h3>ストーリー＆目的</h3>
+      <p style="margin:0 0 6px;">1989年、パソコン業界は戦国時代に突入。NEC、シャープ、富士通、電波新聞、もりやゲームズの5社から1つを選び、社長として他の4社をすべて買収すればクリア！</p>
+      <p style="margin:0;">※NECが一番強く、もりやゲームズが一番弱いです。すべての会社を買い取る前に自社が買収されるとゲームオーバーになります。</p>
+    </div>
+    <div class="manual-card">
+      <h3>バグ修正モードの変更点</h3>
+      <ul>
+        <li><b>170行 技術力上書き修正</b>：他社の技術力が毎月プレイヤーの0.97倍に上書きされるバグを直し、各社が自社技術×0.97になるよう修正（下限100保護）。</li>
+        <li><b>1350行 他社の年度決算実装</b>：他社も毎年4月に売上の97%を運営金へ繰り越し＆売上/支出リセットを行い、長期プレイでのマイナス暴走・12桁崩れを防止。</li>
+        <li><b>70行 在庫マイナス爆発防止</b>：販売台数が在庫を超えないよう上限処理。</li>
+        <li><b>460行 生産の資金チェック＆0台キャンセル</b>：資金不足時は生産不可にし、0台入力でコマンド選択へ戻れます。</li>
+        <li><b>490行 パソコン売る改善</b>：全8機種に販促効果が効くよう修正。</li>
+        <li><b>520行 給料0詰み防止</b>：給料は最低1万円以上を維持。</li>
+      </ul>
+    </div>
+    <div class="manual-card">
+      <h3>コマンド一覧 (1〜12)</h3>
+      <ul>
+        <li><b>1:企業買う</b> — 会社番号(1〜5)を指定して買収</li>
+        <li><b>2:パソコン開発</b> — 最大8機種(NO.0〜7)。8/16/32bit選択。定価が原価の2倍以内ならまずまず売れます</li>
+        <li><b>3:製造中止</b> — 機種を1つ削除</li>
+        <li><b>4:価格変える</b> — 開発した機種の定価を再設定</li>
+        <li><b>5:パソコン生産</b> — 台数×原価の費用。社員数・給料が多いほど上限増</li>
+        <li><b>6:パソコン売る</b> — いつもより多く売れる</li>
+        <li><b>7:社員雇う</b> — 定年で毎月減る社員を補充。技術も少し上昇</li>
+        <li><b>8:給料変える</b> — 1人あたりの月給(万円)を変更</li>
+        <li><b>9:技術あげる</b> — 費用なしで技術を少し上げる</li>
+        <li><b>10:他社見る / 11:パソコン見る</b> — ターン消費なしで確認</li>
+        <li><b>12:何もしない</b> — そのままターン終了</li>
+      </ul>
+    </div>
+    <div class="manual-card">
+      <h3>操作方法＆セーブのコツ</h3>
+      <ul>
+        <li><span class="kbd">SPACE</span>：ゲーム開始・ステータス/決算画面の続行</li>
+        <li><span class="kbd">0</span>〜<span class="kbd">9</span> + <span class="kbd">ENTER</span>：コマンドや数値の入力</li>
+        <li><span class="kbd">*</span>：入力しなおし（原作仕様） / <span class="kbd">Backspace</span>：1文字消去</li>
+        <li><b>セーブ機能</b>：毎月の自ターン開始時に自動保存（AUTOSAVE）され、スロット1〜3やJSONファイルにもいつでも保存・復元できます。</li>
+        <li><b>音色切替</b>：「FM-77風」は原作MMLの <code>S13M512</code>（立ち上がり持続エンベロープ）＋実機スピーカーの温かみある帯域特性を再現しています。</li>
+      </ul>
+    </div>
+  </div>
+</details>
+
+<script>
+(() => {
+  "use strict";
+
+  // =========================================================================
+  // 1. 内蔵 1-bit ビットマップフォント (ASCII + 半角カタカナ + 漢字4文字)
+  // =========================================================================
+  const FONT_DATA = {"f8":{" ":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"!":[0,16,16,16,16,16,16,16,16,16,0,0,24,24,0,0],"\"":[54,36,72,0,0,0,0,0,0,0,0,0,0,0,0,0],"#":[0,36,36,36,36,254,72,72,72,72,252,72,72,72,72,0],"$":[16,56,84,146,146,80,48,24,20,18,146,146,84,56,16,0],"%":[0,98,146,148,148,104,8,16,32,44,82,82,146,140,0,0],"&":[0,48,72,72,72,72,48,32,84,148,136,136,148,98,0,0],"'":[48,48,16,32,0,0,0,0,0,0,0,0,0,0,0,0],"(":[4,8,16,16,32,32,32,32,32,32,32,16,16,8,4,0],")":[64,32,16,16,8,8,8,8,8,8,8,16,16,32,64,0],"*":[0,0,0,16,146,84,56,16,56,84,146,16,0,0,0,0],"+":[0,0,0,0,16,16,16,254,16,16,16,0,0,0,0,0],",":[0,0,0,0,0,0,0,0,0,0,0,48,48,16,32,0],"-":[0,0,0,0,0,0,0,124,0,0,0,0,0,0,0,0],".":[0,0,0,0,0,0,0,0,0,0,0,0,48,48,0,0],"/":[0,2,2,4,4,8,8,16,32,32,64,64,128,128,0,0],"0":[0,48,72,132,132,132,132,132,132,132,132,132,72,48,0,0],"1":[0,16,112,16,16,16,16,16,16,16,16,16,16,16,0,0],"2":[0,48,72,132,132,4,8,8,16,32,32,64,128,252,0,0],"3":[0,48,72,132,132,4,8,48,8,4,132,132,72,48,0,0],"4":[0,8,8,24,24,40,40,72,72,136,252,8,8,8,0,0],"5":[0,252,128,128,128,176,200,132,4,4,4,132,72,48,0,0],"6":[0,48,72,132,132,128,176,200,132,132,132,132,72,48,0,0],"7":[0,252,4,4,8,8,8,16,16,16,32,32,32,32,0,0],"8":[0,48,72,132,132,132,72,48,72,132,132,132,72,48,0,0],"9":[0,48,72,132,132,132,132,76,52,4,132,132,72,48,0,0],":":[0,0,0,0,0,48,48,0,0,0,0,48,48,0,0,0],";":[0,0,0,0,0,48,48,0,0,0,0,48,48,16,32,0],"<":[0,0,4,8,16,32,64,128,64,32,16,8,4,0,0,0],"=":[0,0,0,0,0,124,0,0,0,124,0,0,0,0,0,0],">":[0,0,128,64,32,16,8,4,8,16,32,64,128,0,0,0],"?":[0,48,72,132,132,4,8,16,32,32,0,0,48,48,0,0],"@":[0,56,68,130,154,170,170,170,170,170,156,128,66,60,0,0],"A":[0,16,16,40,40,40,40,68,68,68,124,130,130,130,0,0],"B":[0,248,132,130,130,130,132,248,132,130,130,130,132,248,0,0],"C":[0,56,68,130,130,128,128,128,128,128,130,130,68,56,0,0],"D":[0,248,132,130,130,130,130,130,130,130,130,130,132,248,0,0],"E":[0,254,128,128,128,128,128,252,128,128,128,128,128,254,0,0],"F":[0,254,128,128,128,128,128,252,128,128,128,128,128,128,0,0],"G":[0,56,68,130,130,128,128,128,142,130,130,130,70,58,0,0],"H":[0,130,130,130,130,130,130,254,130,130,130,130,130,130,0,0],"I":[0,56,16,16,16,16,16,16,16,16,16,16,16,56,0,0],"J":[0,4,4,4,4,4,4,4,4,4,132,132,72,48,0,0],"K":[0,130,132,132,136,144,144,160,208,136,136,132,130,130,0,0],"L":[0,128,128,128,128,128,128,128,128,128,128,128,128,254,0,0],"M":[0,130,130,198,198,198,198,170,170,170,170,146,146,146,0,0],"N":[0,130,130,194,194,162,162,146,146,138,138,134,134,130,0,0],"O":[0,56,68,130,130,130,130,130,130,130,130,130,68,56,0,0],"P":[0,248,132,130,130,130,132,248,128,128,128,128,128,128,0,0],"Q":[0,56,68,130,130,130,130,130,130,130,146,138,68,58,0,0],"R":[0,248,132,130,130,130,132,248,136,136,132,132,130,130,0,0],"S":[0,56,68,130,130,128,96,24,4,2,130,130,68,56,0,0],"T":[0,254,16,16,16,16,16,16,16,16,16,16,16,16,0,0],"U":[0,130,130,130,130,130,130,130,130,130,130,130,68,56,0,0],"V":[0,130,130,130,68,68,68,68,40,40,40,16,16,16,0,0],"W":[0,146,146,146,146,170,170,170,170,68,68,68,68,68,0,0],"X":[0,130,130,68,68,40,40,16,40,40,68,68,130,130,0,0],"Y":[0,130,130,68,68,40,40,16,16,16,16,16,16,16,0,0],"Z":[0,254,2,4,4,8,8,16,32,32,64,64,128,254,0,0],"[":[124,64,64,64,64,64,64,64,64,64,64,64,64,64,124,0],"\\":[0,130,130,68,68,40,40,124,16,16,124,16,16,16,0,0],"]":[124,4,4,4,4,4,4,4,4,4,4,4,4,4,124,0],"^":[16,40,68,0,0,0,0,0,0,0,0,0,0,0,0,0],"_":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,255],"`":[32,16,8,0,0,0,0,0,0,0,0,0,0,0,0,0],"a":[0,0,0,0,0,0,120,132,4,60,68,132,140,118,0,0],"b":[0,128,128,128,128,128,184,196,130,130,130,130,196,184,0,0],"c":[0,0,0,0,0,0,60,66,128,128,128,128,66,60,0,0],"d":[0,2,2,2,2,2,58,70,130,130,130,130,70,58,0,0],"e":[0,0,0,0,0,0,56,68,130,254,128,128,66,60,0,0],"f":[0,24,32,32,32,32,248,32,32,32,32,32,32,32,0,0],"g":[0,0,0,0,0,0,58,68,68,56,64,124,130,130,124,0],"h":[0,128,128,128,128,128,184,196,130,130,130,130,130,130,0,0],"i":[0,0,16,16,0,0,16,16,16,16,16,16,16,16,0,0],"j":[0,0,16,16,0,0,16,16,16,16,16,16,16,16,96,0],"k":[0,128,128,128,128,128,132,136,144,160,208,136,132,130,0,0],"l":[0,16,16,16,16,16,16,16,16,16,16,16,16,16,0,0],"m":[0,0,0,0,0,0,172,210,146,146,146,146,146,146,0,0],"n":[0,0,0,0,0,0,184,196,130,130,130,130,130,130,0,0],"o":[0,0,0,0,0,0,56,68,130,130,130,130,68,56,0,0],"p":[0,0,0,0,0,0,184,196,130,130,130,196,184,128,128,0],"q":[0,0,0,0,0,0,58,70,130,130,130,70,58,2,2,0],"r":[0,0,0,0,0,0,46,48,32,32,32,32,32,32,0,0],"s":[0,0,0,0,0,0,124,130,128,96,28,2,130,124,0,0],"t":[0,0,32,32,32,32,248,32,32,32,32,32,32,24,0,0],"u":[0,0,0,0,0,0,130,130,130,130,130,130,70,58,0,0],"v":[0,0,0,0,0,0,130,130,68,68,40,40,16,16,0,0],"w":[0,0,0,0,0,0,146,146,146,170,170,68,68,68,0,0],"x":[0,0,0,0,0,0,130,68,40,16,16,40,68,130,0,0],"y":[0,0,0,0,0,0,130,130,68,68,40,40,16,32,192,0],"z":[0,0,0,0,0,0,254,4,8,16,32,64,128,254,0,0],"{":[28,16,16,16,16,16,16,32,16,16,16,16,16,16,28,0],"|":[16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16],"}":[112,16,16,16,16,16,16,8,16,16,16,16,16,16,112,0],"~":[100,152,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"｡":[0,0,0,0,0,0,0,0,0,0,0,48,72,72,48,0],"｢":[124,64,64,64,64,64,64,64,64,64,64,64,64,0,0,0],"｣":[0,0,4,4,4,4,4,4,4,4,4,4,4,4,124,0],"､":[0,0,0,0,0,0,0,0,0,0,0,0,64,32,16,0],"･":[0,0,0,0,0,0,0,48,48,0,0,0,0,0,0,0],"ｦ":[0,0,252,4,4,4,252,4,4,8,8,16,32,64,0,0],"ｧ":[0,0,0,0,0,252,4,40,48,32,32,64,64,128,0,0],"ｨ":[0,0,0,0,4,4,8,16,48,208,16,16,16,16,0,0],"ｩ":[0,0,0,0,16,16,254,130,130,2,4,4,8,16,0,0],"ｪ":[0,0,0,0,0,0,0,124,16,16,16,16,254,0,0,0],"ｫ":[0,0,0,0,8,8,8,254,40,40,72,72,136,24,0,0],"ｬ":[0,0,0,0,64,70,122,226,36,36,16,16,16,16,0,0],"ｭ":[0,0,0,0,0,0,120,8,8,8,8,254,0,0,0,0],"ｮ":[0,0,0,0,0,0,124,4,4,124,4,4,124,4,0,0],"ｯ":[0,0,0,0,0,34,146,82,66,4,4,8,16,32,64,0],"ｰ":[0,0,0,0,0,0,128,126,0,0,0,0,0,0,0,0],"ｱ":[0,0,254,2,18,20,20,16,16,16,32,32,64,64,0,0],"ｲ":[0,2,2,2,4,4,8,24,40,200,8,8,8,8,0,0],"ｳ":[16,16,16,254,130,130,130,130,2,4,4,8,16,32,0,0],"ｴ":[0,0,0,124,16,16,16,16,16,16,16,254,0,0,0,0],"ｵ":[8,8,8,8,254,24,24,40,40,40,72,72,136,24,0,0],"ｶ":[16,16,16,16,254,18,18,18,34,34,34,66,66,140,0,0],"ｷ":[0,16,16,28,240,16,16,30,248,8,8,8,8,8,0,0],"ｸ":[16,16,16,62,34,66,130,4,4,8,8,16,32,64,0,0],"ｹ":[32,32,32,32,126,72,72,136,8,8,16,16,32,64,0,0],"ｺ":[0,0,0,252,4,4,4,4,4,4,4,4,252,4,0,0],"ｻ":[0,72,72,72,252,72,72,72,8,8,16,16,32,64,0,0],"ｼ":[0,96,16,0,2,194,34,4,4,8,8,16,32,192,0,0],"ｽ":[0,252,4,4,8,8,8,16,16,40,36,68,66,130,0,0],"ｾ":[32,32,32,32,46,242,34,36,36,32,32,32,32,30,0,0],"ｿ":[0,0,132,68,68,4,4,8,8,8,16,16,32,64,0,0],"ﾀ":[32,32,32,62,98,66,66,164,20,8,8,20,32,64,0,0],"ﾁ":[0,4,8,112,16,16,16,254,16,16,16,32,32,64,0,0],"ﾂ":[0,34,18,146,66,66,2,4,4,8,8,16,32,64,0,0],"ﾃ":[0,124,0,0,0,254,16,16,16,16,32,32,64,128,0,0],"ﾄ":[0,32,32,32,32,32,56,36,34,32,32,32,32,32,0,0],"ﾅ":[0,16,16,16,16,254,16,16,16,16,32,32,64,128,0,0],"ﾆ":[0,0,0,124,0,0,0,0,0,0,0,254,0,0,0,0],"ﾇ":[0,0,126,2,2,68,36,20,8,20,20,34,66,128,0,0],"ﾈ":[16,16,16,252,4,8,8,16,48,84,146,16,16,16,0,0],"ﾉ":[0,4,4,4,4,4,8,8,8,16,16,32,64,128,0,0],"ﾊ":[0,0,36,36,36,36,34,34,66,66,66,130,130,0,0,0],"ﾋ":[0,64,64,64,64,70,120,64,64,64,64,64,62,0,0,0],"ﾌ":[0,0,252,4,4,4,4,8,8,8,16,16,32,64,0,0],"ﾍ":[0,0,32,80,80,136,136,4,4,4,2,2,2,0,0,0],"ﾎ":[0,16,16,16,254,16,16,84,84,82,146,146,16,16,0,0],"ﾏ":[0,0,252,4,4,4,8,136,80,32,32,16,16,16,0,0],"ﾐ":[0,0,96,24,4,0,112,12,0,0,224,28,2,0,0,0],"ﾑ":[0,16,16,16,16,16,32,32,36,36,66,78,242,2,0,0],"ﾒ":[0,4,4,4,100,20,8,12,20,18,32,32,64,128,0,0],"ﾓ":[0,0,124,16,16,16,16,254,16,16,16,16,14,0,0,0],"ﾔ":[0,64,64,70,58,226,36,20,16,16,8,8,8,8,0,0],"ﾕ":[0,0,0,124,4,4,4,4,8,8,8,254,0,0,0,0],"ﾖ":[0,0,0,252,4,4,4,252,4,4,4,252,4,0,0,0],"ﾗ":[0,0,120,0,0,0,252,4,4,8,8,16,32,64,0,0],"ﾘ":[0,68,68,68,68,68,68,68,4,4,8,8,16,32,0,0],"ﾙ":[0,16,80,80,80,80,82,82,82,84,84,152,152,144,0,0],"ﾚ":[0,64,64,64,64,64,66,66,66,68,68,72,80,96,0,0],"ﾛ":[0,0,0,252,132,132,132,132,132,132,132,252,132,0,0,0],"ﾜ":[0,0,252,132,132,132,132,4,4,4,8,8,16,32,0,0],"ﾝ":[0,0,128,64,32,2,2,2,4,4,8,16,32,192,0,0],"ﾞ":[16,8,32,16,0,0,0,0,0,0,0,0,0,0,0,0],"ﾟ":[48,72,72,48,0,0,0,0,0,0,0,0,0,0,0,0],"円":[0,0,126,74,74,74,74,126,66,66,66,66,66,70,0,0],"‥":[0,0,0,0,0,0,0,0,0,0,0,0,66,66,0,0]},"f16":{"年":[4096,4096,16380,8320,16512,32896,8184,4224,4224,4224,65534,128,128,128,128,0],"月":[8176,4112,4112,4112,8176,4112,4112,4112,8176,4112,4112,8208,8208,16400,32880,0],"円":[0,32764,16644,16644,16644,16644,16644,32764,16388,16388,16388,16388,16388,16388,16412,0],"人":[256,256,256,256,640,640,640,1088,1088,2080,2080,4112,8200,16388,32770,0],"‥":[0,0,0,0,0,0,12336,12336,0,0,0,0,0,0,0,0]}};
+
+  // =========================================================================
+  // 2. 原作 DATA 文 (1430〜2070行 完全そのまま)
+  // =========================================================================
+  const COMPANY_NAMES = ["", "NEC", "SHARP", "FUJITSU", "DEMPA", "MORIYA GAMES"];
+
+  const HEX_LINES = [
+    "1F80,78FF,FFF0,3FFD,FFC0,FC7F,83C1,FC7C,FFE1,C0FF,031F,8060,FFF7,03FC",
+    "707E,0003,FFFE,3FFF,C1F8,0007,7FF8,1FE3,83F8,039E,1FF0,3FC0,07FC,1E3C",
+    "0FE0,FF01,C7FF,F8FE,0781,FE0F,07FF,F1E0,071F,FFFE,01FF,C100,0FFF,FFE0",
+    "FF00,0FF0,007F,C001,FFFF,FE03,FFFF,FC07,FFFF,FFEF,F000,FF00,0FFE,001F",
+    "FFFF,FE3F,FFFF,FCFF,8003,FCFF,000F,F003,FFF0,01FC,007F,FBF8,00FF,EFFC",
+    "0000,0FF0,00FF,007E,7FC0,1FC0,00FF,BF80,01FF,3FFF,FFE0,FFFF,FFF0,1F83",
+    "FE01,FC00,7FE3,F800,FFE0,FFFF,FF8F,FFFF,FF03,F01F,F01F,CFFF,E03F,FFFF",
+    "FC00,0007,FEFF,000F,F07F,FFFF,C1FD,FFF8,03FF,FFFC,07FE,003F,EFF0,00FF",
+    "1FFF,FFFE,1FC3,FFF0,3F80,0000,FFFF,FFFC,FF00,0FF3,F000,0FF9,FC03,FFC3",
+    "F800,0000,FFFF,FE0F,F000,FF7E,0000,7FDF,C003,FFBF,8000,0000,0000,00FC",
+    "7000,0000,0000,000E,39C0,0000,0000,0000,3838,0000,0001,FFBC,79F3,E7FE",
+    "7F78,F604,C187,0E43,2609,833F,860C,3870,181E,0C19,8430,61C3,80C0,1C60",
+    "CC01,C70E,1C06,1033,8EF0,07F0,71F0,787F,0FE0,0000,0F00,0000,0000,0400",
+    "FFFF,07FF,FEFE,00FE,FFFF,C01F,C01F,FFF8,FFFF,DFE0,3FDF,FFFE,07FC,03FF",
+    "FF9F,FFFB,FE0F,FBFF,FFE1,FFC0,7F07,FBF8,007F,E3FF,7F01,FC7F,FC0F,E07F",
+    "7FFF,8FFE,FFEF,E03F,9FDF,C1FC,0FEF,FFF1,FFFF,FDFF,FFF7,F1FC,3F83,FDFC",
+    "003F,FFFF,BFFF,FDFF,FFC7,FFFF,3FFF,F7EF,FBF7,FFFE,7FFF,FCFF,FFC7,FFFE",
+    "FCFE,7EFE,001F,E03F,DFFF,E0FF,FFDF,8F8F,DFC0,07F8,03FC,F8F1,C03F,F81F",
+    "FFF0,1F87,E01F,81FF,E000,0003,FFE0,0FFF,03E3,C70F,FFFC,0FFF,F3EF,DF87",
+    "FFFC,7FFF,F1FF,9F80,7E1F,FFE0,0000,3FFF,E0FF,FF0F,BF7E,3FFF,FCFF,FFFF",
+    "FFFF,3FFF,F9F8,07E7,FE7E,01F8,FC0F,C000,01FC,1FC7,E07E,3FFF,FCFC,0003",
+    "F00F,FFFF,FCFF,FFE7,E01F,87E1,FC0F,E7E0,1F80,0007,E03F,3F00,FCFF,FFF3",
+    "F000,0FC0,00FD,FBF3,F01F,9FFF,FC00,03FF,FF1F,807E,0000,1F80,00FC,03F3",
+    "F7EF,CFFF,FC3F,FFF3,E3C7,CF80,3E7F,FFC0,7007,FFF8,7FFF,F800,007E,3FF3",
+    "FFFF,CF8F,1F3F,FFFC,3FFF,FF8F,1F3E,00F9,F9F8,01F0,03FF,01FF,FFE0,0001",
+    "F8FF,CFFF,FF3E,3C7C,FC00,0000,0FFE,3C7C,FC07,E7E3,F807,E003,F007,E01F",
+    "8000,07F0,3F3F,00FC,F8F1,F3F0,000F,C03F,F8F1,F1FF,FF1F,83F8,1F80,0FC0",
+    "1F80,7E00,000F,FFF8,FC03,F3E3,C7CF,FFFC,3FFF,FFE3,C7C0,FFE0,7E03,F87E",
+    "003F,007E,01F8,0000,0FFF,83F0,0FCF,8F1F,3FFF,FC3F,FFC3,FFBF,FEFF,FBFE",
+    "EFFB,3FEF,FFBF,FEFF,FBFE,1C07,701C,C070,01C0,0701,1C07,701C,C070,5D17",
+    "745D,D174,45D1,1745,5D17,745D,D174"
+  ];
+
+  // BGM MML データ (MU$(0..35))
+  const MU_DATA = [
+    "S13M512T123L8O3AO4CD4DFE8.C16", "S13M512T123L8O3AO4CD4DFE8.C16", "FGF4E4DE",
+    "FGF4E4DE", "D4C4O3A2", "D4C4O3A2", "AO4CD4DFE8.C16", "AO4CD4DFE8.C16", "FGA4A4AG",
+    "FGA4A4AG", "F4G4F2", "F4G4F2", "O5CO4AG4G4FA", "F4E4E4F4", "G4C4O5CO4AG4", "G4C4F4E4",
+    "G4AO5CD2", "E4FAB4A4", "DEF4E4D4", "G4F4A4B-4", "C4F4O4A4GF", "O5C4O4B4A4GF", "G4A4O5C2",
+    "G4A4G4F4", "O4AO5CD4DFE8.C16", "E4F4F4G4", "FGF4E4DE", "A4A4A4B-4", "D4C4O4A2", "F4G4F2",
+    "AO5CD4DFE8.C16", "O3AO4CD4DFE8.C16", "FGA4A4AG", "FGA4A4AG", "F4G4F2", "F4G4F2"
+  ];
+
+  // メッセージ＆カラー (BS$(0..79))
+  const BS_RAW = [
+    ["ｺﾏﾝﾄﾞ",6],["ｷｷﾞｮｳ ｶｳ",3],["ﾊﾟｿｺﾝ ｶｲﾊﾂ",3],["ｾｲｿﾞｳ ﾁｭｳｼ",3],["ｶｶｸ ｶｴﾙ",3],["ﾊﾟｿｺﾝ ｾｲｻﾝ",3],
+    ["ﾊﾟｿｺﾝ ｳﾙ",3],["ｼｬｲﾝ ﾔﾄｳ",3],["ｷｭｳﾘｮｳ ｶｴﾙ",3],["ｷﾞｼﾞｭﾂｱｹﾞﾙ",3],["ﾀｼｬ ﾐﾙ",3],["ﾊﾟｿｺﾝ ﾐﾙ",3],
+    ["ﾅﾆﾓ ｼﾅｲ",3],["PRESENTS",7],["<< ﾊｰﾄﾞ ﾒｰｶｰ >>",7],["PUSH SPACE KEY",6],
+    ["ｶｲｼｬｦ ｴﾗﾝﾃﾞｸﾀﾞｻｲ",4],["ﾄﾞﾉ ｶｲｼｬﾆ ｼﾏｽｶ(1-5)?",7],["ﾊ",7],["ｳﾝｴｲｷﾝ ｻﾞﾝﾀﾞｶ",4],["ｳﾘｱｹﾞ",4],
+    ["ｼｼｭﾂ",4],["ﾘｴｷ",4],["ｼｬｲﾝｽｳ",4],["ｷｭｳﾘｮｳ",4],["ｷﾞｼﾞｭﾂ",4],["ｼｪｱ",4],
+    ["ﾏﾝ円",5],["ﾏﾝ円",5],["ﾏﾝ円",5],["ﾏﾝ円",5],
+    ["人",5],["ﾏﾝ円",5],["",0],["%",5],["ﾉ ｺﾏﾝﾄﾞ ｼﾞｯｺｳﾁｭｳ",7],["ｱﾅﾀﾉ ﾊﾞﾝﾃﾞｽ",7],["ｱﾅﾀﾉﾌﾟﾚｲｼﾃｲﾙｶｲｼｬﾊ",7],
+    ["ﾆ ﾖｯﾃ ｶｲﾄﾗﾚﾃｼﾏｲﾏｼﾀ ﾂﾏﾘ ﾄｰｻﾝ‥",7],["GAME OVER････････ﾏﾀ ﾌﾟﾚｲｼﾃﾈ!",7],
+    ["ｺﾏﾝﾄﾞｦ ﾄﾞｳｿﾞ(1-12)?",7],["ﾄﾞﾉ ｶｲｼｬｦ ｶｲﾏｽｶ(1-5)?",7],["ｦ ｶｳﾆﾊ",7],["ｲﾘﾏｽ",7],
+    ["ｼﾞﾌﾞﾝﾃﾞ ｼﾞﾌﾞﾝﾉｶｲｼｬｦ ｶｯﾃ ﾄﾞｰｽﾝﾀﾞ!!",7],["ｵｶﾈｶﾞﾀﾘﾏｾﾝ",7],["ｶｲﾏｽｶ(1=YES 2=NO)?",7],
+    ["ﾄﾞﾉ NOﾃﾞ ﾊﾟｿｺﾝｦ ﾂｸﾘﾏｽｶ(0-7)?",7],["ｿﾉ NOﾊ ｽﾃﾞﾆ ﾂｸｯﾃｱﾘﾏｽ",7],["ｶｲﾊﾂ ﾋﾖｳｶﾞ",7],
+    ["ﾄﾞﾉ BIT ﾉ ﾊﾟｿｺﾝﾆ ｼﾏｽｶ(8･16･32)?",7],["ﾊﾟｿｺﾝﾉ ﾅﾏｴｦ ｷﾒﾃｸﾀﾞｻｲ(MAX 10)@",7],
+    ["1 ﾀﾞｲ ｱﾀﾘﾉ ｹﾞﾝｶﾊ",7],["1 ﾀﾞｲ ｱﾀﾘﾉ ﾃｲｶｦ ｲｸﾗﾆ ｼﾏｽｶ?",7],["ﾄﾞﾉ NOｦ ｹｼﾏｽｶ(0-7)?",7],
+    ["ﾄﾞﾉ NOﾉ ﾊﾟｿｺﾝﾉ ｶｶｸｦ ｶｴﾏｽｶ(0-7)?",7],["ｿﾉ NOﾊ ﾏﾀﾞﾂｸｯﾃ ｱﾘﾏｾﾝ",7],
+    ["ﾄﾞﾉ NOﾉ ﾊﾟｿｺﾝｦ ｾｲｻﾝ ｼﾏｽｶ(0-7)?",7],["ﾄﾞﾚﾀﾞｹ ｾｲｻﾝ ｼﾏｽｶ(1-",7],
+    ["ﾃｸﾏｸﾏﾔｺﾝ ﾃｸﾏｸﾏｲｺﾝ ﾀｸｻﾝﾊﾟｿｺﾝｶﾞｳﾚﾙﾖｳﾆﾅｰﾚ!",7],["ｼｬｲﾝｦ ﾅﾝﾆﾝ ﾔﾄｲﾏｽｶ?",7],
+    ["ｷｭｳﾘｮｳ(ｹﾞｯｷｭｳ)ｦ ｲｸﾗﾆ ｶｴﾏｽｶ?",7],["ｼｬﾁｮｳﾓ ｼｬｲﾝﾓ ﾐﾅ ｶｿﾞｸ ｺｹｺｹ ﾖｸｺｹ ｷﾝﾁｮｰﾙ",7],
+    ["ﾄﾞﾉ ｶｲｼｬﾉ ｽﾃｰﾀｽｦ ﾐﾏｽｶ(1-5)?",7],["年ﾄﾞ ｹｯｻﾝ ﾎｳｺｸ",5],["ｳﾘｱｹﾞｷﾝ",3],
+    ["ｾﾞｲｷﾝｦ ｳﾘｱｹﾞﾉ 3%ｵｻﾒﾏｽ",2],["年ﾄﾞ ｸﾘｺｼ ｳﾝｴｲｷﾝ",3],["年ﾄﾞ ｳﾝｴｲｷﾝ",7],
+    ["ｱﾅﾀﾊ ｽﾍﾞﾃﾉ ｶｲｼｬｦ ｶｲﾄﾘﾏｼﾀ",7],["ｱﾅﾀﾊ ｺﾝﾋﾟｭｰﾀｰｷﾞｮｳｶｲﾉ ﾃｲｵｳﾄ ﾅｯﾀ!!",7],
+    ["ｽﾀｯﾌ ｼｮｳｶｲ",7],["ﾌﾟﾛｸﾞﾗﾑ / MORIYA GAMES",7],["ﾌﾟﾛｸﾞﾗﾑ / ﾓﾘﾔﾏ ｶｽﾞﾔ",7],
+    ["ﾃｽﾄﾌﾟﾚｲ / ｻｶｸﾞﾁ ﾄﾓﾋｺ",7],["ﾃｽﾄﾌﾟﾚｲ / ﾌｶｶﾞﾜ ｿｳｲﾁﾛｳ",7],["ﾃｽﾄﾌﾟﾚｲ / ﾏﾂｼﾀ ｱｷﾗ",7],
+    ["ｾｲｻｸ ﾁｮｻｸ / 1989 MORIYA GAMES",7],["HARD MAKER",7],["- ｵﾜﾘ -",7]
+  ];
+
+  // 各社初期ステータス (1:NEC, 2:SHARP, 3:FUJITSU, 4:DEMPA, 5:MORIYA GAMES)
+  const INITIAL_ST = [
+    null,
+    [156325200, 0, 0, 0, 43241, 52, 40000, 53, 10600000, -1],
+    [127410000, 0, 0, 0, 32654, 48, 35000, 17,  3400000, -1],
+    [100532000, 0, 0, 0, 35601, 44, 40000, 16,  3200000, -1],
+    [ 96385200, 0, 0, 0, 27054, 35, 30000, 11,  2200000, -1],
+    [ 78520300, 0, 0, 0, 14562, 26, 20000,  3,   600000, -1]
+  ];
+
+  // 枠内の黒抜き矩形 (2060-2070行)
+  const WINDOW_RECTS = [
+    [16, 8, 63, 23],
+    [80, 8, 335, 23],
+    [16, 32, 239, 55],
+    [16, 64, 239, 167],
+    [256, 32, 623, 167],
+    [352, 8, 623, 31]
+  ];
+
+  // ビットマップデータ展開
+  const ALL_WORDS = [];
+  for (const line of HEX_LINES) {
+    for (const tok of line.split(",")) {
+      ALL_WORDS.push(parseInt(tok.trim(), 16));
+    }
+  }
+  function wordsToBits(words) {
+    const bits = new Uint8Array(words.length * 16);
+    let p = 0;
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      for (let b = 15; b >= 0; b--) {
+        bits[p++] = (w >> b) & 1;
+      }
+    }
+    return bits;
+  }
+  let wIdx = 0;
+  const takeBits = (n) => {
+    const slice = ALL_WORDS.slice(wIdx, wIdx + n);
+    wIdx += n;
+    return wordsToBits(slice);
+  };
+  const BMP_NEC = takeBits(40);
+  const BMP_SHA = takeBits(98);
+  const BMP_FUJ = takeBits(44);
+  const BMP_DEM = takeBits(67);
+  const BMP_MOR = takeBits(154);
+  const BMP_WAK = takeBits(24);
+
+  // =========================================================================
+  // 3. FM-7 グラフィック＆テキスト VRAM エミュレータ (640x400 / 8色パレット)
+  // =========================================================================
+  const FM7_RGB = [
+    [0, 0, 0],       // 0: 黒
+    [36, 96, 255],   // 1: 青
+    [255, 36, 36],   // 2: 赤
+    [255, 48, 255],  // 3: マゼンタ
+    [32, 240, 64],   // 4: 緑
+    [48, 248, 255],  // 5: シアン
+    [255, 248, 36],  // 6: 黄
+    [255, 255, 255]  // 7: 白
+  ];
+
+  class FM7Screen {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext("2d");
+      this.width = 640;
+      this.height = 400;
+      this.vram = new Uint8Array(this.width * this.height);
+      this.palette = [0, 1, 2, 3, 4, 5, 6, 7];
+      this.imgData = this.ctx.createImageData(this.width, this.height);
+      this.curX = 0;
+      this.curY = 0;
+      this.fgColor = 7;
+      this.bgColor = 0;
+      this.dirty = true;
+    }
+
+    cls() {
+      this.vram.fill(0);
+      this.curX = 0;
+      this.curY = 0;
+      this.dirty = true;
+      this.flush();
+    }
+
+    resetPalette() {
+      for (let i = 0; i < 8; i++) this.palette[i] = i;
+      this.dirty = true;
+      this.flush();
+    }
+
+    setPalette(slot, rgbIndex) {
+      this.palette[slot & 7] = rgbIndex & 7;
+      this.dirty = true;
+      this.flush();
+    }
+
+    locate(x, y) {
+      this.curX = Math.max(0, Math.min(39, x | 0));
+      this.curY = Math.max(0, Math.min(24, y | 0));
+    }
+
+    color(fg, bg) {
+      if (fg !== undefined) this.fgColor = fg & 7;
+      if (bg !== undefined) this.bgColor = bg & 7;
+    }
+
+    lineBF(x1, y1, x2, y2, col) {
+      const lx1 = Math.max(0, Math.min(x1, x2) | 0);
+      const lx2 = Math.min(639, Math.max(x1, x2) | 0);
+      const ly1 = Math.max(0, Math.min(y1, y2) | 0);
+      const ly2 = Math.min(199, Math.max(y1, y2) | 0);
+      const c = col & 7;
+      for (let y = ly1 * 2; y <= ly2 * 2 + 1; y++) {
+        const rowOff = y * 640;
+        for (let x = lx1; x <= lx2; x++) {
+          this.vram[rowOff + x] = c;
+        }
+      }
+      this.dirty = true;
+    }
+
+    putMono(x1, y1, x2, y2, bits, col) {
+      const w = (x2 - x1 + 1) | 0;
+      const h = (y2 - y1 + 1) | 0;
+      const c = col & 7;
+      let p = 0;
+      for (let dy = 0; dy < h; dy++) {
+        const py = (y1 + dy) * 2;
+        if (py < 0 || py + 1 >= 400) { p += w; continue; }
+        const r0 = py * 640;
+        const r1 = (py + 1) * 640;
+        for (let dx = 0; dx < w; dx++) {
+          if (bits[p++]) {
+            const px = x1 + dx;
+            if (px >= 0 && px < 640) {
+              this.vram[r0 + px] = c;
+              this.vram[r1 + px] = c;
+            }
+          }
+        }
+      }
+      this.dirty = true;
+    }
+
+    putWak(x1, y1, bits) {
+      for (let dy = 0; dy < 8; dy++) {
+        const py = (y1 + dy) * 2;
+        if (py < 0 || py + 1 >= 400) continue;
+        const r0 = py * 640;
+        const r1 = (py + 1) * 640;
+        for (let dx = 0; dx < 16; dx++) {
+          const i = dy * 16 + dx;
+          const c = bits[i] | (bits[128 + i] << 1) | (bits[256 + i] << 2);
+          const px = x1 + dx;
+          if (px >= 0 && px < 640) {
+            this.vram[r0 + px] = c;
+            this.vram[r1 + px] = c;
+          }
+        }
+      }
+      this.dirty = true;
+    }
+
+    symbol(x, y, text, mx, my, col) {
+      const c = col & 7;
+      let cx = x | 0;
+      const baseY = (y | 0) * 2;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const rows = FONT_DATA.f8[ch] || FONT_DATA.f8[" "];
+        for (let ry = 0; ry < 16; ry++) {
+          const bits = rows[ry];
+          if (!bits) continue;
+          for (let rx = 0; rx < 8; rx++) {
+            if ((bits >> (7 - rx)) & 1) {
+              for (let sy = 0; sy < my; sy++) {
+                const py = baseY + ry * my + sy;
+                if (py < 0 || py >= 400) continue;
+                const rowOff = py * 640;
+                for (let sx = 0; sx < mx; sx++) {
+                  const px = cx + rx * mx + sx;
+                  if (px >= 0 && px < 640) {
+                    this.vram[rowOff + px] = c;
+                  }
+                }
+              }
+            }
+          }
+        }
+        cx += 8 * mx;
+      }
+      this.dirty = true;
+    }
+
+    scrollConsole() {
+      const topY = 22 * 16;
+      const rowH = 16;
+      const copyStart = (topY + rowH) * 640;
+      const copyEnd = 25 * 16 * 640;
+      const dstStart = topY * 640;
+      this.vram.copyWithin(dstStart, copyStart, copyEnd);
+      this.vram.fill(0, 24 * 16 * 640, 25 * 16 * 640);
+      this.dirty = true;
+    }
+
+    newline() {
+      this.curX = 0;
+      this.curY++;
+      if (this.curY > 24) {
+        this.scrollConsole();
+        this.curY = 24;
+      }
+    }
+
+    drawCellChar(ch) {
+      if (this.curX >= 40) {
+        this.newline();
+      }
+      const baseX = this.curX * 16;
+      const baseY = this.curY * 16;
+      const fg = this.fgColor;
+      const bg = this.bgColor;
+
+      for (let ry = 0; ry < 16; ry++) {
+        const rowOff = (baseY + ry) * 640 + baseX;
+        for (let rx = 0; rx < 16; rx++) {
+          this.vram[rowOff + rx] = bg;
+        }
+      }
+
+      if (FONT_DATA.f16[ch]) {
+        const rows = FONT_DATA.f16[ch];
+        for (let ry = 0; ry < 16; ry++) {
+          const bits = rows[ry];
+          const rowOff = (baseY + ry) * 640 + baseX;
+          for (let rx = 0; rx < 16; rx++) {
+            if ((bits >> (15 - rx)) & 1) {
+              this.vram[rowOff + rx] = fg;
+            }
+          }
+        }
+      } else {
+        const rows = FONT_DATA.f8[ch] || FONT_DATA.f8[" "];
+        for (let ry = 0; ry < 16; ry++) {
+          const bits = rows[ry];
+          const rowOff = (baseY + ry) * 640 + baseX;
+          for (let rx = 0; rx < 8; rx++) {
+            if ((bits >> (7 - rx)) & 1) {
+              this.vram[rowOff + rx * 2] = fg;
+              this.vram[rowOff + rx * 2 + 1] = fg;
+            }
+          }
+        }
+      }
+
+      this.curX++;
+      this.dirty = true;
+    }
+
+    printCharAt(str, idx) {
+      const code = str.charCodeAt(idx);
+      if (code === 17 && idx + 1 < str.length) {
+        this.fgColor = str.charCodeAt(idx + 1) & 7;
+        return 2;
+      }
+      if (code === 28) {
+        this.curX++;
+        if (this.curX >= 40) this.newline();
+        return 1;
+      }
+      this.drawCellChar(str[idx]);
+      return 1;
+    }
+
+    print(str, withNewline = true) {
+      let i = 0;
+      while (i < str.length) {
+        i += this.printCharAt(str, i);
+      }
+      if (withNewline) this.newline();
+      this.flush();
+    }
+
+    backspaceCell() {
+      if (this.curX > 0) {
+        this.curX--;
+        const baseX = this.curX * 16;
+        const baseY = this.curY * 16;
+        for (let ry = 0; ry < 16; ry++) {
+          const rowOff = (baseY + ry) * 640 + baseX;
+          for (let rx = 0; rx < 16; rx++) {
+            this.vram[rowOff + rx] = 0;
+          }
+        }
+        this.dirty = true;
+        this.flush();
+      }
+    }
+
+    flush() {
+      if (!this.dirty) return;
+      const data = this.imgData.data;
+      const vram = this.vram;
+      const pal = this.palette;
+      const len = vram.length;
+      for (let i = 0; i < len; i++) {
+        const rgb = FM7_RGB[pal[vram[i]]];
+        const o = i * 4;
+        data[o] = rgb[0];
+        data[o + 1] = rgb[1];
+        data[o + 2] = rgb[2];
+        data[o + 3] = 255;
+      }
+      this.ctx.putImageData(this.imgData, 0, 0);
+      this.dirty = false;
+    }
+  }
+
+  // =========================================================================
+  // 4. FM-77 PSG (AY-3-8910) 音源エミュレータ
+  //    ・原作 S13M512 (立ち上がり持続ハードウェアエンベロープ) 再現
+  //    ・FM-77 スピーカー特性 (ローパス + 中低域の厚み + ほのかな空間響き)
+  // =========================================================================
+  const NOTE_SEMITONES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+  class FM7Audio {
+    constructor() {
+      this.ctx = null;
+      this.masterGain = null;
+      this.bgmBus = null;
+      this.lowpass = null;
+      this.warmth = null;
+      this.delayWet = null;
+      this.bgmEnabled = true;
+      this.sfxEnabled = true;
+      this.fm77Tone = true; // true: FM-77実機スピーカー＋S13M512風 / false: 生PSG
+      this.volume = 0.40;
+      this.bgmRunning = false;
+      this.bgmTimer = null;
+      this.muIndex = 0;
+      this.chStates = [
+        { tempo: 123, oct: 4, len: 8, envShape: 13, envPeriod: 512, nextTime: 0 },
+        { tempo: 123, oct: 4, len: 8, envShape: 13, envPeriod: 512, nextTime: 0 }
+      ];
+      this.activeNodes = new Set();
+    }
+
+    unlock() {
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        this.ctx = new AudioCtx();
+
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = this.volume;
+
+        // FM-77 筐体スピーカーの温かい帯域特性
+        this.warmth = this.ctx.createBiquadFilter();
+        this.warmth.type = "peaking";
+        this.warmth.frequency.value = 320;
+        this.warmth.Q.value = 0.85;
+        this.warmth.gain.value = this.fm77Tone ? 5.0 : 0.0;
+
+        this.lowpass = this.ctx.createBiquadFilter();
+        this.lowpass.type = "lowpass";
+        this.lowpass.frequency.value = this.fm77Tone ? 2450 : 14000;
+        this.lowpass.Q.value = this.fm77Tone ? 0.9 : 0.5;
+
+        this.bgmBus = this.ctx.createGain();
+        this.bgmBus.gain.value = 1.0;
+
+        // ほのかな筐体共鳴/空間の深み (極短いショートディレイ)
+        const delay = this.ctx.createDelay(0.1);
+        delay.delayTime.value = 0.017;
+        const delayFilter = this.ctx.createBiquadFilter();
+        delayFilter.type = "lowpass";
+        delayFilter.frequency.value = 1600;
+        this.delayWet = this.ctx.createGain();
+        this.delayWet.gain.value = this.fm77Tone ? 0.20 : 0.0;
+
+        // ドライ経路: bgmBus -> warmth -> lowpass -> masterGain -> destination
+        this.bgmBus.connect(this.warmth);
+        this.warmth.connect(this.lowpass);
+        this.lowpass.connect(this.masterGain);
+
+        // ウェット経路 (FM-77の深み): bgmBus -> delay -> delayFilter -> delayWet -> masterGain
+        this.bgmBus.connect(delay);
+        delay.connect(delayFilter);
+        delayFilter.connect(this.delayWet);
+        this.delayWet.connect(this.masterGain);
+
+        this.masterGain.connect(this.ctx.destination);
+      }
+      if (this.ctx.state === "suspended") {
+        this.ctx.resume().catch(() => {});
+      }
+    }
+
+    setToneMode(isFm77) {
+      this.fm77Tone = isFm77;
+      if (this.ctx && this.lowpass && this.warmth && this.delayWet) {
+        const now = this.ctx.currentTime;
+        this.warmth.gain.setTargetAtTime(isFm77 ? 5.0 : 0.0, now, 0.03);
+        this.lowpass.frequency.setTargetAtTime(isFm77 ? 2450 : 14000, now, 0.03);
+        this.lowpass.Q.setTargetAtTime(isFm77 ? 0.9 : 0.5, now, 0.03);
+        this.delayWet.gain.setTargetAtTime(isFm77 ? 0.20 : 0.0, now, 0.03);
+      }
+    }
+
+    setVolume(v) {
+      this.volume = v;
+      if (this.masterGain && this.ctx) {
+        this.masterGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.02);
+      }
+    }
+
+    // 1110行 BEEP1:BEEP0 タイプライタークリック音
+    beepClick() {
+      if (!this.sfxEnabled) return;
+      this.unlock();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(this.fm77Tone ? 980 : 1180, now);
+      gain.gain.setValueAtTime(0.085, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.017);
+      osc.connect(gain);
+      gain.connect(this.fm77Tone ? this.lowpass : this.masterGain);
+      osc.start(now);
+      osc.stop(now + 0.019);
+    }
+
+    parseMML(mml, state) {
+      const events = [];
+      let i = 0;
+      const s = mml.toUpperCase();
+      while (i < s.length) {
+        const c = s[i++];
+        if (c === "T") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.tempo = Math.max(32, Math.min(255, parseInt(num, 10)));
+        } else if (c === "O") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.oct = parseInt(num, 10);
+        } else if (c === "L") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.len = parseInt(num, 10);
+        } else if (c === "S") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.envShape = parseInt(num, 10);
+        } else if (c === "M") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.envPeriod = parseInt(num, 10);
+        } else if (c === "V") {
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") i++;
+        } else if (c === "R" || NOTE_SEMITONES[c] !== undefined) {
+          let semi = NOTE_SEMITONES[c];
+          if (c !== "R") {
+            if (i < s.length && (s[i] === "+" || s[i] === "#")) { semi++; i++; }
+            else if (i < s.length && s[i] === "-") { semi--; i++; }
+          }
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          let lenVal = num ? parseInt(num, 10) : state.len;
+          let dur = (240 / state.tempo) / lenVal;
+          while (i < s.length && s[i] === ".") {
+            dur *= 1.5;
+            i++;
+          }
+          let freq = 0;
+          if (c !== "R") {
+            const midi = (state.oct + 1) * 12 + semi;
+            freq = 440 * Math.pow(2, (midi - 69) / 12);
+          }
+          events.push({
+            freq,
+            dur,
+            envShape: state.envShape,
+            envPeriod: state.envPeriod
+          });
+        }
+      }
+      return events;
+    }
+
+    scheduleNote(ev, startTime, chIdx, gainPeak = 0.13) {
+      if (!this.ctx || ev.freq <= 0) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(ev.freq, startTime);
+
+      // FM-77風: 2ch間に極わずかなデチューン (±1.8 cent) でユニゾンに奥行きを出す
+      if (this.fm77Tone) {
+        const detuneCents = chIdx === 0 ? -1.8 : (chIdx === 1 ? 1.8 : 0);
+        osc.detune.setValueAtTime(detuneCents, startTime);
+      }
+
+      const dur = ev.dur;
+      const gateEnd = startTime + Math.max(0.025, dur * 0.92);
+      const stopTime = startTime + dur * 0.98;
+
+      if (this.fm77Tone && ev.envShape === 13) {
+        // AY-3-8910 S13 (Attack=1, Hold=1) + M512:
+        // 約0.09秒かけて 0 -> 最大音量 へふわっと立ち上がり持続するオルガン風PSG音色
+        const rampSec = Math.min(dur * 0.65, Math.max(0.035, (ev.envPeriod / 512) * 0.095));
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(gainPeak * 0.22, startTime + 0.006);
+        gain.gain.linearRampToValueAtTime(gainPeak, startTime + rampSec);
+        gain.gain.setValueAtTime(gainPeak, Math.max(startTime + rampSec, gateEnd));
+        gain.gain.linearRampToValueAtTime(0.0001, stopTime);
+      } else {
+        // 標準ゲート矩形波 (ゲームオーバーや生PSGモード)
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(gainPeak, startTime + 0.004);
+        gain.gain.setValueAtTime(gainPeak * 0.82, gateEnd);
+        gain.gain.linearRampToValueAtTime(0.0001, stopTime);
+      }
+
+      osc.connect(gain);
+      gain.connect(this.bgmBus);
+      osc.start(startTime);
+      osc.stop(stopTime + 0.005);
+
+      this.activeNodes.add(osc);
+      osc.onended = () => {
+        this.activeNodes.delete(osc);
+        osc.disconnect();
+        gain.disconnect();
+      };
+    }
+
+    startBGM() {
+      this.stopBGM();
+      this.bgmRunning = true;
+      this.muIndex = 0;
+      this.unlock();
+      if (!this.ctx) return;
+      const t0 = this.ctx.currentTime + 0.05;
+      this.chStates = [
+        { tempo: 123, oct: 4, len: 8, envShape: 13, envPeriod: 512, nextTime: t0 },
+        { tempo: 123, oct: 4, len: 8, envShape: 13, envPeriod: 512, nextTime: t0 }
+      ];
+      this._pumpBGM();
+    }
+
+    _pumpBGM() {
+      if (!this.bgmRunning || !this.ctx) return;
+
+      const now = this.ctx.currentTime;
+      while (this.chStates[0].nextTime < now + 1.5) {
+        const m0 = MU_DATA[this.muIndex];
+        const m1 = MU_DATA[this.muIndex + 1];
+        const ev0 = this.parseMML(m0, this.chStates[0]);
+        const ev1 = this.parseMML(m1, this.chStates[1]);
+
+        if (this.bgmEnabled) {
+          let t = this.chStates[0].nextTime;
+          for (const e of ev0) {
+            if (e.freq > 0) this.scheduleNote(e, t, 0, 0.115);
+            t += e.dur;
+          }
+          this.chStates[0].nextTime = t;
+
+          t = this.chStates[1].nextTime;
+          for (const e of ev1) {
+            if (e.freq > 0) this.scheduleNote(e, t, 1, 0.105);
+            t += e.dur;
+          }
+          this.chStates[1].nextTime = t;
+        } else {
+          const d0 = ev0.reduce((a, b) => a + b.dur, 0);
+          const d1 = ev1.reduce((a, b) => a + b.dur, 0);
+          this.chStates[0].nextTime += d0;
+          this.chStates[1].nextTime += d1;
+        }
+
+        const syncT = Math.max(this.chStates[0].nextTime, this.chStates[1].nextTime);
+        this.chStates[0].nextTime = syncT;
+        this.chStates[1].nextTime = syncT;
+
+        this.muIndex += 2;
+        if (this.muIndex > 35) this.muIndex = 0;
+      }
+
+      this.bgmTimer = setTimeout(() => this._pumpBGM(), 250);
+    }
+
+    stopBGM() {
+      this.bgmRunning = false;
+      if (this.bgmTimer) {
+        clearTimeout(this.bgmTimer);
+        this.bgmTimer = null;
+      }
+      for (const osc of this.activeNodes) {
+        try { osc.stop(); } catch (_) {}
+      }
+      this.activeNodes.clear();
+    }
+
+    playGameOverJingle() {
+      if (!this.bgmEnabled && !this.sfxEnabled) return;
+      this.unlock();
+      if (!this.ctx) return;
+      const p = "L8BGAFGEFDCCCCR4O5C8";
+      const tracks = ["O2" + p, "O3" + p, "O4" + p];
+      const t0 = this.ctx.currentTime + 0.03;
+      tracks.forEach((tr, idx) => {
+        const st = { tempo: 120, oct: 4, len: 8, envShape: 0, envPeriod: 0, nextTime: t0 };
+        const evs = this.parseMML(tr, st);
+        let t = t0;
+        for (const e of evs) {
+          if (e.freq > 0) this.scheduleNote(e, t, idx, 0.095);
+          t += e.dur;
+        }
+      });
+    }
+  }
+
+  // =========================================================================
+  // 5. ひらがな/全角カタカナ → FM-7半角カタカナ変換
+  // =========================================================================
+  const FULL_TO_HALF_KANA = {
+    "ア":"ｱ","イ":"ｲ","ウ":"ｳ","エ":"ｴ","オ":"ｵ",
+    "カ":"ｶ","キ":"ｷ","ク":"ｸ","ケ":"ｹ","コ":"ｺ",
+    "サ":"ｻ","シ":"ｼ","ス":"ｽ","セ":"ｾ","ソ":"ｿ",
+    "タ":"ﾀ","チ":"ﾁ","ツ":"ﾂ","テ":"ﾃ","ト":"ﾄ",
+    "ナ":"ﾅ","ニ":"ﾆ","ヌ":"ﾇ","ネ":"ﾈ","ノ":"ﾉ",
+    "ハ":"ﾊ","ヒ":"ﾋ","フ":"ﾌ","ヘ":"ﾍ","ホ":"ﾎ",
+    "マ":"ﾏ","ミ":"ﾐ","ム":"ﾑ","メ":"ﾒ","モ":"ﾓ",
+    "ヤ":"ﾔ","ユ":"ﾕ","ヨ":"ﾖ",
+    "ラ":"ﾗ","リ":"ﾘ","ル":"ﾙ","レ":"ﾚ","ロ":"ﾛ",
+    "ワ":"ﾜ","ヲ":"ｦ","ン":"ﾝ",
+    "ァ":"ｧ","ィ":"ｨ","ゥ":"ｩ","ェ":"ｪ","ォ":"ｫ",
+    "ャ":"ｬ","ュ":"ｭ","ョ":"ｮ","ッ":"ｯ","ー":"ｰ","・":"･",
+    "ガ":"ｶﾞ","ギ":"ｷﾞ","グ":"ｸﾞ","ゲ":"ｹﾞ","ゴ":"ｺﾞ",
+    "ザ":"ｻﾞ","ジ":"ｼﾞ","ズ":"ｽﾞ","ゼ":"ｾﾞ","ゾ":"ｿﾞ",
+    "ダ":"ﾀﾞ","ヂ":"ﾁﾞ","ヅ":"ﾂﾞ","デ":"ﾃﾞ","ド":"ﾄﾞ",
+    "バ":"ﾊﾞ","ビ":"ﾋﾞ","ブ":"ﾌﾞ","ベ":"ﾍﾞ","ボ":"ﾎﾞ",
+    "パ":"ﾊﾟ","ピ":"ﾋﾟ","プ":"ﾌﾟ","ペ":"ﾍﾟ","ポ":"ﾎﾟ",
+    "ヴ":"ｳﾞ","　":" "
+  };
+
+  function toFM7HalfWidth(input) {
+    let out = "";
+    for (const ch of input) {
+      const code = ch.charCodeAt(0);
+      let c = ch;
+      if (code >= 0x3041 && code <= 0x3096) {
+        c = String.fromCharCode(code + 0x60);
+      }
+      if (c.charCodeAt(0) >= 0xFF01 && c.charCodeAt(0) <= 0xFF5E) {
+        out += String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+      } else if (FULL_TO_HALF_KANA[c]) {
+        out += FULL_TO_HALF_KANA[c];
+      } else if (FONT_DATA.f8[c]) {
+        out += c;
+      }
+    }
+    return out;
+  }
+
+  // =========================================================================
+  // 6. F-BASIC ユーティリティ関数
+  // =========================================================================
+  function basicStr(n) {
+    return (n >= 0 ? " " : "") + String(n);
+  }
+
+  function basicUsingInt(width, n) {
+    const rounded = Math.round(n);
+    const s = String(rounded);
+    if (s.length >= width) return s;
+    return " ".repeat(width - s.length) + s;
+  }
+
+  function basicInt(n) {
+    return Math.floor(n);
+  }
+
+  function calcDisplayMonth(be) {
+    let m = be + 3;
+    if (m > 12) m -= 12;
+    return m;
+  }
+
+  // =========================================================================
+  // 7. セーブ管理 (localStorage + JSON エクスポート/インポート)
+  // =========================================================================
+  const SAVE_STORAGE_KEY = "fm7_hard_maker_saves_v1";
+
+  class SaveManager {
+    constructor() {
+      this.slots = { auto: null, slot1: null, slot2: null, slot3: null };
+      this.loadAllFromStorage();
+    }
+
+    loadAllFromStorage() {
+      try {
+        if (typeof localStorage === "undefined") return;
+        const raw = localStorage.getItem(SAVE_STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          for (const k of ["auto", "slot1", "slot2", "slot3"]) {
+            if (this.validateSave(parsed[k])) this.slots[k] = parsed[k];
+          }
+        }
+      } catch (_) {}
+    }
+
+    persist() {
+      try {
+        if (typeof localStorage === "undefined") return;
+        localStorage.setItem(SAVE_STORAGE_KEY, JSON.stringify(this.slots));
+      } catch (_) {}
+    }
+
+    validateSave(data) {
+      if (!data || typeof data !== "object") return false;
+      if (typeof data.PM !== "number" || data.PM < 1 || data.PM > 5) return false;
+      if (typeof data.BC !== "number" || typeof data.BE !== "number") return false;
+      if (!Array.isArray(data.ST) || data.ST.length !== 6) return false;
+      if (!Array.isArray(data.SD) || data.SD.length !== 8) return false;
+      if (!Array.isArray(data.PN) || data.PN.length !== 8) return false;
+      return true;
+    }
+
+    saveToSlot(slotKey, snapshot) {
+      if (!this.validateSave(snapshot)) return false;
+      this.slots[slotKey] = JSON.parse(JSON.stringify(snapshot));
+      this.persist();
+      return true;
+    }
+
+    getSlot(slotKey) {
+      return this.slots[slotKey] || null;
+    }
+
+    deleteSlot(slotKey) {
+      this.slots[slotKey] = null;
+      this.persist();
+    }
+  }
+
+  // =========================================================================
+  // 8. HARD MAKER ゲーム本体 (原作モード / バグ修正モード + セーブ/ロード対応)
+  // =========================================================================
+  class AbortRunError extends Error {}
+
+  class HardMakerGame {
+    constructor(screen, audio, saveManager, hooks = {}) {
+      this.scr = screen;
+      this.audio = audio;
+      this.saveManager = saveManager;
+      this.hooks = hooks;
+      this.fastMode = false;
+      this.bugFixMode = true; // デフォルト: 長時間でも安心のバグ修正モード
+      this.runId = 0;
+      this.keyResolvers = [];
+      this.keyQueue = [];
+      this.lastTurnSnapshot = null; // 毎月の自ターン開始時の完全状態
+      this.imeBar = document.getElementById("imeBar");
+      this.imeInput = document.getElementById("imeInput");
+      this.imeSubmit = document.getElementById("imeSubmit");
+      this._imeActive = false;
+
+      this.BS = BS_RAW.map(([txt, col]) => String.fromCharCode(17, col) + txt);
+      this.SP = String.fromCharCode(28).repeat(16);
+
+      this._bindIme();
+    }
+
+    _bindIme() {
+      const submitIme = () => {
+        if (!this._imeActive) return;
+        const converted = toFM7HalfWidth(this.imeInput.value).slice(0, 10);
+        if (!converted) return;
+        this.imeInput.value = "";
+        this._resolveKey({ type: "ime_string", value: converted });
+      };
+      this.imeSubmit.addEventListener("click", submitIme);
+      this.imeInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.isComposing) {
+          e.preventDefault();
+          submitIme();
+        }
+      });
+    }
+
+    pushKey(key) {
+      this.audio.unlock();
+      this._resolveKey({ type: "key", value: key });
+    }
+
+    _resolveKey(payload) {
+      if (this.keyResolvers.length > 0) {
+        const res = this.keyResolvers.shift();
+        res(payload);
+      } else if (this.keyQueue.length < 32) {
+        this.keyQueue.push(payload);
+      }
+    }
+
+    waitKey(token) {
+      return new Promise((resolve, reject) => {
+        if (token !== this.runId) { reject(new AbortRunError()); return; }
+        if (this.keyQueue.length > 0) {
+          resolve(this.keyQueue.shift());
+          return;
+        }
+        this.keyResolvers.push((ev) => {
+          if (token !== this.runId) { reject(new AbortRunError()); return; }
+          resolve(ev);
+        });
+      });
+    }
+
+    sleep(ms, token) {
+      return new Promise((resolve, reject) => {
+        if (token !== this.runId) { reject(new AbortRunError()); return; }
+        setTimeout(() => {
+          if (token !== this.runId) { reject(new AbortRunError()); return; }
+          resolve();
+        }, ms);
+      });
+    }
+
+    // 現在の自ターン開始時スナップショットを生成
+    captureSnapshot() {
+      if (!this.PM || this.PM < 1 || this.PM > 5) return null;
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const savedAt = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      return {
+        version: 1,
+        savedAt,
+        bugFixMode: this.bugFixMode,
+        BC: this.BC,
+        BE: this.BE,
+        PM: this.PM,
+        GC: this.PM,
+        SS: this.SS,
+        UD: this.UD,
+        ST: this.ST.map((r) => (r ? r.slice() : null)),
+        PN: this.PN.slice(),
+        SD: this.SD.map((r) => r.slice())
+      };
+    }
+
+    getSaveableSnapshot() {
+      return this.lastTurnSnapshot ? JSON.parse(JSON.stringify(this.lastTurnSnapshot)) : null;
+    }
+
+    _abortCurrentRun() {
+      this.runId++;
+      this.audio.stopBGM();
+      this.imeBar.classList.remove("active");
+      this._imeActive = false;
+      this.keyQueue = [];
+      while (this.keyResolvers.length > 0) {
+        const r = this.keyResolvers.shift();
+        r({ type: "abort" });
+      }
+    }
+
+    reset() {
+      this._abortCurrentRun();
+      this.lastTurnSnapshot = null;
+      if (this.hooks.onStateChange) this.hooks.onStateChange();
+      this.start();
+    }
+
+    // セーブデータからゲームを完全復元して自ターンから再開
+    loadFromSnapshot(snap) {
+      if (!this.saveManager.validateSave(snap)) return false;
+      this._abortCurrentRun();
+      const token = this.runId;
+
+      if (typeof snap.bugFixMode === "boolean") {
+        this.bugFixMode = snap.bugFixMode;
+        if (this.hooks.onModeSync) this.hooks.onModeSync(this.bugFixMode);
+      }
+
+      this.BC = snap.BC;
+      this.BE = snap.BE;
+      this.PM = snap.PM;
+      this.GC = snap.PM;
+      this.SS = snap.SS;
+      this.UD = snap.UD || 2;
+      this.V = 1;
+      this.ST = snap.ST.map((r) => (r ? r.slice() : null));
+      this.PN = snap.PN.slice();
+      this.SD = snap.SD.map((r) => r.slice());
+      this.lastTurnSnapshot = JSON.parse(JSON.stringify(snap));
+
+      // 画面全体を再構築
+      this.scr.resetPalette();
+      this.scr.cls();
+      this.scr.color(7, 0);
+      this.drawFrameAndWindows();
+      this.drawCommandList();
+
+      // 日付
+      const month = calcDisplayMonth(this.BE);
+      this.scr.locate(1, 5);
+      this.scr.color(3);
+      this.scr.print(
+        "DATE:" + basicUsingInt(5, this.BC) + "年" + basicUsingInt(2, month) + "月",
+        false
+      );
+
+      // 左上: 自社番号・LTD・自社ロゴ
+      this.scr.locate(1, 1); this.scr.color(7); this.scr.print(basicStr(this.PM), false);
+      this.scr.locate(1, 2); this.scr.print("LTD", false);
+      this.drawCompanyLogo(5, 1, this.PM);
+
+      // 右側: 自社ステータス
+      this.sub1170(this.PM);
+
+      // BGM 再開
+      this.audio.startBGM();
+      if (this.hooks.onStateChange) this.hooks.onStateChange();
+
+      // 自ターンのコマンド入力から復帰
+      this._resumeLoadedLoop(token);
+      return true;
+    }
+
+    async _resumeLoadedLoop(token) {
+      try {
+        this.scr.locate(0, 24); this.scr.newline();
+        this.drawCompanyLogo(0, 23, this.PM);
+        await this.sub1100(this.SP + this.BS[36], token);
+        await this.mainLoop(token, "LINE_180");
+      } catch (e) {
+        if (!(e instanceof AbortRunError)) console.error(e);
+      }
+    }
+
+    drawFrameAndWindows() {
+      for (let N = 0; N <= 21; N++) {
+        for (let M = 0; M <= 39; M++) {
+          this.scr.putWak(M * 16, N * 8, BMP_WAK);
+        }
+      }
+      for (const [x1, y1, x2, y2] of WINDOW_RECTS) {
+        this.scr.lineBF(x1, y1, x2, y2, 0);
+      }
+    }
+
+    drawCommandList() {
+      this.scr.locate(6, 8); this.scr.print(this.BS[0], false);
+      for (let I = 1; I <= 12; I++) {
+        this.scr.locate(1, I + 8); this.scr.color(1); this.scr.print(basicStr(I), false);
+        this.scr.locate(4, I + 8); this.scr.color(5); this.scr.print(":" + this.BS[I], false);
+      }
+      this.scr.flush();
+    }
+
+    drawCompanyLogo(M, N, O) {
+      this.scr.lineBF(M * 16, N * 8, M * 16 + 255, N * 8 + 15, 7);
+      if (O === 1) {
+        this.scr.putMono(M * 16 + 96, N * 8 + 3, M * 16 + 158, N * 8 + 12, BMP_NEC, 2);
+      } else if (O === 2) {
+        this.scr.putMono(M * 16 + 50, N * 8 + 3, M * 16 + 205, N * 8 + 12, BMP_SHA, 0);
+      } else if (O === 3) {
+        this.scr.putMono(M * 16 + 93, N * 8 + 3, M * 16 + 161, N * 8 + 12, BMP_FUJ, 2);
+      } else if (O === 4) {
+        this.scr.putMono(M * 16 + 74, N * 8 + 3, M * 16 + 180, N * 8 + 12, BMP_DEM, 0);
+      } else {
+        this.scr.putMono(M * 16 + 5, N * 8 + 3, M * 16 + 250, N * 8 + 12, BMP_MOR, this.V);
+      }
+      this.scr.flush();
+    }
+
+    async sub1100(text, token) {
+      while (true) {
+        this.scr.locate(0, 24);
+        this.scr.color(7);
+        let i = 0;
+        let lastChar = "";
+        while (i < text.length) {
+          const step = this.scr.printCharAt(text, i);
+          if (step === 1) {
+            const ch = text[i];
+            lastChar = ch;
+            if (ch !== String.fromCharCode(28)) {
+              this.scr.flush();
+              if (!this.fastMode) {
+                this.audio.beepClick();
+                await this.sleep(24, token);
+              }
+            }
+          }
+          i += step;
+        }
+        this.scr.flush();
+
+        if (lastChar !== "?" && lastChar !== "@") {
+          this.scr.newline();
+          this.scr.flush();
+          return { str: "", num: 0 };
+        }
+
+        let buf = "";
+        if (lastChar === "@") {
+          this._imeActive = true;
+          this.imeBar.classList.add("active");
+          this.imeInput.value = "";
+        }
+
+        try {
+          while (true) {
+            const ev = await this.waitKey(token);
+            if (ev.type === "ime_string") {
+              while (buf.length > 0) {
+                buf = buf.slice(0, -1);
+                this.scr.backspaceCell();
+              }
+              buf = ev.value;
+              this.scr.print(buf, true);
+              return { str: buf, num: parseFloat(buf) || 0 };
+            }
+
+            const k = ev.value;
+            if (k === "Enter") {
+              if (buf === "") continue;
+              this.scr.newline();
+              this.scr.flush();
+              return { str: buf, num: parseFloat(buf) || 0 };
+            }
+            if (k === "*") {
+              this.scr.newline();
+              this.scr.flush();
+              break;
+            }
+            if (k === "Backspace") {
+              if (buf.length > 0) {
+                buf = buf.slice(0, -1);
+                this.scr.backspaceCell();
+              }
+              continue;
+            }
+            if (lastChar === "@") {
+              const half = toFM7HalfWidth(k);
+              if (half.length === 1 && buf.length < 18) {
+                buf += half;
+                this.scr.print(half, false);
+              }
+            } else if (lastChar === "?") {
+              if (k.length === 1 && k >= "0" && k <= "9" && buf.length < 15) {
+                buf += k;
+                this.scr.print(k, false);
+              }
+            }
+          }
+        } finally {
+          this._imeActive = false;
+          this.imeBar.classList.remove("active");
+        }
+      }
+    }
+
+    sub1170(O) {
+      this.drawCompanyLogo(22, 1, O);
+      this.scr.locate(38, 2); this.scr.color(6); this.scr.print("ﾉ", false);
+      this.scr.locate(34, 3); this.scr.print("ｽﾃｰﾀｽ", false);
+      this.scr.lineBF(256, 32, 623, 167, 0);
+      this.scr.locate(16, 5); this.scr.print(this.BS[19], false);
+      for (let I = 20; I <= 26; I++) {
+        this.scr.locate(16, I - 13);
+        this.scr.print(this.BS[I], false);
+      }
+      for (let I = 6; I <= 13; I++) {
+        this.scr.locate(22, I); this.scr.color(2); this.scr.print(":", false);
+        this.scr.locate(23, I); this.scr.color(6);
+        this.scr.print(basicUsingInt(12, this.ST[O][I - 6]), false);
+        this.scr.locate(35, I);
+        this.scr.print(this.BS[I + 21], false);
+      }
+      this.scr.flush();
+    }
+
+    sub1230() {
+      this.scr.lineBF(256, 32, 623, 167, 0);
+      for (let J = 4; J <= 16; J += 6) {
+        for (let I = 32; I <= 64; I += 16) {
+          if (I === 64 && J === 16) {
+            this.scr.flush();
+            return;
+          }
+          const S = (J - 4) / 2 + (I - 32) / 16;
+          const M = I;
+          let N = J;
+          this.scr.symbol(M * 8, N * 8, "NO" + basicStr(S) + basicStr(this.SD[S][3]) + "BIT", 1, 1, 7);
+          if (this.SD[S][4]) {
+            N = J + 1;
+            this.scr.symbol(M * 8, N * 8, "ﾅﾏｴ " + this.PN[S], 1, 1, 7);
+            N = J + 2;
+            this.scr.symbol(M * 8, N * 8, "ﾃｲｶ " + basicStr(this.SD[S][0]) + "円", 1, 1, 7);
+            N = J + 3;
+            this.scr.symbol(M * 8, N * 8, "ｹﾞﾝｶ" + basicStr(this.SD[S][1]) + "円", 1, 1, 7);
+            N = J + 4;
+            this.scr.symbol(M * 8, N * 8, "ﾀﾞｲｽｳ" + basicStr(basicInt(this.SD[S][2])) + "ｺ", 1, 1, 7);
+          }
+        }
+      }
+      this.scr.flush();
+    }
+
+    async waitSpace(token) {
+      while (true) {
+        const ev = await this.waitKey(token);
+        if (ev.type === "key" && ev.value === " ") return;
+      }
+    }
+
+    // 590〜720行: コンピュータ企業の行動ルーチン
+    async sub590(K, token) {
+      const GC = this.GC;
+      let S = this.ST[GC][6] * 9;
+      this.SS += S;
+      const SA = S * (this.ST[GC][5] * 0.9);
+      this.ST[GC][0] -= SA;
+      this.ST[GC][1] += S * this.ST[GC][5];
+      this.ST[GC][2] += SA;
+      this.ST[GC][8] += S;
+      this.ST[GC][3] = this.ST[GC][1] - this.ST[GC][2];
+      this.ST[GC][7] = basicInt(this.ST[GC][8] / this.SS * 100);
+      if (K) return false;
+
+      // 620〜630行: プレイヤー企業買収チェック (GAME OVER)
+      let I = Math.floor(Math.random() * 10);
+      if (I === 1 && this.ST[GC][0] > this.ST[this.PM][7] * 10000000) {
+        if (this.ST[GC][7] > this.ST[this.PM][7] * 2) {
+          this.audio.stopBGM();
+          this.scr.locate(0, 24);
+          this.scr.newline();
+          this.scr.flush();
+          await this.runGameOver(token);
+          return true;
+        }
+      }
+
+      I = Math.floor(Math.random() * 2);
+      if (I === 1) {
+        await this.sub590(true, token);
+        return false;
+      }
+      I = Math.floor(Math.random() * 5);
+      if (I === 3) {
+        S = this.ST[GC][7] * 512;
+        this.ST[GC][4] += S;
+        this.ST[GC][6] += S + 16;
+        return false;
+      }
+      I = Math.floor(Math.random() * 5);
+      if (I === 2) {
+        this.ST[GC][5] += 0.5;
+        return false;
+      }
+      this.ST[GC][6] *= 1.04;
+      return false;
+    }
+
+    async runGameOver(token) {
+      while (true) {
+        await this.sleep(this.fastMode ? 200 : 600, token);
+        for (let I = 0; I <= 64; I++) {
+          for (let J = 0; J <= 7; J++) {
+            this.scr.setPalette(I % 8, J);
+          }
+          await this.sleep(16, token);
+        }
+        this.scr.resetPalette();
+
+        this.audio.playGameOverJingle();
+        await this.sub1100(this.BS[37], token);
+        this.scr.newline();
+        this.drawCompanyLogo(0, 23, this.GC);
+        await this.sub1100(this.SP + this.BS[38], token);
+        await this.sub1100(this.BS[39], token);
+      }
+    }
+
+    // 1300〜1380行: 年度決算報告
+    async runSettlement(token) {
+      this.scr.lineBF(256, 32, 623, 167, 0);
+      this.scr.lineBF(352, 8, 623, 31, 0);
+      this.scr.locate(16, 5); this.scr.color(5);
+      this.scr.print(basicStr(this.BC - 1) + " " + this.BS[64], false);
+
+      for (let I = 7; I <= 9; I++) {
+        this.scr.locate(17, I); this.scr.color(6);
+        this.scr.print(this.BS[I + 13], false);
+        this.scr.locate(22, I);
+        this.scr.print(basicUsingInt(12, this.ST[this.PM][I - 6]) + "ﾏﾝ円", false);
+      }
+
+      this.scr.locate(17, 11); this.scr.print(this.BS[66], false);
+      this.scr.locate(17, 13); this.scr.print(this.BS[65], false);
+      const S = this.ST[this.PM][1] * 0.97;
+      this.scr.locate(22, 14); this.scr.print(basicStr(basicInt(S)) + " ﾏﾝ円", false);
+
+      this.scr.locate(16, 15); this.scr.color(3);
+      this.scr.print(basicStr(this.BC - 1) + " " + this.BS[67], false);
+      this.scr.locate(22, 16); this.scr.color(6);
+      this.scr.print(basicStr(basicInt(this.ST[this.PM][0])) + " ﾏﾝ円", false);
+
+      this.ST[this.PM][0] += S;
+      this.ST[this.PM][1] = 0;
+      this.ST[this.PM][2] = 0;
+      this.ST[this.PM][3] = 0;
+
+      // 【バグ修正モード】生存している他社も同様に年度決算を実施（運営金マイナス暴走・12桁溢れ防止）
+      if (this.bugFixMode) {
+        for (let c = 1; c <= 5; c++) {
+          if (c !== this.PM && this.ST[c][9]) {
+            this.ST[c][0] += this.ST[c][1] * 0.97;
+            this.ST[c][1] = 0;
+            this.ST[c][2] = 0;
+            this.ST[c][3] = 0;
+          }
+        }
+      }
+
+      this.scr.locate(16, 18);
+      this.scr.print(basicStr(this.BC) + " " + this.BS[68], false);
+      this.scr.locate(22, 19);
+      this.scr.print(basicStr(basicInt(this.ST[this.PM][0])) + " ﾏﾝ円", false);
+
+      await this.sub1100(this.BS[15], token);
+      await this.waitSpace(token);
+      this.sub1170(this.PM);
+    }
+
+    async runEnding(token) {
+      for (let I = 69; I <= 79; I++) {
+        this.scr.locate(0, 24);
+        this.scr.newline();
+        const rawLen = this.BS[I].length;
+        const J = Math.max(0, Math.round((40 - rawLen) / 2));
+        await this.sub1100(" ".repeat(J) + this.BS[I], token);
+        await this.sleep(this.fastMode ? 350 : 900, token);
+      }
+      await this.sleep(this.fastMode ? 1200 : 3500, token);
+    }
+
+    async start() {
+      const token = this.runId;
+      try {
+        this.scr.resetPalette();
+        this.scr.cls();
+        this.scr.color(7, 0);
+        this.SS = 20000000;
+        this.BC = 1989;
+        this.BE = 0;
+        this.PM = 0;
+        this.GC = 0;
+        this.UD = 2;
+        this.V = 7;
+
+        this.ST = INITIAL_ST.map((row) => (row ? row.slice() : null));
+        this.PN = Array(8).fill("");
+        this.SD = Array.from({ length: 8 }, () => [0, 0, 0, 0, 0]);
+
+        this.scr.locate(16, 12);
+        for (const ch of "READING") {
+          this.scr.print(ch, false);
+          await this.sleep(this.fastMode ? 25 : 70, token);
+        }
+        await this.sleep(this.fastMode ? 80 : 200, token);
+
+        this.drawFrameAndWindows();
+        this.scr.putMono(19 * 16 + 5, 5 * 8 + 3, 19 * 16 + 250, 5 * 8 + 12, BMP_MOR, this.V);
+        this.V = 1;
+        this.scr.locate(23, 7); this.scr.print(this.BS[13], false);
+        this.scr.symbol(278, 72, "HARD MAKER", 4, 4, 6);
+        this.scr.locate(20, 14); this.scr.print(this.BS[14], false);
+        this.scr.locate(20, 17); this.scr.print(this.BS[15], false);
+        this.scr.flush();
+
+        await this.waitSpace(token);
+
+        this.audio.startBGM();
+        this.scr.lineBF(256, 32, 623, 167, 0);
+        this.scr.locate(19, 5); this.scr.print(this.BS[16], false);
+        for (let O = 1; O <= 5; O++) {
+          const M = 20;
+          const N = O * 2 + 5;
+          this.scr.locate(17, N); this.scr.color(4);
+          this.scr.print(basicStr(O), false);
+          this.drawCompanyLogo(M, N, O);
+        }
+
+        let sel = 0;
+        while (sel < 1 || sel > 5) {
+          const r = await this.sub1100(this.BS[17], token);
+          sel = r.num;
+        }
+
+        this.PM = sel;
+        this.drawCommandList();
+        await this.mainLoop(token, "LINE_70");
+      } catch (e) {
+        if (!(e instanceof AbortRunError)) console.error(e);
+      }
+    }
+
+    async mainLoop(token, initialState = "LINE_70") {
+      let state = initialState;
+
+      while (true) {
+        if (state === "LINE_70") {
+          // 70〜90行: プレイヤーのパソコン売上計算＆自社ステータス更新
+          const curUD = this.UD;
+          for (let I = 0; I <= 7; I++) {
+            const divisor = this.bugFixMode ? curUD : this.UD;
+            let S = basicInt(this.SD[I][2] / divisor * (this.SD[I][1] / (this.SD[I][0] + 1)));
+            if (!this.bugFixMode) {
+              this.UD = 2; // 原作通りループ内でリセット
+            } else {
+              // 【バグ修正モード】在庫マイナス爆発防止
+              S = Math.max(0, Math.min(basicInt(this.SD[I][2]), S));
+            }
+            this.SS += S;
+            this.SD[I][2] -= S;
+            this.ST[this.PM][1] += (this.SD[I][0] / 10000) * S;
+            this.ST[this.PM][8] += S;
+          }
+          if (this.bugFixMode) this.UD = 2;
+
+          this.ST[this.PM][3] = this.ST[this.PM][1] - this.ST[this.PM][2];
+          this.ST[this.PM][7] = basicInt(this.ST[this.PM][8] / this.SS * 100);
+          this.sub1170(this.PM);
+          state = "LINE_120";
+        } else if (state === "LINE_100") {
+          this.BE++;
+          this.GC = 0;
+          let month = this.BE + 3;
+          if (month > 12) {
+            month -= 12;
+            if (month === 1) this.BC++;
+          }
+          this.scr.locate(1, 5);
+          this.scr.color(3);
+          this.scr.print(
+            "DATE:" + basicUsingInt(5, this.BC) + "年" + basicUsingInt(2, month) + "月",
+            false
+          );
+          state = "LINE_120";
+        } else if (state === "LINE_120") {
+          if (this.BE > 12) {
+            this.BE = 0;
+            await this.runSettlement(token);
+            state = "LINE_100";
+            continue;
+          }
+          this.GC++;
+          if (this.GC > 5 || this.BE === 0) {
+            state = "LINE_100";
+            continue;
+          }
+          if (!this.ST[this.GC][9]) {
+            state = "LINE_120";
+            continue;
+          }
+          this.scr.locate(1, 1); this.scr.color(7); this.scr.print(basicStr(this.GC), false);
+          this.scr.locate(1, 2); this.scr.print("LTD", false);
+
+          this.drawCompanyLogo(5, 1, this.GC);
+          this.scr.locate(0, 24); this.scr.newline();
+          const isPlayer = (this.PM === this.GC);
+          const J = isPlayer ? 1 : 0;
+          this.drawCompanyLogo(0, 23, this.GC);
+          await this.sub1100(this.SP + this.BS[35 + J], token);
+
+          const salaryTotal = this.ST[this.GC][4] * this.ST[this.GC][5];
+          this.ST[this.GC][0] -= salaryTotal;
+          this.ST[this.GC][2] += salaryTotal;
+          this.ST[this.GC][4] *= 0.99;
+
+          // 170行: 技術力減衰 (バグ修正モードでは各社自身の技術を0.97倍＋下限100保護)
+          if (this.bugFixMode) {
+            this.ST[this.GC][6] = Math.max(100, this.ST[this.GC][6] * 0.97);
+          } else {
+            this.ST[this.GC][6] = this.ST[this.PM][6] * 0.97;
+          }
+
+          if (!isPlayer) {
+            const gameOver = await this.sub590(false, token);
+            if (gameOver) return;
+            state = "LINE_120";
+            continue;
+          }
+
+          // プレイヤーのターン開始：画面更新＆オートセーブ用スナップショット保存
+          this.sub1170(this.PM);
+          const snap = this.captureSnapshot();
+          if (snap) {
+            this.lastTurnSnapshot = snap;
+            this.saveManager.saveToSlot("auto", snap);
+            if (this.hooks.onStateChange) this.hooks.onStateChange();
+          }
+
+          state = "LINE_180";
+        } else if (state === "LINE_180") {
+          let SA = 0;
+          while (SA < 1 || SA > 12) {
+            const r = await this.sub1100(this.BS[40], token);
+            SA = r.num;
+          }
+          state = await this.execPlayerCommand(SA, token);
+        }
+      }
+    }
+
+    async execPlayerCommand(SA, token) {
+      // 1: 企業買う (210-280行)
+      if (SA === 1) {
+        let U = 0;
+        while (U < 1 || U > 5) {
+          const r = await this.sub1100(this.BS[41], token);
+          U = r.num;
+        }
+        this.scr.locate(0, 24); this.scr.newline();
+        if (U === this.PM || this.ST[U][9] === 0) {
+          await this.sub1100(this.BS[44], token);
+          return "LINE_180";
+        }
+        this.drawCompanyLogo(0, 23, U);
+        const price = this.ST[U][7] * 25600000;
+        await this.sub1100(this.SP + this.BS[42] + basicStr(price) + this.BS[27] + this.BS[43], token);
+        if (price > this.ST[this.PM][0]) {
+          await this.sub1100(this.BS[45], token);
+          return "LINE_180";
+        }
+        let yn = 0;
+        while (yn < 1 || yn > 2) {
+          const r = await this.sub1100(this.BS[46], token);
+          yn = r.num;
+        }
+        if (yn === 2) return "LINE_180";
+
+        this.ST[this.PM][0] -= price;
+        this.ST[this.PM][2] += price;
+        this.ST[U][0] = 0;
+        for (let I = 4; I <= 8; I++) {
+          this.ST[this.PM][I] += this.ST[U][I];
+          this.ST[U][I] = 0;
+        }
+        this.ST[U][1] = 0; this.ST[U][2] = 0; this.ST[U][3] = 0;
+        this.ST[U][9] = 0;
+
+        let aliveSum = 0;
+        for (let I = 1; I <= 5; I++) aliveSum += this.ST[I][9];
+        if (aliveSum === -1) {
+          await this.runEnding(token);
+        }
+        return "LINE_70";
+      }
+
+      // 2: パソコン開発 (300-370行)
+      if (SA === 2) {
+        let U = -1;
+        while (U < 0 || U > 7) {
+          this.sub1230();
+          const r = await this.sub1100(this.BS[47], token);
+          U = r.num;
+        }
+        if (this.SD[U][4]) {
+          await this.sub1100(this.BS[48], token);
+          this.sub1170(this.PM);
+          return "LINE_180";
+        }
+        let bits = 0;
+        while (bits !== 8 && bits !== 16 && bits !== 32) {
+          const r = await this.sub1100(this.BS[50], token);
+          bits = r.num;
+        }
+        this.SD[U][3] = bits;
+        const techVal = this.bugFixMode ? Math.max(100, this.ST[this.PM][6]) : this.ST[this.PM][6];
+        const techFactor = techVal / 1000;
+        const devCost = basicInt(50000000 / techFactor * bits);
+        await this.sub1100(this.BS[49] + basicStr(devCost) + this.BS[27] + this.BS[43], token);
+        if (devCost > this.ST[this.PM][0]) {
+          await this.sub1100(this.BS[45], token);
+          this.sub1170(this.PM);
+          return "LINE_180";
+        }
+        let name = "";
+        while (true) {
+          const r = await this.sub1100(this.BS[51], token);
+          if (r.str.length <= 10) {
+            name = r.str;
+            break;
+          }
+        }
+        this.PN[U] = name;
+        this.ST[this.PM][0] -= devCost;
+        this.ST[this.PM][2] += devCost;
+        this.SD[U][4] = -1;
+        const unitCost = this.ST[this.PM][5] * 256 * this.SD[U][3];
+        this.SD[U][1] = unitCost;
+        await this.sub1100(this.BS[52] + basicStr(unitCost) + "円", token);
+        const rPrice = await this.sub1100(this.BS[53], token);
+        this.SD[U][0] = rPrice.num;
+        return "LINE_70";
+      }
+
+      // 3: 製造中止 (390-400行)
+      if (SA === 3) {
+        let U = -1;
+        while (U < 0 || U > 7) {
+          this.sub1230();
+          const r = await this.sub1100(this.BS[54], token);
+          U = r.num;
+        }
+        if (!this.SD[U][4]) {
+          await this.sub1100(this.BS[56], token);
+          this.sub1170(this.PM);
+          return "LINE_180";
+        }
+        for (let I = 0; I <= 4; I++) this.SD[U][I] = 0;
+        this.PN[U] = "";
+        return "LINE_70";
+      }
+
+      // 4: 価格変える / 5: パソコン生産 (420-470行)
+      if (SA === 4 || SA === 5) {
+        const R = (SA - 4) * 2;
+        let U = -1;
+        while (U < 0 || U > 7) {
+          this.sub1230();
+          const r = await this.sub1100(this.BS[55 + R], token);
+          U = r.num;
+        }
+        if (!this.SD[U][4]) {
+          await this.sub1100(this.BS[56], token);
+          this.sub1170(this.PM);
+          return "LINE_180";
+        }
+        if (R === 0) {
+          const r = await this.sub1100(this.BS[53], token);
+          this.SD[U][0] = r.num;
+          return "LINE_70";
+        }
+        const maxProd = basicInt(this.ST[this.PM][4] * this.ST[this.PM][5]);
+        let qty = -1;
+        while (qty < 0 || qty > maxProd) {
+          const r = await this.sub1100(this.BS[58] + basicStr(maxProd) + ")?", token);
+          qty = r.num;
+        }
+        if (this.bugFixMode && qty === 0) {
+          // バグ修正モード: 0台入力でキャンセルしてやり直し
+          this.sub1170(this.PM);
+          return "LINE_180";
+        }
+        const prodCost = (this.SD[U][1] / 10000) * qty;
+        if (this.bugFixMode && prodCost > this.ST[this.PM][0]) {
+          // バグ修正モード: 資金不足チェック
+          await this.sub1100(this.BS[45], token);
+          this.sub1170(this.PM);
+          return "LINE_180";
+        }
+        this.ST[this.PM][0] -= prodCost;
+        this.ST[this.PM][2] += prodCost;
+        this.SD[U][2] += qty;
+        return "LINE_70";
+      }
+
+      // 6: パソコン売る (490行)
+      if (SA === 6) {
+        this.UD = Math.round(Math.random() + 0.9);
+        await this.sub1100(this.BS[59], token);
+        return "LINE_70";
+      }
+
+      // 7: 社員雇う / 8: 給料変える / 9: 技術あげる (510-530行)
+      if (SA === 7 || SA === 8 || SA === 9) {
+        const R = SA + 53;
+        const r = await this.sub1100(this.BS[R], token);
+        if (R === 62) {
+          this.ST[this.PM][6] *= 1.1;
+          return "LINE_70";
+        }
+        if (R === 61) {
+          // バグ修正モード: 給料0による詰み防止 (最低1万円)
+          this.ST[this.PM][5] = this.bugFixMode ? Math.max(1, r.num) : r.num;
+          return "LINE_70";
+        }
+        const hireNum = this.bugFixMode ? Math.min(100000, r.num) : r.num;
+        this.ST[this.PM][4] += hireNum;
+        this.ST[this.PM][6] += hireNum * 0.9;
+        return "LINE_70";
+      }
+
+      // 10: 他社見る / 11: パソコン見る (550-570行)
+      if (SA === 10 || SA === 11) {
+        let target = 0;
+        while (SA === 10 && (target < 1 || target > 5)) {
+          const r = await this.sub1100(this.BS[63], token);
+          target = r.num;
+        }
+        if (SA === 10) {
+          this.sub1170(target);
+        } else {
+          this.sub1230();
+        }
+        await this.sub1100(this.BS[15], token);
+        await this.waitSpace(token);
+        this.sub1170(this.PM);
+        return "LINE_180";
+      }
+
+      // 12: なにもしない
+      return "LINE_70";
+    }
+  }
+
+  // =========================================================================
+  // 9. UI・セーブスロット・イベント配線
+  // =========================================================================
+  const canvas = document.getElementById("fm7Canvas");
+  const screenWrap = document.getElementById("screenWrap");
+  const toastBar = document.getElementById("toastBar");
+  const modePill = document.getElementById("modePill");
+  const btnMode = document.getElementById("btnMode");
+  const slotGrid = document.getElementById("slotGrid");
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toastBar.textContent = msg;
+    toastBar.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastBar.classList.remove("show"), 2200);
+  }
+
+  const screen = new FM7Screen(canvas);
+  const audio = new FM7Audio();
+  const saveManager = new SaveManager();
+
+  function syncModeUI(isFix) {
+    btnMode.textContent = "モード: " + (isFix ? "バグ修正" : "原作準拠");
+    btnMode.classList.toggle("fix-on", isFix);
+    btnMode.classList.toggle("orig-on", !isFix);
+    modePill.textContent = isFix ? "バグ修正モード" : "原作準拠モード";
+    modePill.classList.toggle("original", !isFix);
+  }
+
+  const game = new HardMakerGame(screen, audio, saveManager, {
+    onStateChange: () => renderSaveSlots(),
+    onModeSync: (isFix) => syncModeUI(isFix)
+  });
+
+  function renderSaveSlots() {
+    if (!slotGrid) return;
+    const defs = [
+      { key: "auto", label: "AUTOSAVE (自動)", isAuto: true },
+      { key: "slot1", label: "スロット 1", isAuto: false },
+      { key: "slot2", label: "スロット 2", isAuto: false },
+      { key: "slot3", label: "スロット 3", isAuto: false }
+    ];
+    const canSave = !!game.getSaveableSnapshot();
+    slotGrid.innerHTML = "";
+
+    for (const def of defs) {
+      const data = saveManager.getSlot(def.key);
+      const card = document.createElement("div");
+      card.className = "slot-card" + (def.isAuto ? " autosave" : "");
+
+      let metaHtml = "<span>データなし</span>";
+      if (data) {
+        const comp = COMPANY_NAMES[data.PM] || ("No." + data.PM);
+        const mo = calcDisplayMonth(data.BE);
+        const share = data.ST[data.PM] ? Math.floor(data.ST[data.PM][7]) : 0;
+        const modeTag = data.bugFixMode === false ? "原作" : "修正";
+        metaHtml = `<strong>${comp}</strong> ${data.BC}年${mo}月 / ｼｪｱ${share}% [${modeTag}]<br>${data.savedAt || ""}`;
+      }
+
+      card.innerHTML = `
+        <div class="slot-head"><span>${def.label}</span></div>
+        <div class="slot-meta">${metaHtml}</div>
+        <div class="slot-actions">
+          ${def.isAuto ? "" : `<button type="button" class="save-btn" ${canSave ? "" : "disabled"}>セーブ</button>`}
+          <button type="button" class="load-btn" ${data ? "" : "disabled"}>ロード</button>
+          <button type="button" class="del-btn" ${data ? "" : "disabled"} title="削除">×</button>
+        </div>
+      `;
+
+      const saveBtn = card.querySelector(".save-btn");
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+          const snap = game.getSaveableSnapshot();
+          if (!snap) {
+            showToast("会社選択後にセーブできます");
+            return;
+          }
+          saveManager.saveToSlot(def.key, snap);
+          renderSaveSlots();
+          showToast(`${def.label} にセーブしました`);
+        });
+      }
+
+      const loadBtn = card.querySelector(".load-btn");
+      if (loadBtn) {
+        loadBtn.addEventListener("click", () => {
+          const d = saveManager.getSlot(def.key);
+          if (!d) return;
+          audio.unlock();
+          if (game.loadFromSnapshot(d)) {
+            showToast(`${def.label} をロードしました`);
+            screenWrap.focus();
+          }
+        });
+      }
+
+      const delBtn = card.querySelector(".del-btn");
+      if (delBtn) {
+        delBtn.addEventListener("click", () => {
+          saveManager.deleteSlot(def.key);
+          renderSaveSlots();
+          showToast(`${def.label} を削除しました`);
+        });
+      }
+
+      slotGrid.appendChild(card);
+    }
+  }
+
+  // JSONファイル保存/読込
+  const btnExportSave = document.getElementById("btnExportSave");
+  const btnImportSave = document.getElementById("btnImportSave");
+  const fileImportInput = document.getElementById("fileImportInput");
+
+  btnExportSave.addEventListener("click", () => {
+    const snap = game.getSaveableSnapshot();
+    if (!snap) {
+      showToast("会社選択後にファイル保存できます");
+      return;
+    }
+    const blob = new Blob([JSON.stringify(snap, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const comp = (COMPANY_NAMES[snap.PM] || "SAVE").replace(/\s+/g, "_");
+    a.href = url;
+    a.download = `HARD_MAKER_${comp}_${snap.BC}_${calcDisplayMonth(snap.BE)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast("セーブファイルを書き出しました");
+  });
+
+  btnImportSave.addEventListener("click", () => {
+    fileImportInput.value = "";
+    fileImportInput.click();
+  });
+
+  fileImportInput.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        if (!saveManager.validateSave(parsed)) {
+          showToast("セーブデータの形式が正しくありません");
+          return;
+        }
+        audio.unlock();
+        game.loadFromSnapshot(parsed);
+        showToast("ファイルからロードしました");
+        screenWrap.focus();
+      } catch (_) {
+        showToast("ファイルの読み込みに失敗しました");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // キーボード入力
+  window.addEventListener("keydown", (e) => {
+    if (document.activeElement === document.getElementById("imeInput")) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (e.key === " " || e.key === "Enter" || e.key === "Backspace" || e.key.length === 1) {
+      if (e.key === " ") e.preventDefault();
+      game.pushKey(e.key);
+    }
+  });
+
+  screenWrap.addEventListener("click", () => {
+    audio.unlock();
+    screenWrap.focus();
+  });
+
+  document.querySelectorAll(".skey").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const k = btn.getAttribute("data-key");
+      game.pushKey(k);
+    });
+  });
+
+  // コントロールボタン
+  const btnBgm = document.getElementById("btnBgm");
+  btnBgm.addEventListener("click", () => {
+    audio.bgmEnabled = !audio.bgmEnabled;
+    btnBgm.textContent = "BGM: " + (audio.bgmEnabled ? "ON" : "OFF");
+    btnBgm.classList.toggle("on", audio.bgmEnabled);
+    if (!audio.bgmEnabled) {
+      for (const osc of audio.activeNodes) { try { osc.stop(); } catch (_) {} }
+      audio.activeNodes.clear();
+    }
+  });
+
+  const btnSfx = document.getElementById("btnSfx");
+  btnSfx.addEventListener("click", () => {
+    audio.sfxEnabled = !audio.sfxEnabled;
+    btnSfx.textContent = "効果音: " + (audio.sfxEnabled ? "ON" : "OFF");
+    btnSfx.classList.toggle("on", audio.sfxEnabled);
+  });
+
+  const btnTone = document.getElementById("btnTone");
+  btnTone.addEventListener("click", () => {
+    audio.setToneMode(!audio.fm77Tone);
+    btnTone.textContent = "音色: " + (audio.fm77Tone ? "FM-77風" : "生PSG");
+    btnTone.classList.toggle("on", audio.fm77Tone);
+    showToast(audio.fm77Tone ? "FM-77実機風 (S13M512＋スピーカー特性)" : "生PSG矩形波モード");
+  });
+
+  const volSlider = document.getElementById("volSlider");
+  volSlider.addEventListener("input", () => {
+    audio.setVolume(parseInt(volSlider.value, 10) / 100);
+  });
+
+  btnMode.addEventListener("click", () => {
+    game.bugFixMode = !game.bugFixMode;
+    syncModeUI(game.bugFixMode);
+    showToast(game.bugFixMode ? "バグ修正モードに切替えました" : "原作準拠モードに切替えました");
+  });
+
+  const btnSpeed = document.getElementById("btnSpeed");
+  btnSpeed.addEventListener("click", () => {
+    game.fastMode = !game.fastMode;
+    btnSpeed.textContent = "文字速度: " + (game.fastMode ? "高速" : "実機準拠");
+    btnSpeed.classList.toggle("on", game.fastMode);
+  });
+
+  const btnScanline = document.getElementById("btnScanline");
+  btnScanline.addEventListener("click", () => {
+    const on = screenWrap.classList.toggle("scanlines");
+    btnScanline.textContent = "走査線: " + (on ? "ON" : "OFF");
+    btnScanline.classList.toggle("on", on);
+  });
+
+  document.getElementById("btnReset").addEventListener("click", () => {
+    game.reset();
+    screenWrap.focus();
+  });
+
+  // テスト用フック公開 (通常利用に影響なし)
+  window.__HARD_MAKER__ = { game, audio, saveManager, screen };
+
+  syncModeUI(game.bugFixMode);
+  renderSaveSlots();
+  game.start();
+})();
+</script>
+</body>
+</html>

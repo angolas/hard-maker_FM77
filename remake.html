@@ -1,0 +1,3313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HARD MAKER - SFC 16bit Remake (Phase 1)</title>
+<style>
+  /* =========================================================================
+     SFC（任天堂版シムシティ）風 16bit パレット & 共通タイルパターン
+     ※画像ファイル不使用・CSSタイル流用による超小容量設計
+     ========================================================================= */
+  :root {
+    --ink: #22293a;
+    --ink-soft: #4a5568;
+    --cream: #f7f1de;
+    --cream-hi: #fffcf0;
+    --cream-shade: #dfd5b7;
+    --sky: #d9eef8;
+    --sky-hi: #eef8fd;
+    --sky-shade: #a6cde0;
+    --panel-gray: #e5e3da;
+    --panel-shade: #bdb9aa;
+    --bar-blue: #2d5aa0;
+    --bar-blue-dark: #1d3f75;
+    --accent-gold: #e5a922;
+    --accent-green: #2f8f5b;
+    --accent-red: #c93b3b;
+    --bevel-hi: #ffffff;
+    --bevel-lo: #7a8194;
+    --outline: #252b3b;
+
+    /* 5社パレット */
+    --c1: #d93838; /* NEC */
+    --c2: #2f3b52; /* SHARP */
+    --c3: #e35d25; /* FUJITSU */
+    --c4: #2c8a56; /* DEMPA */
+    --c5: #2c6be0; /* MORIYA GAMES */
+
+    /* 共通タイルパターン（8x8/16x16ドット格子・斜線を全画面で使い回し） */
+    --tile-bg:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 16px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 16px),
+      repeating-linear-gradient(45deg, #4b7c74 0 8px, #44726a 8px 16px);
+    --tile-bar-stripe:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.12) 0 2px, rgba(0,0,0,0.08) 2px 4px);
+    --tile-checker:
+      repeating-conic-gradient(rgba(37,43,59,0.06) 0% 25%, transparent 0% 50%) 50% / 12px 12px;
+    --tile-bankrupt:
+      repeating-linear-gradient(-45deg, #9fa5b0 0 4px, #858c99 4px 8px);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background-color: #44726a;
+    background-image: var(--tile-bg);
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 10px calc(84px + env(safe-area-inset-bottom));
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 980px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* =========================================================================
+     SFC 共通9スライス風立体ベベル枠・ボタン（全画面流用）
+     ========================================================================= */
+  .sfc-win {
+    background: var(--cream);
+    border: 3px solid var(--outline);
+    border-radius: 10px;
+    box-shadow:
+      inset 3px 3px 0 var(--bevel-hi),
+      inset -3px -3px 0 var(--cream-shade),
+      0 4px 0 rgba(20, 26, 38, 0.35);
+    overflow: hidden;
+  }
+
+  .sfc-win.sky {
+    background: var(--sky);
+    box-shadow:
+      inset 3px 3px 0 var(--sky-hi),
+      inset -3px -3px 0 var(--sky-shade),
+      0 4px 0 rgba(20, 26, 38, 0.35);
+  }
+
+  .sfc-win.gray {
+    background: var(--panel-gray);
+    box-shadow:
+      inset 3px 3px 0 var(--bevel-hi),
+      inset -3px -3px 0 var(--panel-shade),
+      0 4px 0 rgba(20, 26, 38, 0.35);
+  }
+
+  .sfc-titlebar {
+    background-color: var(--bar-blue);
+    background-image: var(--tile-bar-stripe);
+    color: #fff;
+    padding: 6px 12px;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    border-bottom: 3px solid var(--outline);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    text-shadow: 1px 2px 0 rgba(16, 24, 48, 0.75);
+  }
+
+  .sfc-titlebar.gold {
+    background-color: #b87c14;
+  }
+  .sfc-titlebar.green {
+    background-color: #267349;
+  }
+  .sfc-titlebar.red {
+    background-color: #a12c2c;
+  }
+
+  .sfc-body {
+    padding: 12px;
+  }
+
+  .sfc-inset {
+    background: var(--cream-hi);
+    border: 2px solid var(--outline);
+    border-radius: 6px;
+    box-shadow:
+      inset 2px 2px 0 rgba(37, 43, 59, 0.16),
+      inset -2px -2px 0 rgba(255, 255, 255, 0.85);
+  }
+
+  .sfc-btn {
+    appearance: none;
+    background: var(--panel-gray);
+    color: var(--ink);
+    border: 2px solid var(--outline);
+    border-radius: 7px;
+    padding: 7px 12px;
+    font-weight: 700;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow:
+      inset 2px 2px 0 #ffffff,
+      inset -2px -2px 0 var(--panel-shade),
+      0 2px 0 var(--outline);
+    transition: transform 0.06s, filter 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .sfc-btn:hover:not(:disabled) {
+    filter: brightness(1.04);
+  }
+  .sfc-btn:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow:
+      inset 2px 2px 0 var(--panel-shade),
+      inset -1px -1px 0 #ffffff;
+  }
+  .sfc-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .sfc-btn.primary {
+    background: #3d7be0;
+    color: #fff;
+    box-shadow:
+      inset 2px 2px 0 #7eb0ff,
+      inset -2px -2px 0 #214e9c,
+      0 2px 0 var(--outline);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.45);
+  }
+  .sfc-btn.success {
+    background: #349661;
+    color: #fff;
+    box-shadow:
+      inset 2px 2px 0 #70d19a,
+      inset -2px -2px 0 #1f633e,
+      0 2px 0 var(--outline);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.45);
+  }
+  .sfc-btn.warn {
+    background: #d9822b;
+    color: #fff;
+    box-shadow:
+      inset 2px 2px 0 #ffbe75,
+      inset -2px -2px 0 #944e0f,
+      0 2px 0 var(--outline);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.45);
+  }
+  .sfc-btn.danger {
+    background: #c93b3b;
+    color: #fff;
+    box-shadow:
+      inset 2px 2px 0 #ff8282,
+      inset -2px -2px 0 #7d1d1d,
+      0 2px 0 var(--outline);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.45);
+  }
+  .sfc-btn.sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 5px;
+  }
+  .sfc-btn.active-toggle {
+    background: #2d5aa0;
+    color: #fff;
+    box-shadow:
+      inset 2px 2px 0 #6ca0f0,
+      inset -2px -2px 0 #1a3869,
+      0 2px 0 var(--outline);
+  }
+
+  .num {
+    font-family: "Consolas", "Courier New", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* =========================================================================
+     常時表示ヘッダー（年月・運営金・5社シェア横棒グラフ）
+     ========================================================================= */
+  .top-hud .sfc-body {
+    padding: 8px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hud-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .hud-date-company {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .date-badge {
+    background: #1d3f75;
+    color: #fff7c2;
+    border: 2px solid var(--outline);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-weight: 800;
+    font-size: 14px;
+    box-shadow: inset 1px 1px 0 #5b87cc;
+  }
+
+  .company-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 2px solid var(--outline);
+    border-radius: 6px;
+    padding: 2px 8px;
+    min-height: 30px;
+  }
+  .company-chip canvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  .mode-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 2px solid var(--outline);
+    background: #d5f5e3;
+    color: #145a32;
+  }
+  .mode-badge.original {
+    background: #fdebd0;
+    color: #7e5109;
+  }
+
+  .hud-cash-box {
+    background: var(--cream-hi);
+    border: 2px solid var(--outline);
+    border-radius: 7px;
+    padding: 4px 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    box-shadow: inset 2px 2px 0 rgba(0,0,0,0.08);
+  }
+  .hud-cash-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--ink-soft);
+  }
+  .hud-cash-val {
+    font-size: 17px;
+    font-weight: 900;
+    color: #164e8a;
+  }
+  .hud-cash-val.neg { color: var(--accent-red); }
+  .hud-cash-sub {
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  /* 5社市場シェア横棒グラフ */
+  .share-wrap {
+    background: var(--cream-hi);
+    border: 2px solid var(--outline);
+    border-radius: 7px;
+    padding: 6px 8px;
+  }
+  .share-bar-track {
+    display: flex;
+    height: 18px;
+    border: 2px solid var(--outline);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #cbd2dd;
+    margin-bottom: 6px;
+  }
+  .share-seg {
+    height: 100%;
+    transition: width 0.25s ease;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.22) 0 2px,
+      rgba(0,0,0,0.08) 2px 4px
+    );
+    border-right: 1px solid rgba(34, 41, 58, 0.35);
+    min-width: 0;
+  }
+  .share-seg:last-child { border-right: none; }
+  .share-legend {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .share-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.65);
+    border: 1px solid rgba(34,41,58,0.2);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .share-item.is-player {
+    border: 2px solid #2d5aa0;
+    background: #e6f2ff;
+    font-weight: 800;
+  }
+  .share-item.bankrupt {
+    background-image: var(--tile-bankrupt);
+    color: #f8fafc;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+    opacity: 0.78;
+    text-decoration: line-through;
+  }
+  .share-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    border: 1px solid var(--outline);
+    flex: 0 0 auto;
+  }
+  .share-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+  .share-pct {
+    font-weight: 800;
+  }
+
+  /* =========================================================================
+     メインエリア（各画面切替）
+     ========================================================================= */
+  .screen-pane { display: none; }
+  .screen-pane.active { display: block; }
+
+  /* タイトル画面 */
+  .title-stage {
+    background-color: #dceef8;
+    background-image: var(--tile-checker);
+    border: 2px solid var(--outline);
+    border-radius: 8px;
+    padding: 28px 18px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .title-presents {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 2px solid var(--outline);
+    border-radius: 8px;
+    padding: 8px 14px;
+    box-shadow: 0 3px 0 rgba(34,41,58,0.2);
+  }
+  .title-logo-16bit {
+    font-size: clamp(32px, 7vw, 56px);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: #ffe24a;
+    -webkit-text-stroke: 2px var(--outline);
+    text-shadow:
+      0 4px 0 #a35a12,
+      0 7px 0 rgba(34, 41, 58, 0.35);
+    line-height: 1.1;
+    margin: 4px 0;
+  }
+  .title-sub {
+    font-weight: 800;
+    color: #1d3f75;
+    background: #fffcf0;
+    border: 2px solid var(--outline);
+    border-radius: 999px;
+    padding: 3px 16px;
+    font-size: 13px;
+  }
+  .title-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .title-note {
+    font-size: 12px;
+    color: var(--ink-soft);
+    max-width: 560px;
+  }
+
+  /* 会社選択画面 */
+  .select-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 10px;
+  }
+  .company-card {
+    background: var(--cream-hi);
+    border: 2px solid var(--outline);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--cream-shade);
+  }
+  .company-logo-box {
+    background: #fff;
+    border: 2px solid var(--outline);
+    border-radius: 5px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+  }
+  .company-logo-box canvas {
+    max-width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .company-stats-mini {
+    font-size: 12px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 8px;
+  }
+  .company-stats-mini dt { color: var(--ink-soft); }
+  .company-stats-mini dd { margin: 0; text-align: right; font-weight: 700; }
+  .diff-tag {
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--outline);
+    background: var(--sky);
+  }
+
+  /* 経営メイン画面 2カラム */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+  }
+
+  .cmd-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .cmd-btn {
+    justify-content: flex-start;
+    padding: 7px 8px;
+    font-size: 12px;
+    text-align: left;
+    position: relative;
+  }
+  .cmd-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: var(--bar-blue);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    flex: 0 0 auto;
+  }
+  .cmd-btn.non-turn {
+    background: var(--sky-hi);
+  }
+  .cmd-btn.non-turn .cmd-num {
+    background: var(--accent-green);
+  }
+  .cmd-btn.selected {
+    background: #fff3b0;
+    border-color: #b87c14;
+  }
+
+  /* コマンド入力フォーム（Phase 1: シンプル標準入力） */
+  .cmd-input-panel {
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--sky-hi);
+    border: 2px solid var(--outline);
+    border-radius: 7px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cmd-input-panel.active { display: flex; }
+  .cmd-input-title {
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--bar-blue-dark);
+    border-bottom: 1px dashed rgba(34,41,58,0.25);
+    padding-bottom: 4px;
+  }
+  .cmd-input-hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(34,41,58,0.2);
+    border-radius: 5px;
+    padding: 6px 8px;
+  }
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .form-row label {
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .sfc-input, .sfc-select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 2px solid var(--outline);
+    border-radius: 5px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .cmd-input-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* 右ペイン：ステータス & PCカード一覧 */
+  .view-tabs {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .view-tab-btn {
+    padding: 3px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    border: 2px solid var(--outline);
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .view-tab-btn.active {
+    background: var(--cream);
+    color: var(--ink);
+  }
+
+  .status-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    background: var(--sky);
+    border: 2px solid var(--outline);
+    border-radius: 7px;
+  }
+  .status-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--cream-hi);
+    border: 2px solid var(--outline);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .status-table tr {
+    border-bottom: 1px solid rgba(34,41,58,0.16);
+  }
+  .status-table tr:last-child { border-bottom: none; }
+  .status-table th {
+    text-align: left;
+    padding: 7px 10px;
+    font-size: 13px;
+    color: #1f4d36;
+    background: rgba(217, 238, 248, 0.45);
+    width: 36%;
+  }
+  .status-table td {
+    text-align: right;
+    padding: 7px 10px;
+    font-weight: 800;
+    font-size: 14px;
+  }
+  .status-table td .sub-unit {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+  .val-neg { color: var(--accent-red); }
+  .val-pos { color: #164e8a; }
+
+  /* パソコンカード (NO.0〜7) */
+  .pc-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+  }
+  .pc-card {
+    background: var(--cream-hi);
+    border: 2px solid var(--outline);
+    border-radius: 7px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--cream-shade);
+  }
+  .pc-card.empty {
+    background: var(--panel-gray);
+    opacity: 0.85;
+  }
+  .pc-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Phase 3 用 PCドットアイコン仮枠 */
+  .pc-icon-placeholder {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border: 2px dashed var(--outline);
+    border-radius: 6px;
+    background-color: var(--sky);
+    background-image: var(--tile-checker);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 11px;
+    line-height: 1.1;
+    color: var(--bar-blue-dark);
+  }
+  .pc-icon-placeholder.b8 { background-color: #e6f4ea; color: #1e6b3b; }
+  .pc-icon-placeholder.b16 { background-color: #dceef8; color: #1d4e89; }
+  .pc-icon-placeholder.b32 { background-color: #fde8d8; color: #9c3d10; }
+  .pc-icon-placeholder.none { background-color: #d7d5cc; color: #5b6270; }
+
+  .pc-card-head {
+    min-width: 0;
+    flex: 1;
+  }
+  .pc-no {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--ink-soft);
+  }
+  .pc-name {
+    font-size: 13px;
+    font-weight: 900;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pc-specs {
+    font-size: 11px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 6px;
+    border-top: 1px solid rgba(34,41,58,0.15);
+    padding-top: 5px;
+  }
+  .pc-specs dt { color: var(--ink-soft); }
+  .pc-specs dd { margin: 0; text-align: right; font-weight: 700; }
+
+  /* 決算報告・エンディング・ゲームオーバー */
+  .report-sheet {
+    background: var(--cream-hi);
+    border: 2px solid var(--outline);
+    border-radius: 8px;
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .report-heading {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--bar-blue-dark);
+    border-bottom: 3px double var(--outline);
+    padding-bottom: 6px;
+  }
+  .tax-notice {
+    text-align: center;
+    background: #fde8e8;
+    border: 2px solid var(--accent-red);
+    color: #8f1d1d;
+    border-radius: 6px;
+    padding: 6px;
+    font-weight: 800;
+    font-size: 13px;
+  }
+  .staff-roll {
+    background: #1d273b;
+    color: #fff8d6;
+    border: 2px solid var(--outline);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 700;
+  }
+  .gameover-box {
+    background: #2b1a1f;
+    color: #ffecec;
+    border: 2px solid var(--outline);
+    border-radius: 8px;
+    padding: 18px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* =========================================================================
+     SFC風メッセージウィンドウ ＋ Phase 3 仮ポートレート枠 (48x48)
+     ========================================================================= */
+  .msg-win .sfc-body {
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  /* Phase 3 でミニキャラ (48x48相当) を差し込むための仮枠 */
+  .portrait-slot {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+    border: 2px solid var(--outline);
+    border-radius: 7px;
+    background-color: var(--sky);
+    background-image: var(--tile-checker);
+    box-shadow: inset 2px 2px 0 rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--bar-blue-dark);
+    padding: 2px;
+  }
+  .portrait-slot .p-badge {
+    font-size: 16px;
+    line-height: 1.1;
+  }
+  .msg-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .msg-speaker {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--bar-blue);
+  }
+  .msg-main {
+    font-size: 14px;
+    font-weight: 800;
+    min-height: 22px;
+    word-break: break-word;
+  }
+  .msg-log {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px dashed rgba(34,41,58,0.2);
+    font-size: 11px;
+    color: var(--ink-soft);
+    max-height: 62px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* =========================================================================
+     下部コントロールバー & セーブパネル
+     ========================================================================= */
+  .toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .toolbar-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .vol-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .vol-wrap input { width: 72px; accent-color: var(--bar-blue); }
+
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .slot-card {
+    background: var(--cream-hi);
+    border: 2px solid var(--outline);
+    border-radius: 7px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .slot-card.autosave {
+    background: var(--sky-hi);
+  }
+  .slot-head {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--bar-blue-dark);
+  }
+  .slot-meta {
+    font-size: 11px;
+    color: var(--ink-soft);
+    min-height: 30px;
+  }
+  .slot-actions {
+    display: flex;
+    gap: 5px;
+  }
+  .slot-actions .sfc-btn { flex: 1; }
+  .slot-actions .sfc-btn.del { flex: 0 0 auto; }
+
+  .toast-float {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 50;
+    background: #1d3f75;
+    color: #fff;
+    border: 2px solid var(--outline);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 800;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .toast-float.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* レスポンシブ（スマホ縦画面最適化） */
+  @media (max-width: 780px) {
+    .main-grid {
+      grid-template-columns: 1fr;
+    }
+    .share-legend {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .hud-cash-val {
+      font-size: 15px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="toastFloat" class="toast-float"></div>
+
+<div class="app-shell">
+
+  <!-- =======================================================================
+       1. 常時表示ヘッダー（年月・自社運営金・5社シェア横棒グラフ）
+       ======================================================================= -->
+  <header class="sfc-win sky top-hud">
+    <div class="sfc-titlebar">
+      <span>HARD MAKER — 16bit REMAKE (Phase 1)</span>
+      <span id="hudModeBadge" class="mode-badge">バグ修正モード</span>
+    </div>
+    <div class="sfc-body">
+      <div class="hud-row">
+        <div class="hud-date-company">
+          <div id="hudDate" class="date-badge num">1989年 4月</div>
+          <div class="company-chip">
+            <canvas id="hudLogoCanvas" width="128" height="14"></canvas>
+            <span id="hudCompanyName" style="font-size:12px;font-weight:800;">会社未選択</span>
+          </div>
+        </div>
+        <div class="hud-cash-box">
+          <span class="hud-cash-label">運営金残高</span>
+          <span id="hudCash" class="hud-cash-val num">---</span>
+          <span id="hudCashSub" class="hud-cash-sub"></span>
+        </div>
+      </div>
+
+      <div class="share-wrap">
+        <div id="shareBarTrack" class="share-bar-track" aria-label="5社市場シェア横棒グラフ"></div>
+        <div id="shareLegend" class="share-legend"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =======================================================================
+       2. メインエリア（タイトル / 会社選択 / 経営 / 決算 / エンディング / GAME OVER）
+       ======================================================================= -->
+  <main>
+
+    <!-- 2-A. タイトル画面 -->
+    <section id="paneTitle" class="screen-pane active">
+      <div class="sfc-win">
+        <div class="sfc-titlebar gold">
+          <span>TITLE — パソコン戦国時代 経営シミュレーション</span>
+          <span>1989 MORIYA GAMES / Remake</span>
+        </div>
+        <div class="sfc-body">
+          <div class="title-stage">
+            <div class="title-presents">
+              <canvas id="titleLogoCanvas" width="246" height="14"></canvas>
+              <span style="font-size:11px;font-weight:800;letter-spacing:0.15em;color:#4a5568;">PRESENTS</span>
+            </div>
+            <div class="title-logo-16bit">HARD MAKER</div>
+            <div class="title-sub">&lt;&lt; ハード メーカー &gt;&gt;</div>
+            <div class="title-note">
+              1989年、パソコン業界は戦国時代に突入した。<br>
+              5社から1社の社長となり、パソコンを開発・販売して他の4社をすべて買収せよ！
+            </div>
+            <div class="title-actions">
+              <button id="btnStartNew" class="sfc-btn primary" type="button">ゲームスタート (SPACE)</button>
+              <button id="btnContinueAuto" class="sfc-btn success" type="button" style="display:none;">AUTOSAVEから再開</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2-B. 会社選択画面 -->
+    <section id="paneSelect" class="screen-pane">
+      <div class="sfc-win">
+        <div class="sfc-titlebar green">
+          <span>会社選択 — どの会社の社長になりますか？ (1〜5)</span>
+          <button id="btnBackTitle" class="sfc-btn sm" type="button">タイトルへ</button>
+        </div>
+        <div class="sfc-body">
+          <div id="selectGrid" class="select-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2-C. 経営メイン画面 -->
+    <section id="paneMain" class="screen-pane">
+      <div class="main-grid">
+
+        <!-- 左カラム：コマンド一覧＋シンプル入力エリア -->
+        <div class="sfc-win">
+          <div class="sfc-titlebar">
+            <span>コマンド (1〜12)</span>
+            <span style="font-size:11px;font-weight:600;">緑＝ターン消費なし</span>
+          </div>
+          <div class="sfc-body">
+            <div id="cmdGrid" class="cmd-grid"></div>
+            <div id="cmdInputPanel" class="cmd-input-panel"></div>
+          </div>
+        </div>
+
+        <!-- 右カラム：会社ステータス / 開発パソコン一覧カード -->
+        <div class="sfc-win">
+          <div class="sfc-titlebar">
+            <span id="rightPaneTitle">ステータス</span>
+            <div class="view-tabs">
+              <button id="tabStatus" class="view-tab-btn active" type="button">自社ステータス</button>
+              <button id="tabPcList" class="view-tab-btn" type="button">パソコン一覧</button>
+            </div>
+          </div>
+          <div class="sfc-body">
+            <!-- 会社ステータス表示 -->
+            <div id="viewStatus">
+              <div class="status-header-bar">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div class="company-chip">
+                    <canvas id="statusLogoCanvas" width="160" height="14"></canvas>
+                  </div>
+                  <strong id="statusCompanyLabel" style="font-size:14px;">---</strong>
+                </div>
+                <span id="statusViewingNote" style="font-size:12px;font-weight:700;color:#2d5aa0;"></span>
+              </div>
+              <table class="status-table">
+                <tbody id="statusTableBody"></tbody>
+              </table>
+            </div>
+
+            <!-- 開発パソコン一覧 (NO.0〜7 カード形式) -->
+            <div id="viewPcList" style="display:none;">
+              <div id="pcCardGrid" class="pc-card-grid"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2-D. 年度決算報告画面 (4月) -->
+    <section id="paneSettlement" class="screen-pane">
+      <div class="sfc-win">
+        <div class="sfc-titlebar gold">
+          <span id="settlementTitleBar">年度決算報告</span>
+          <span>4月 決算</span>
+        </div>
+        <div class="sfc-body">
+          <div id="settlementContent" class="report-sheet"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2-E. エンディング画面 -->
+    <section id="paneEnding" class="screen-pane">
+      <div class="sfc-win">
+        <div class="sfc-titlebar gold">
+          <span>CONGRATULATIONS! — コンピューター業界制覇</span>
+          <span>ENDING</span>
+        </div>
+        <div class="sfc-body">
+          <div class="report-sheet">
+            <div class="report-heading">全社買収達成！</div>
+            <div id="staffRollBox" class="staff-roll"></div>
+            <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+              <button id="btnEndingContinue" class="sfc-btn primary" type="button">原作通り経営を続ける</button>
+              <button id="btnEndingTitle" class="sfc-btn" type="button">タイトルへ戻る</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2-F. ゲームオーバー画面 -->
+    <section id="paneGameOver" class="screen-pane">
+      <div class="sfc-win">
+        <div class="sfc-titlebar red">
+          <span>GAME OVER — 企業買収により倒産</span>
+          <span>TOOSAN</span>
+        </div>
+        <div class="sfc-body">
+          <div class="gameover-box">
+            <div style="font-size:22px;font-weight:900;color:#ff9494;letter-spacing:0.12em;">GAME OVER</div>
+            <div style="background:#fff;border:2px solid #000;border-radius:6px;padding:6px 14px;">
+              <canvas id="gameOverLogoCanvas" width="180" height="14"></canvas>
+            </div>
+            <div id="gameOverMsg" style="font-size:14px;font-weight:700;line-height:1.7;"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <button id="btnGameOverReset" class="sfc-btn primary" type="button">最初からやり直す</button>
+              <button id="btnGameOverLoadAuto" class="sfc-btn success" type="button">AUTOSAVEからやり直す</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =======================================================================
+       3. SFC風メッセージウィンドウ ＋ Phase 3 仮ポートレート枠 (48x48相当)
+       ======================================================================= -->
+  <section class="sfc-win msg-win" aria-live="polite">
+    <div class="sfc-titlebar">
+      <span>メッセージウィンドウ</span>
+      <span id="msgTurnInfo" style="font-size:11px;font-weight:600;">待機中</span>
+    </div>
+    <div class="sfc-body">
+      <!-- Phase 3 でミニキャラドット絵 (48x48) を差し込むための仮枠 -->
+      <div id="portraitSlot" class="portrait-slot" title="Phase 3 ミニキャラ表示用 仮ポートレート枠">
+        <span id="portraitBadge" class="p-badge">社</span>
+        <span style="font-size:9px;opacity:0.8;">48×48仮枠</span>
+      </div>
+      <div class="msg-content">
+        <div id="msgSpeaker" class="msg-speaker">MORIYA GAMES 案内</div>
+        <div id="msgMain" class="msg-main">HARD MAKER へようこそ！ゲームスタートを押してください。</div>
+        <div id="msgLog" class="msg-log"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================================
+       4. 音源・設定ツールバー & セーブ／ロードパネル
+       ======================================================================= -->
+  <section class="sfc-win gray">
+    <div class="sfc-titlebar">
+      <span>システム設定・サウンド（原作 FM7Audio 流用）</span>
+      <span>Save Key: sfc_hard_maker_remake_saves_v1</span>
+    </div>
+    <div class="sfc-body">
+      <div class="toolbar-row">
+        <div class="toolbar-group">
+          <button id="btnBgm" class="sfc-btn sm active-toggle" type="button">BGM: ON</button>
+          <button id="btnSfx" class="sfc-btn sm active-toggle" type="button">効果音: ON</button>
+          <button id="btnTone" class="sfc-btn sm active-toggle" type="button">音色: FM-77風</button>
+          <span class="vol-wrap">
+            <span>音量</span>
+            <input id="volSlider" type="range" min="0" max="100" value="40">
+          </span>
+        </div>
+        <div class="toolbar-group">
+          <button id="btnMode" class="sfc-btn sm success" type="button">モード: バグ修正</button>
+          <button id="btnSpeed" class="sfc-btn sm" type="button">文字送り: 通常</button>
+          <button id="btnReset" class="sfc-btn sm danger" type="button">リセット</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;padding-top:10px;border-top:2px solid rgba(34,41,58,0.18);">
+        <div class="toolbar-row">
+          <strong style="font-size:13px;color:#1d3f75;">セーブ / ロード（自動保存 ＋ 手動3スロット ＋ JSON入出力）</strong>
+          <div class="toolbar-group">
+            <button id="btnExportSave" class="sfc-btn sm" type="button">JSON保存</button>
+            <button id="btnImportSave" class="sfc-btn sm" type="button">JSON読込</button>
+            <input id="fileImportInput" type="file" accept=".json,application/json" style="display:none">
+          </div>
+        </div>
+        <div id="slotGrid" class="slot-grid"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // =========================================================================
+  // 1. 原作データ定数（phase0_report.md 準拠・原作と完全一致）
+  // =========================================================================
+  const COMPANY_NAMES = ["", "NEC", "SHARP", "FUJITSU", "DEMPA", "MORIYA GAMES"];
+  const COMPANY_COLORS = ["", "#d93838", "#2f3b52", "#e35d25", "#2c8a56", "#2c6be0"];
+  const COMPANY_DIFF = ["", "初級（最強・シェア53%）", "中級（シェア17%）", "中級（シェア16%）", "上級（シェア11%）", "超上級（最弱・シェア3%）"];
+
+  // 各社初期ステータス ST[1..5][0..9]
+  const INITIAL_ST = [
+    null,
+    [156325200, 0, 0, 0, 43241, 52, 40000, 53, 10600000, -1],
+    [127410000, 0, 0, 0, 32654, 48, 35000, 17,  3400000, -1],
+    [100532000, 0, 0, 0, 35601, 44, 40000, 16,  3200000, -1],
+    [ 96385200, 0, 0, 0, 27054, 35, 30000, 11,  2200000, -1],
+    [ 78520300, 0, 0, 0, 14562, 26, 20000,  3,   600000, -1]
+  ];
+
+  // 原作コマンド一覧（1〜12）
+  const COMMAND_DEFS = [
+    { id: 1,  name: "企業買う",     nonTurn: false },
+    { id: 2,  name: "パソコン開発", nonTurn: false },
+    { id: 3,  name: "製造中止",     nonTurn: false },
+    { id: 4,  name: "価格変える",   nonTurn: false },
+    { id: 5,  name: "パソコン生産", nonTurn: false },
+    { id: 6,  name: "パソコン売る", nonTurn: false },
+    { id: 7,  name: "社員雇う",     nonTurn: false },
+    { id: 8,  name: "給料変える",   nonTurn: false },
+    { id: 9,  name: "技術あげる",   nonTurn: false },
+    { id: 10, name: "他社見る",     nonTurn: true  },
+    { id: 11, name: "パソコン見る", nonTurn: true  },
+    { id: 12, name: "なにもしない", nonTurn: false }
+  ];
+
+  // 原作名セリフ・スタッフロール（BS$ より）
+  const TEXTS = {
+    sellSpell: "ﾃｸﾏｸﾏﾔｺﾝ ﾃｸﾏｸﾏｲｺﾝ ﾀｸｻﾝﾊﾟｿｺﾝｶﾞｳﾚﾙﾖｳﾆﾅｰﾚ!",
+    techChant: "ｼｬﾁｮｳﾓ ｼｬｲﾝﾓ ﾐﾅ ｶｿﾞｸ ｺｹｺｹ ﾖｸｺｹ ｷﾝﾁｮｰﾙ",
+    selfBuy:   "ｼﾞﾌﾞﾝﾃﾞ ｼﾞﾌﾞﾝﾉｶｲｼｬｦ ｶｯﾃ ﾄﾞｰｽﾝﾀﾞ!!",
+    noMoney:   "ｵｶﾈｶﾞﾀﾘﾏｾﾝ",
+    alreadyPc: "ｿﾉ NOﾊ ｽﾃﾞﾆ ﾂｸｯﾃｱﾘﾏｽ",
+    notMadePc: "ｿﾉ NOﾊ ﾏﾀﾞﾂｸｯﾃ ｱﾘﾏｾﾝ",
+    endingLines: [
+      "ｱﾅﾀﾊ ｽﾍﾞﾃﾉ ｶｲｼｬｦ ｶｲﾄﾘﾏｼﾀ",
+      "ｱﾅﾀﾊ ｺﾝﾋﾟｭｰﾀｰｷﾞｮｳｶｲﾉ ﾃｲｵｳﾄ ﾅｯﾀ!!",
+      "ｽﾀｯﾌ ｼｮｳｶｲ",
+      "ﾌﾟﾛｸﾞﾗﾑ / MORIYA GAMES",
+      "ﾌﾟﾛｸﾞﾗﾑ / ﾓﾘﾔﾏ ｶｽﾞﾔ",
+      "ﾃｽﾄﾌﾟﾚｲ / ｻｶｸﾞﾁ ﾄﾓﾋｺ",
+      "ﾃｽﾄﾌﾟﾚｲ / ﾌｶｶﾞﾜ ｿｳｲﾁﾛｳ",
+      "ﾃｽﾄﾌﾟﾚｲ / ﾏﾂｼﾀ ｱｷﾗ",
+      "ｾｲｻｸ ﾁｮｻｸ / 1989 MORIYA GAMES",
+      "HARD MAKER",
+      "- ｵﾜﾘ -"
+    ]
+  };
+
+  // 原作ドットロゴ 16進数データ（1430〜1710行：小容量で5社ロゴを全画面で流用）
+  const HEX_LOGO_LINES = [
+    "1F80,78FF,FFF0,3FFD,FFC0,FC7F,83C1,FC7C,FFE1,C0FF,031F,8060,FFF7,03FC",
+    "707E,0003,FFFE,3FFF,C1F8,0007,7FF8,1FE3,83F8,039E,1FF0,3FC0,07FC,1E3C",
+    "0FE0,FF01,C7FF,F8FE,0781,FE0F,07FF,F1E0,071F,FFFE,01FF,C100,0FFF,FFE0",
+    "FF00,0FF0,007F,C001,FFFF,FE03,FFFF,FC07,FFFF,FFEF,F000,FF00,0FFE,001F",
+    "FFFF,FE3F,FFFF,FCFF,8003,FCFF,000F,F003,FFF0,01FC,007F,FBF8,00FF,EFFC",
+    "0000,0FF0,00FF,007E,7FC0,1FC0,00FF,BF80,01FF,3FFF,FFE0,FFFF,FFF0,1F83",
+    "FE01,FC00,7FE3,F800,FFE0,FFFF,FF8F,FFFF,FF03,F01F,F01F,CFFF,E03F,FFFF",
+    "FC00,0007,FEFF,000F,F07F,FFFF,C1FD,FFF8,03FF,FFFC,07FE,003F,EFF0,00FF",
+    "1FFF,FFFE,1FC3,FFF0,3F80,0000,FFFF,FFFC,FF00,0FF3,F000,0FF9,FC03,FFC3",
+    "F800,0000,FFFF,FE0F,F000,FF7E,0000,7FDF,C003,FFBF,8000,0000,0000,00FC",
+    "7000,0000,0000,000E,39C0,0000,0000,0000,3838,0000,0001,FFBC,79F3,E7FE",
+    "7F78,F604,C187,0E43,2609,833F,860C,3870,181E,0C19,8430,61C3,80C0,1C60",
+    "CC01,C70E,1C06,1033,8EF0,07F0,71F0,787F,0FE0,0000,0F00,0000,0000,0400",
+    "FFFF,07FF,FEFE,00FE,FFFF,C01F,C01F,FFF8,FFFF,DFE0,3FDF,FFFE,07FC,03FF",
+    "FF9F,FFFB,FE0F,FBFF,FFE1,FFC0,7F07,FBF8,007F,E3FF,7F01,FC7F,FC0F,E07F",
+    "7FFF,8FFE,FFEF,E03F,9FDF,C1FC,0FEF,FFF1,FFFF,FDFF,FFF7,F1FC,3F83,FDFC",
+    "003F,FFFF,BFFF,FDFF,FFC7,FFFF,3FFF,F7EF,FBF7,FFFE,7FFF,FCFF,FFC7,FFFE",
+    "FCFE,7EFE,001F,E03F,DFFF,E0FF,FFDF,8F8F,DFC0,07F8,03FC,F8F1,C03F,F81F",
+    "FFF0,1F87,E01F,81FF,E000,0003,FFE0,0FFF,03E3,C70F,FFFC,0FFF,F3EF,DF87",
+    "FFFC,7FFF,F1FF,9F80,7E1F,FFE0,0000,3FFF,E0FF,FF0F,BF7E,3FFF,FCFF,FFFF",
+    "FFFF,3FFF,F9F8,07E7,FE7E,01F8,FC0F,C000,01FC,1FC7,E07E,3FFF,FCFC,0003",
+    "F00F,FFFF,FCFF,FFE7,E01F,87E1,FC0F,E7E0,1F80,0007,E03F,3F00,FCFF,FFF3",
+    "F000,0FC0,00FD,FBF3,F01F,9FFF,FC00,03FF,FF1F,807E,0000,1F80,00FC,03F3",
+    "F7EF,CFFF,FC3F,FFF3,E3C7,CF80,3E7F,FFC0,7007,FFF8,7FFF,F800,007E,3FF3",
+    "FFFF,CF8F,1F3F,FFFC,3FFF,FF8F,1F3E,00F9,F9F8,01F0,03FF,01FF,FFE0,0001",
+    "F8FF,CFFF,FF3E,3C7C,FC00,0000,0FFE,3C7C,FC07,E7E3,F807,E003,F007,E01F",
+    "8000,07F0,3F3F,00FC,F8F1,F3F0,000F,C03F,F8F1,F1FF,FF1F,83F8,1F80,0FC0",
+    "1F80,7E00,000F,FFF8,FC03,F3E3,C7CF,FFFC,3FFF,FFE3,C7C0,FFE0,7E03,F87E",
+    "003F,007E,01F8,0000,0FFF,83F0,0FCF,8F1F,3FFF,FC3F,FFC3"
+  ];
+
+  const LOGO_WORDS = [];
+  for (const line of HEX_LOGO_LINES) {
+    for (const tok of line.split(",")) LOGO_WORDS.push(parseInt(tok.trim(), 16));
+  }
+  function decodeBits(words) {
+    const bits = new Uint8Array(words.length * 16);
+    let p = 0;
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      for (let b = 15; b >= 0; b--) bits[p++] = (w >> b) & 1;
+    }
+    return bits;
+  }
+  let lwIdx = 0;
+  const takeLogo = (n, w, col) => {
+    const bits = decodeBits(LOGO_WORDS.slice(lwIdx, lwIdx + n));
+    lwIdx += n;
+    return { bits, w, h: 10, col };
+  };
+  const COMPANY_LOGOS = [
+    null,
+    takeLogo(40,  63,  "#d93838"), // 1: NEC
+    takeLogo(98,  156, "#1f2937"), // 2: SHARP
+    takeLogo(44,  69,  "#d93838"), // 3: FUJITSU
+    takeLogo(67,  107, "#1f2937"), // 4: DEMPA
+    takeLogo(154, 246, "#2c6be0")  // 5: MORIYA GAMES
+  ];
+
+  // 原作ドットロゴを任意の小型Canvasに中央描画する共通ヘルパー
+  function drawDotLogo(canvas, companyId, overrideColor) {
+    if (!canvas || !canvas.getContext) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const logo = COMPANY_LOGOS[companyId];
+    if (!logo) return;
+    const scaleX = Math.max(0.5, Math.min(1, (canvas.width - 4) / logo.w));
+    const scaleY = Math.max(1, Math.floor((canvas.height - 2) / logo.h));
+    const drawW = logo.w * scaleX;
+    const drawH = logo.h * scaleY;
+    const ox = Math.floor((canvas.width - drawW) / 2);
+    const oy = Math.floor((canvas.height - drawH) / 2);
+    ctx.fillStyle = overrideColor || logo.col;
+    let p = 0;
+    for (let y = 0; y < logo.h; y++) {
+      for (let x = 0; x < logo.w; x++) {
+        if (logo.bits[p++]) {
+          ctx.fillRect(ox + x * scaleX, oy + y * scaleY, Math.ceil(scaleX), scaleY);
+        }
+      }
+    }
+  }
+
+  // =========================================================================
+  // 2. 原作 FM7Audio そのまま流用（Phase 4 までの暫定音源層）
+  // =========================================================================
+  const MU_DATA = [
+    "S13M512T123L8O3AO4CD4DFE8.C16", "S13M512T123L8O3AO4CD4DFE8.C16", "FGF4E4DE",
+    "FGF4E4DE", "D4C4O3A2", "D4C4O3A2", "AO4CD4DFE8.C16", "AO4CD4DFE8.C16", "FGA4A4AG",
+    "FGA4A4AG", "F4G4F2", "F4G4F2", "O5CO4AG4G4FA", "F4E4E4F4", "G4C4O5CO4AG4", "G4C4F4E4",
+    "G4AO5CD2", "E4FAB4A4", "DEF4E4D4", "G4F4A4B-4", "C4F4O4A4GF", "O5C4O4B4A4GF", "G4A4O5C2",
+    "G4A4G4F4", "O4AO5CD4DFE8.C16", "E4F4F4G4", "FGF4E4DE", "A4A4A4B-4", "D4C4O4A2", "F4G4F2",
+    "AO5CD4DFE8.C16", "O3AO4CD4DFE8.C16", "FGA4A4AG", "FGA4A4AG", "F4G4F2", "F4G4F2"
+  ];
+  const NOTE_SEMITONES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+  class FM7Audio {
+    constructor() {
+      this.ctx = null;
+      this.masterGain = null;
+      this.bgmBus = null;
+      this.lowpass = null;
+      this.warmth = null;
+      this.delayWet = null;
+      this.bgmEnabled = true;
+      this.sfxEnabled = true;
+      this.fm77Tone = true;
+      this.volume = 0.40;
+      this.bgmRunning = false;
+      this.bgmTimer = null;
+      this.muIndex = 0;
+      this.chStates = [
+        { tempo: 123, oct: 4, len: 8, envShape: 13, envPeriod: 512, nextTime: 0 },
+        { tempo: 123, oct: 4, len: 8, envShape: 13, envPeriod: 512, nextTime: 0 }
+      ];
+      this.activeNodes = new Set();
+    }
+
+    unlock() {
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        this.ctx = new AudioCtx();
+
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = this.volume;
+
+        this.warmth = this.ctx.createBiquadFilter();
+        this.warmth.type = "peaking";
+        this.warmth.frequency.value = 320;
+        this.warmth.Q.value = 0.85;
+        this.warmth.gain.value = this.fm77Tone ? 5.0 : 0.0;
+
+        this.lowpass = this.ctx.createBiquadFilter();
+        this.lowpass.type = "lowpass";
+        this.lowpass.frequency.value = this.fm77Tone ? 2450 : 14000;
+        this.lowpass.Q.value = this.fm77Tone ? 0.9 : 0.5;
+
+        this.bgmBus = this.ctx.createGain();
+        this.bgmBus.gain.value = 1.0;
+
+        const delay = this.ctx.createDelay(0.1);
+        delay.delayTime.value = 0.017;
+        const delayFilter = this.ctx.createBiquadFilter();
+        delayFilter.type = "lowpass";
+        delayFilter.frequency.value = 1600;
+        this.delayWet = this.ctx.createGain();
+        this.delayWet.gain.value = this.fm77Tone ? 0.20 : 0.0;
+
+        this.bgmBus.connect(this.warmth);
+        this.warmth.connect(this.lowpass);
+        this.lowpass.connect(this.masterGain);
+
+        this.bgmBus.connect(delay);
+        delay.connect(delayFilter);
+        delayFilter.connect(this.delayWet);
+        this.delayWet.connect(this.masterGain);
+
+        this.masterGain.connect(this.ctx.destination);
+      }
+      if (this.ctx.state === "suspended") {
+        this.ctx.resume().catch(() => {});
+      }
+    }
+
+    setToneMode(isFm77) {
+      this.fm77Tone = isFm77;
+      if (this.ctx && this.lowpass && this.warmth && this.delayWet) {
+        const now = this.ctx.currentTime;
+        this.warmth.gain.setTargetAtTime(isFm77 ? 5.0 : 0.0, now, 0.03);
+        this.lowpass.frequency.setTargetAtTime(isFm77 ? 2450 : 14000, now, 0.03);
+        this.lowpass.Q.setTargetAtTime(isFm77 ? 0.9 : 0.5, now, 0.03);
+        this.delayWet.gain.setTargetAtTime(isFm77 ? 0.20 : 0.0, now, 0.03);
+      }
+    }
+
+    setVolume(v) {
+      this.volume = v;
+      if (this.masterGain && this.ctx) {
+        this.masterGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.02);
+      }
+    }
+
+    beepClick() {
+      if (!this.sfxEnabled) return;
+      this.unlock();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(this.fm77Tone ? 980 : 1180, now);
+      gain.gain.setValueAtTime(0.085, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.017);
+      osc.connect(gain);
+      gain.connect(this.fm77Tone ? this.lowpass : this.masterGain);
+      osc.start(now);
+      osc.stop(now + 0.019);
+    }
+
+    parseMML(mml, state) {
+      const events = [];
+      let i = 0;
+      const s = mml.toUpperCase();
+      while (i < s.length) {
+        const c = s[i++];
+        if (c === "T") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.tempo = Math.max(32, Math.min(255, parseInt(num, 10)));
+        } else if (c === "O") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.oct = parseInt(num, 10);
+        } else if (c === "L") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.len = parseInt(num, 10);
+        } else if (c === "S") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.envShape = parseInt(num, 10);
+        } else if (c === "M") {
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          if (num) state.envPeriod = parseInt(num, 10);
+        } else if (c === "V") {
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") i++;
+        } else if (c === "R" || NOTE_SEMITONES[c] !== undefined) {
+          let semi = NOTE_SEMITONES[c];
+          if (c !== "R") {
+            if (i < s.length && (s[i] === "+" || s[i] === "#")) { semi++; i++; }
+            else if (i < s.length && s[i] === "-") { semi--; i++; }
+          }
+          let num = "";
+          while (i < s.length && s[i] >= "0" && s[i] <= "9") num += s[i++];
+          let lenVal = num ? parseInt(num, 10) : state.len;
+          let dur = (240 / state.tempo) / lenVal;
+          while (i < s.length && s[i] === ".") { dur *= 1.5; i++; }
+          let freq = 0;
+          if (c !== "R") {
+            const midi = (state.oct + 1) * 12 + semi;
+            freq = 440 * Math.pow(2, (midi - 69) / 12);
+          }
+          events.push({ freq, dur, envShape: state.envShape, envPeriod: state.envPeriod });
+        }
+      }
+      return events;
+    }
+
+    scheduleNote(ev, startTime, chIdx, gainPeak = 0.13) {
+      if (!this.ctx || ev.freq <= 0) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(ev.freq, startTime);
+
+      if (this.fm77Tone) {
+        const detuneCents = chIdx === 0 ? -1.8 : (chIdx === 1 ? 1.8 : 0);
+        osc.detune.setValueAtTime(detuneCents, startTime);
+      }
+
+      const dur = ev.dur;
+      const gateEnd = startTime + Math.max(0.025, dur * 0.92);
+      const stopTime = startTime + dur * 0.98;
+
+      if (this.fm77Tone && ev.envShape === 13) {
+        const rampSec = Math.min(dur * 0.65, Math.max(0.035, (ev.envPeriod / 512) * 0.095));
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(gainPeak * 0.22, startTime + 0.006);
+        gain.gain.linearRampToValueAtTime(gainPeak, startTime + rampSec);
+        gain.gain.setValueAtTime(gainPeak, Math.max(startTime + rampSec, gateEnd));
+        gain.gain.linearRampToValueAtTime(0.0001, stopTime);
+      } else {
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(gainPeak, startTime + 0.004);
+        gain.gain.setValueAtTime(gainPeak * 0.82, gateEnd);
+        gain.gain.linearRampToValueAtTime(0.0001, stopTime);
+      }
+
+      osc.connect(gain);
+      gain.connect(this.bgmBus);
+      osc.start(startTime);
+      osc.stop(stopTime + 0.005);
+
+      this.activeNodes.add(osc);
+      osc.onended = () => {
+        this.activeNodes.delete(osc);
+        osc.disconnect();
+        gain.disconnect();
+      };
+    }
+
+    startBGM() {
+      this.stopBGM();
+      this.bgmRunning = true;
+      this.muIndex = 0;
+      this.unlock();
+      if (!this.ctx) return;
+      const t0 = this.ctx.currentTime + 0.05;
+      this.chStates = [
+        { tempo: 123, oct: 4, len: 8, envShape: 13, envPeriod: 512, nextTime: t0 },
+        { tempo: 123, oct: 4, len: 8, envShape: 13, envPeriod: 512, nextTime: t0 }
+      ];
+      this._pumpBGM();
+    }
+
+    _pumpBGM() {
+      if (!this.bgmRunning || !this.ctx) return;
+      const now = this.ctx.currentTime;
+      while (this.chStates[0].nextTime < now + 1.5) {
+        const m0 = MU_DATA[this.muIndex];
+        const m1 = MU_DATA[this.muIndex + 1];
+        const ev0 = this.parseMML(m0, this.chStates[0]);
+        const ev1 = this.parseMML(m1, this.chStates[1]);
+
+        if (this.bgmEnabled) {
+          let t = this.chStates[0].nextTime;
+          for (const e of ev0) {
+            if (e.freq > 0) this.scheduleNote(e, t, 0, 0.115);
+            t += e.dur;
+          }
+          this.chStates[0].nextTime = t;
+
+          t = this.chStates[1].nextTime;
+          for (const e of ev1) {
+            if (e.freq > 0) this.scheduleNote(e, t, 1, 0.105);
+            t += e.dur;
+          }
+          this.chStates[1].nextTime = t;
+        } else {
+          const d0 = ev0.reduce((a, b) => a + b.dur, 0);
+          const d1 = ev1.reduce((a, b) => a + b.dur, 0);
+          this.chStates[0].nextTime += d0;
+          this.chStates[1].nextTime += d1;
+        }
+
+        const syncT = Math.max(this.chStates[0].nextTime, this.chStates[1].nextTime);
+        this.chStates[0].nextTime = syncT;
+        this.chStates[1].nextTime = syncT;
+
+        this.muIndex += 2;
+        if (this.muIndex > 35) this.muIndex = 0;
+      }
+      this.bgmTimer = setTimeout(() => this._pumpBGM(), 250);
+    }
+
+    stopBGM() {
+      this.bgmRunning = false;
+      if (this.bgmTimer) {
+        clearTimeout(this.bgmTimer);
+        this.bgmTimer = null;
+      }
+      for (const osc of this.activeNodes) {
+        try { osc.stop(); } catch (_) {}
+      }
+      this.activeNodes.clear();
+    }
+
+    playGameOverJingle() {
+      if (!this.bgmEnabled && !this.sfxEnabled) return;
+      this.unlock();
+      if (!this.ctx) return;
+      const p = "L8BGAFGEFDCCCCR4O5C8";
+      const tracks = ["O2" + p, "O3" + p, "O4" + p];
+      const t0 = this.ctx.currentTime + 0.03;
+      tracks.forEach((tr, idx) => {
+        const st = { tempo: 120, oct: 4, len: 8, envShape: 0, envPeriod: 0, nextTime: t0 };
+        const evs = this.parseMML(tr, st);
+        let t = t0;
+        for (const e of evs) {
+          if (e.freq > 0) this.scheduleNote(e, t, idx, 0.095);
+          t += e.dur;
+        }
+      });
+    }
+  }
+
+  // =========================================================================
+  // 3. セーブ管理（リメイク専用キー: sfc_hard_maker_remake_saves_v1）
+  // =========================================================================
+  const SAVE_STORAGE_KEY = "sfc_hard_maker_remake_saves_v1";
+
+  function calcDisplayMonth(be) {
+    if (be <= 0) return 4;
+    let m = be + 3;
+    if (m > 12) m -= 12;
+    return m;
+  }
+
+  class SaveManager {
+    constructor() {
+      this.slots = { auto: null, slot1: null, slot2: null, slot3: null };
+      this.loadAllFromStorage();
+    }
+
+    loadAllFromStorage() {
+      try {
+        if (typeof localStorage === "undefined") return;
+        const raw = localStorage.getItem(SAVE_STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          for (const k of ["auto", "slot1", "slot2", "slot3"]) {
+            if (this.validateSave(parsed[k])) this.slots[k] = parsed[k];
+          }
+        }
+      } catch (_) {}
+    }
+
+    persist() {
+      try {
+        if (typeof localStorage === "undefined") return;
+        localStorage.setItem(SAVE_STORAGE_KEY, JSON.stringify(this.slots));
+      } catch (_) {}
+    }
+
+    // 原作版のJSONセーブとも完全互換で検証
+    validateSave(data) {
+      if (!data || typeof data !== "object") return false;
+      if (typeof data.PM !== "number" || data.PM < 1 || data.PM > 5) return false;
+      if (typeof data.BC !== "number" || typeof data.BE !== "number") return false;
+      if (!Array.isArray(data.ST) || data.ST.length !== 6) return false;
+      if (!Array.isArray(data.SD) || data.SD.length !== 8) return false;
+      if (!Array.isArray(data.PN) || data.PN.length !== 8) return false;
+      return true;
+    }
+
+    saveToSlot(slotKey, snapshot) {
+      if (!this.validateSave(snapshot)) return false;
+      this.slots[slotKey] = JSON.parse(JSON.stringify(snapshot));
+      this.persist();
+      return true;
+    }
+
+    getSlot(slotKey) {
+      return this.slots[slotKey] || null;
+    }
+
+    deleteSlot(slotKey) {
+      this.slots[slotKey] = null;
+      this.persist();
+    }
+  }
+
+  // =========================================================================
+  // 4. 純粋ゲームエンジン HardMakerEngine（DOM / Canvas / await 完全非依存）
+  //    ※すべての計算式・乱数・状態遷移・bugFixMode差分は原作 index.html と100%一致
+  // =========================================================================
+  class HardMakerEngine {
+    constructor(rng = () => Math.random()) {
+      this.rng = rng;
+      this.bugFixMode = true;
+      this.resetToTitle();
+    }
+
+    resetToTitle() {
+      this.phase = "title"; // title | select | player_turn | settlement | ending | game_over
+      this.SS = 20000000;
+      this.BC = 1989;
+      this.BE = 0;
+      this.PM = 0;
+      this.GC = 0;
+      this.UD = 2;
+      this.ST = INITIAL_ST.map((r) => (r ? r.slice() : null));
+      this.PN = Array(8).fill("");
+      this.SD = Array.from({ length: 8 }, () => [0, 0, 0, 0, 0]);
+      this.lastTurnSnapshot = null;
+      this.lastSettlement = null;
+      this.gameOverBuyerId = 0;
+    }
+
+    goToSelect() {
+      this.resetToTitle();
+      this.phase = "select";
+    }
+
+    // 会社選択して開始（LINE_70 -> LINE_120 -> LINE_100 -> 最初の自ターンまで進行）
+    selectCompany(companyId) {
+      if (companyId < 1 || companyId > 5) return { ok: false, events: [] };
+      this.resetToTitle();
+      this.PM = companyId;
+      const events = [{ type: "company_selected", companyId }];
+      this._advanceFromState("LINE_70", events);
+      return { ok: true, events };
+    }
+
+    // プレビュー用計算ヘルパー（状態を変更しない）
+    getCompanyBuyPrice(targetId) {
+      if (!this.ST[targetId]) return 0;
+      return this.ST[targetId][7] * 25600000;
+    }
+
+    getDevCost(bits) {
+      const techVal = this.bugFixMode ? Math.max(100, this.ST[this.PM][6]) : this.ST[this.PM][6];
+      const techFactor = techVal / 1000;
+      return Math.floor(50000000 / techFactor * bits);
+    }
+
+    getUnitCost(bits) {
+      return this.ST[this.PM][5] * 256 * bits;
+    }
+
+    getMaxProduction() {
+      return Math.floor(this.ST[this.PM][4] * this.ST[this.PM][5]);
+    }
+
+    // コマンド実行（1〜12）
+    executeCommand(cmd, params = {}) {
+      if (this.phase !== "player_turn") {
+        return { ok: false, turnConsumed: false, message: "現在はコマンドを実行できません。", events: [] };
+      }
+
+      const events = [];
+
+      // 1: 企業買う (210-280行)
+      if (cmd === 1) {
+        const U = Number(params.targetId);
+        if (!Number.isInteger(U) || U < 1 || U > 5) {
+          return { ok: false, turnConsumed: false, message: "会社番号(1〜5)を選んでください。", events };
+        }
+        if (U === this.PM || this.ST[U][9] === 0) {
+          return { ok: false, turnConsumed: false, message: TEXTS.selfBuy, events };
+        }
+        const price = this.ST[U][7] * 25600000;
+        if (price > this.ST[this.PM][0]) {
+          return { ok: false, turnConsumed: false, message: TEXTS.noMoney, events };
+        }
+        if (params.confirm !== true) {
+          return { ok: false, turnConsumed: false, message: "買収をキャンセルしました。", events };
+        }
+
+        this.ST[this.PM][0] -= price;
+        this.ST[this.PM][2] += price;
+        this.ST[U][0] = 0;
+        for (let I = 4; I <= 8; I++) {
+          this.ST[this.PM][I] += this.ST[U][I];
+          this.ST[U][I] = 0;
+        }
+        this.ST[U][1] = 0; this.ST[U][2] = 0; this.ST[U][3] = 0;
+        this.ST[U][9] = 0;
+
+        events.push({ type: "company_bought", targetId: U, price });
+
+        let aliveSum = 0;
+        for (let I = 1; I <= 5; I++) aliveSum += this.ST[I][9];
+        if (aliveSum === -1) {
+          this.phase = "ending";
+          events.push({ type: "ending" });
+          return {
+            ok: true,
+            turnConsumed: true,
+            message: `${COMPANY_NAMES[U]}を買収しました！全社制覇達成！`,
+            events
+          };
+        }
+
+        this._advanceFromState("LINE_70", events);
+        return { ok: true, turnConsumed: true, message: `${COMPANY_NAMES[U]}を買収しました！`, events };
+      }
+
+      // 2: パソコン開発 (300-370行)
+      if (cmd === 2) {
+        const U = Number(params.slot);
+        const bits = Number(params.bits);
+        const name = String(params.name || "");
+        const price = Number(params.price);
+
+        if (!Number.isInteger(U) || U < 0 || U > 7) {
+          return { ok: false, turnConsumed: false, message: "NO(0〜7)を指定してください。", events };
+        }
+        if (this.SD[U][4]) {
+          return { ok: false, turnConsumed: false, message: TEXTS.alreadyPc, events };
+        }
+        if (bits !== 8 && bits !== 16 && bits !== 32) {
+          return { ok: false, turnConsumed: false, message: "BITは 8・16・32 のいずれかを選んでください。", events };
+        }
+
+        // 原作320行そのままの順序（資金不足でもSD[U][3]=bitsが残る原作挙動を保持）
+        this.SD[U][3] = bits;
+        const techVal = this.bugFixMode ? Math.max(100, this.ST[this.PM][6]) : this.ST[this.PM][6];
+        const techFactor = techVal / 1000;
+        const devCost = Math.floor(50000000 / techFactor * bits);
+
+        if (devCost > this.ST[this.PM][0]) {
+          return { ok: false, turnConsumed: false, message: `${TEXTS.noMoney}（開発費: ${formatManYen(devCost)}）`, events };
+        }
+        if (name.length === 0 || name.length > 10) {
+          return { ok: false, turnConsumed: false, message: "パソコン名は1〜10文字で入力してください。", events };
+        }
+        if (!Number.isFinite(price) || price < 0) {
+          return { ok: false, turnConsumed: false, message: "定価は0以上の数値で入力してください。", events };
+        }
+
+        this.PN[U] = name;
+        this.ST[this.PM][0] -= devCost;
+        this.ST[this.PM][2] += devCost;
+        this.SD[U][4] = -1;
+        const unitCost = this.ST[this.PM][5] * 256 * this.SD[U][3];
+        this.SD[U][1] = unitCost;
+        this.SD[U][0] = price;
+
+        events.push({ type: "pc_developed", slot: U, bits, name, devCost, unitCost, price });
+        this._advanceFromState("LINE_70", events);
+        return {
+          ok: true,
+          turnConsumed: true,
+          message: `NO.${U}「${name}」(${bits}BIT)を開発しました！（1台原価 ${unitCost.toLocaleString()}円 / 定価 ${price.toLocaleString()}円）`,
+          events
+        };
+      }
+
+      // 3: 製造中止 (390-400行)
+      if (cmd === 3) {
+        const U = Number(params.slot);
+        if (!Number.isInteger(U) || U < 0 || U > 7) {
+          return { ok: false, turnConsumed: false, message: "NO(0〜7)を指定してください。", events };
+        }
+        if (!this.SD[U][4]) {
+          return { ok: false, turnConsumed: false, message: TEXTS.notMadePc, events };
+        }
+        const oldName = this.PN[U];
+        for (let I = 0; I <= 4; I++) this.SD[U][I] = 0;
+        this.PN[U] = "";
+        events.push({ type: "pc_stopped", slot: U, name: oldName });
+        this._advanceFromState("LINE_70", events);
+        return { ok: true, turnConsumed: true, message: `NO.${U}「${oldName}」を製造中止にしました。`, events };
+      }
+
+      // 4: 価格変える (420-440行)
+      if (cmd === 4) {
+        const U = Number(params.slot);
+        const newPrice = Number(params.price);
+        if (!Number.isInteger(U) || U < 0 || U > 7) {
+          return { ok: false, turnConsumed: false, message: "NO(0〜7)を指定してください。", events };
+        }
+        if (!this.SD[U][4]) {
+          return { ok: false, turnConsumed: false, message: TEXTS.notMadePc, events };
+        }
+        if (!Number.isFinite(newPrice) || newPrice < 0) {
+          return { ok: false, turnConsumed: false, message: "定価は0以上の数値で入力してください。", events };
+        }
+        this.SD[U][0] = newPrice;
+        events.push({ type: "price_changed", slot: U, price: newPrice });
+        this._advanceFromState("LINE_70", events);
+        return {
+          ok: true,
+          turnConsumed: true,
+          message: `NO.${U}「${this.PN[U]}」の定価を ${newPrice.toLocaleString()}円 に変更しました。`,
+          events
+        };
+      }
+
+      // 5: パソコン生産 (420-470行)
+      if (cmd === 5) {
+        const U = Number(params.slot);
+        const qty = Number(params.qty);
+        if (!Number.isInteger(U) || U < 0 || U > 7) {
+          return { ok: false, turnConsumed: false, message: "NO(0〜7)を指定してください。", events };
+        }
+        if (!this.SD[U][4]) {
+          return { ok: false, turnConsumed: false, message: TEXTS.notMadePc, events };
+        }
+        const maxProd = this.getMaxProduction();
+        if (!Number.isFinite(qty) || qty < 0 || qty > maxProd) {
+          return { ok: false, turnConsumed: false, message: `生産台数は 0〜${maxProd.toLocaleString()} の範囲で入力してください。`, events };
+        }
+        if (this.bugFixMode && qty === 0) {
+          return { ok: false, turnConsumed: false, message: "生産をキャンセルしました。", events };
+        }
+        const prodCost = (this.SD[U][1] / 10000) * qty;
+        if (this.bugFixMode && prodCost > this.ST[this.PM][0]) {
+          return { ok: false, turnConsumed: false, message: TEXTS.noMoney, events };
+        }
+        this.ST[this.PM][0] -= prodCost;
+        this.ST[this.PM][2] += prodCost;
+        this.SD[U][2] += qty;
+        events.push({ type: "pc_produced", slot: U, qty, prodCost });
+        this._advanceFromState("LINE_70", events);
+        return {
+          ok: true,
+          turnConsumed: true,
+          message: `NO.${U}「${this.PN[U]}」を ${Math.floor(qty).toLocaleString()}台 生産しました！`,
+          events
+        };
+      }
+
+      // 6: パソコン売る (490行)
+      if (cmd === 6) {
+        this.UD = Math.round(this.rng() + 0.9);
+        events.push({ type: "pc_sell_boost", ud: this.UD });
+        this._advanceFromState("LINE_70", events);
+        return { ok: true, turnConsumed: true, message: TEXTS.sellSpell, events };
+      }
+
+      // 7: 社員雇う (510, 530行)
+      if (cmd === 7) {
+        const n = Number(params.count);
+        if (!Number.isFinite(n) || n < 0) {
+          return { ok: false, turnConsumed: false, message: "人数は0以上の数値で入力してください。", events };
+        }
+        const hireNum = this.bugFixMode ? Math.min(100000, n) : n;
+        this.ST[this.PM][4] += hireNum;
+        this.ST[this.PM][6] += hireNum * 0.9;
+        events.push({ type: "hired", count: hireNum });
+        this._advanceFromState("LINE_70", events);
+        return { ok: true, turnConsumed: true, message: `社員を ${Math.floor(hireNum).toLocaleString()}人 雇いました。`, events };
+      }
+
+      // 8: 給料変える (510, 520行)
+      if (cmd === 8) {
+        const sal = Number(params.salary);
+        if (!Number.isFinite(sal) || sal < 0) {
+          return { ok: false, turnConsumed: false, message: "給料は0以上の数値で入力してください。", events };
+        }
+        const applied = this.bugFixMode ? Math.max(1, sal) : sal;
+        this.ST[this.PM][5] = applied;
+        events.push({ type: "salary_changed", salary: applied });
+        this._advanceFromState("LINE_70", events);
+        return { ok: true, turnConsumed: true, message: `1人あたり月給を ${applied.toLocaleString()}万円 に変更しました。`, events };
+      }
+
+      // 9: 技術あげる (510行)
+      if (cmd === 9) {
+        this.ST[this.PM][6] *= 1.1;
+        events.push({ type: "tech_up" });
+        this._advanceFromState("LINE_70", events);
+        return { ok: true, turnConsumed: true, message: TEXTS.techChant, events };
+      }
+
+      // 10: 他社見る (ターン非消費)
+      if (cmd === 10) {
+        const targetId = Number(params.targetId);
+        if (!Number.isInteger(targetId) || targetId < 1 || targetId > 5) {
+          return { ok: false, turnConsumed: false, message: "会社番号(1〜5)を選んでください。", events };
+        }
+        return {
+          ok: true,
+          turnConsumed: false,
+          viewTarget: targetId,
+          message: `${COMPANY_NAMES[targetId]} のステータスを表示しています（ターン消費なし）。`,
+          events
+        };
+      }
+
+      // 11: パソコン見る (ターン非消費)
+      if (cmd === 11) {
+        return {
+          ok: true,
+          turnConsumed: false,
+          viewPcList: true,
+          message: "開発したパソコン一覧を表示しています（ターン消費なし）。",
+          events
+        };
+      }
+
+      // 12: なにもしない
+      if (cmd === 12) {
+        events.push({ type: "do_nothing" });
+        this._advanceFromState("LINE_70", events);
+        return { ok: true, turnConsumed: true, message: "今月は何もしませんでした。", events };
+      }
+
+      return { ok: false, turnConsumed: false, message: "不正なコマンドです。", events };
+    }
+
+    // エンディング確認後、原作通り LINE_70 から継続
+    confirmEnding() {
+      if (this.phase !== "ending") return { ok: false, events: [] };
+      const events = [];
+      this._advanceFromState("LINE_70", events);
+      return { ok: true, events };
+    }
+
+    // 決算画面確認後、次年度4月（LINE_100）へ進行
+    confirmSettlement() {
+      if (this.phase !== "settlement") return { ok: false, events: [] };
+      const events = [];
+      this._advanceFromState("LINE_100", events);
+      return { ok: true, events };
+    }
+
+    // 原作メインループ（LINE_70 / LINE_100 / LINE_120）を次の停止点まで同期実行
+    _advanceFromState(startState, events) {
+      let state = startState;
+      let guard = 0;
+
+      while (guard++ < 500) {
+        if (state === "LINE_70") {
+          // 70〜90行: プレイヤーのパソコン売上計算＆シェア更新
+          const curUD = this.UD;
+          let totalSold = 0;
+          let totalRev = 0;
+          for (let I = 0; I <= 7; I++) {
+            const divisor = this.bugFixMode ? curUD : this.UD;
+            let S = Math.floor(this.SD[I][2] / divisor * (this.SD[I][1] / (this.SD[I][0] + 1)));
+            if (!this.bugFixMode) {
+              this.UD = 2;
+            } else {
+              S = Math.max(0, Math.min(Math.floor(this.SD[I][2]), S));
+            }
+            this.SS += S;
+            this.SD[I][2] -= S;
+            const rev = (this.SD[I][0] / 10000) * S;
+            this.ST[this.PM][1] += rev;
+            this.ST[this.PM][8] += S;
+            totalSold += S;
+            totalRev += rev;
+          }
+          if (this.bugFixMode) this.UD = 2;
+
+          this.ST[this.PM][3] = this.ST[this.PM][1] - this.ST[this.PM][2];
+          this.ST[this.PM][7] = Math.floor(this.ST[this.PM][8] / this.SS * 100);
+          if (totalSold !== 0) {
+            events.push({ type: "player_sales", totalSold, totalRev });
+          }
+          state = "LINE_120";
+        } else if (state === "LINE_100") {
+          // 100〜110行: 月進行
+          this.BE++;
+          this.GC = 0;
+          let month = this.BE + 3;
+          if (month > 12) {
+            month -= 12;
+            if (month === 1) this.BC++;
+          }
+          events.push({ type: "date_advanced", year: this.BC, month });
+          state = "LINE_120";
+        } else if (state === "LINE_120") {
+          // 120行: 決算判定
+          if (this.BE > 12) {
+            this.BE = 0;
+            this._executeSettlement();
+            this.phase = "settlement";
+            events.push({ type: "settlement", report: this.lastSettlement });
+            return;
+          }
+          this.GC++;
+          if (this.GC > 5 || this.BE === 0) {
+            state = "LINE_100";
+            continue;
+          }
+          if (!this.ST[this.GC][9]) {
+            state = "LINE_120";
+            continue;
+          }
+
+          // 150〜170行: 毎月固定処理（給料・定年・技術減衰）
+          const salaryTotal = this.ST[this.GC][4] * this.ST[this.GC][5];
+          this.ST[this.GC][0] -= salaryTotal;
+          this.ST[this.GC][2] += salaryTotal;
+          this.ST[this.GC][4] *= 0.99;
+
+          if (this.bugFixMode) {
+            this.ST[this.GC][6] = Math.max(100, this.ST[this.GC][6] * 0.97);
+          } else {
+            this.ST[this.GC][6] = this.ST[this.PM][6] * 0.97;
+          }
+
+          if (this.GC !== this.PM) {
+            const over = this._runCpuTurn(false, events);
+            if (over) {
+              this.phase = "game_over";
+              this.gameOverBuyerId = this.GC;
+              events.push({ type: "game_over", buyerId: this.GC });
+              return;
+            }
+            state = "LINE_120";
+            continue;
+          }
+
+          // プレイヤー手番到達：スナップショット記録して停止
+          this.phase = "player_turn";
+          this.lastTurnSnapshot = this.captureSnapshot();
+          events.push({ type: "player_turn_ready", year: this.BC, month: calcDisplayMonth(this.BE) });
+          return;
+        }
+      }
+    }
+
+    // 590〜720行: CPU企業行動（原作完全準拠）
+    _runCpuTurn(K, events) {
+      const GC = this.GC;
+      let S = this.ST[GC][6] * 9;
+      this.SS += S;
+      const SA = S * (this.ST[GC][5] * 0.9);
+      this.ST[GC][0] -= SA;
+      this.ST[GC][1] += S * this.ST[GC][5];
+      this.ST[GC][2] += SA;
+      this.ST[GC][8] += S;
+      this.ST[GC][3] = this.ST[GC][1] - this.ST[GC][2];
+      this.ST[GC][7] = Math.floor(this.ST[GC][8] / this.SS * 100);
+      if (K) return false;
+
+      // 620〜630行: プレイヤー企業買収判定
+      let I = Math.floor(this.rng() * 10);
+      if (I === 1 && this.ST[GC][0] > this.ST[this.PM][7] * 10000000) {
+        if (this.ST[GC][7] > this.ST[this.PM][7] * 2) {
+          return true;
+        }
+      }
+
+      let action = "tech";
+      I = Math.floor(this.rng() * 2);
+      if (I === 1) {
+        this._runCpuTurn(true, events);
+        action = "double_sell";
+        events.push({ type: "cpu_turn", companyId: GC, action });
+        return false;
+      }
+      I = Math.floor(this.rng() * 5);
+      if (I === 3) {
+        S = this.ST[GC][7] * 512;
+        this.ST[GC][4] += S;
+        this.ST[GC][6] += S + 16;
+        action = "hire";
+        events.push({ type: "cpu_turn", companyId: GC, action });
+        return false;
+      }
+      I = Math.floor(this.rng() * 5);
+      if (I === 2) {
+        this.ST[GC][5] += 0.5;
+        action = "raise_salary";
+        events.push({ type: "cpu_turn", companyId: GC, action });
+        return false;
+      }
+      this.ST[GC][6] *= 1.04;
+      events.push({ type: "cpu_turn", companyId: GC, action });
+      return false;
+    }
+
+    // 1300〜1370行: 年度決算計算（原作完全準拠）
+    _executeSettlement() {
+      const sales = this.ST[this.PM][1];
+      const expense = this.ST[this.PM][2];
+      const profit = this.ST[this.PM][3];
+      const afterTaxSales = sales * 0.97;
+      const prevCash = this.ST[this.PM][0];
+
+      this.ST[this.PM][0] += afterTaxSales;
+      this.ST[this.PM][1] = 0;
+      this.ST[this.PM][2] = 0;
+      this.ST[this.PM][3] = 0;
+
+      if (this.bugFixMode) {
+        for (let c = 1; c <= 5; c++) {
+          if (c !== this.PM && this.ST[c][9]) {
+            this.ST[c][0] += this.ST[c][1] * 0.97;
+            this.ST[c][1] = 0;
+            this.ST[c][2] = 0;
+            this.ST[c][3] = 0;
+          }
+        }
+      }
+
+      this.lastSettlement = {
+        fiscalYear: this.BC - 1,
+        nextYear: this.BC,
+        sales,
+        expense,
+        profit,
+        afterTaxSales,
+        prevCash,
+        newCash: this.ST[this.PM][0]
+      };
+    }
+
+    captureSnapshot() {
+      if (!this.PM || this.PM < 1 || this.PM > 5) return null;
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const savedAt = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      return {
+        version: 1,
+        format: "hard_maker_remake_v1",
+        savedAt,
+        bugFixMode: this.bugFixMode,
+        BC: this.BC,
+        BE: this.BE,
+        PM: this.PM,
+        GC: this.PM,
+        SS: this.SS,
+        UD: this.UD,
+        ST: this.ST.map((r) => (r ? r.slice() : null)),
+        PN: this.PN.slice(),
+        SD: this.SD.map((r) => r.slice())
+      };
+    }
+
+    exportSnapshot() {
+      return this.lastTurnSnapshot ? JSON.parse(JSON.stringify(this.lastTurnSnapshot)) : null;
+    }
+
+    importSnapshot(snap) {
+      if (!snap || typeof snap.PM !== "number" || snap.PM < 1 || snap.PM > 5) return false;
+      if (typeof snap.bugFixMode === "boolean") this.bugFixMode = snap.bugFixMode;
+      this.BC = snap.BC;
+      this.BE = snap.BE;
+      this.PM = snap.PM;
+      this.GC = snap.PM;
+      this.SS = snap.SS;
+      this.UD = snap.UD || 2;
+      this.ST = snap.ST.map((r) => (r ? r.slice() : null));
+      this.PN = snap.PN.slice();
+      this.SD = snap.SD.map((r) => r.slice());
+      this.phase = "player_turn";
+      this.lastSettlement = null;
+      this.gameOverBuyerId = 0;
+      this.lastTurnSnapshot = JSON.parse(JSON.stringify(snap));
+      return true;
+    }
+  }
+
+  // =========================================================================
+  // 5. 表示フォーマットユーティリティ（万円／円の桁あふれ防止）
+  // =========================================================================
+  function formatManYen(val) {
+    const n = Math.round(val);
+    return `${n.toLocaleString("ja-JP")}万円`;
+  }
+
+  // 大きな万円金額に対する「億・兆・京」読み補助
+  function formatManYenSub(val) {
+    const abs = Math.abs(Math.round(val));
+    if (abs < 10000) return "";
+    const sign = val < 0 ? "-" : "";
+    // 万円単位なので 10,000万円 = 1億円、100,000,000万円 = 1兆円
+    const cho = Math.floor(abs / 100000000);
+    const oku = Math.floor((abs % 100000000) / 10000);
+    const man = abs % 10000;
+    const parts = [];
+    if (cho > 0) parts.push(`${cho.toLocaleString("ja-JP")}兆`);
+    if (oku > 0) parts.push(`${oku.toLocaleString("ja-JP")}億`);
+    if (cho === 0 && man > 0) parts.push(`${man.toLocaleString("ja-JP")}万`);
+    return `（約 ${sign}${parts.join("")}円）`;
+  }
+
+  // =========================================================================
+  // 6. UI コントローラー（SFCシムシティ風画面描画＆操作）
+  // =========================================================================
+  const engine = new HardMakerEngine();
+  const audio = new FM7Audio();
+  const saveManager = new SaveManager();
+
+  const stateUI = {
+    selectedCmd: null,
+    rightTab: "status", // "status" | "pc_list"
+    viewingCompanyId: 0,
+    fastText: false,
+    msgLogs: [],
+    typeTimer: null
+  };
+
+  // DOM 参照
+  const $ = (id) => document.getElementById(id);
+  const panes = {
+    title: $("paneTitle"),
+    select: $("paneSelect"),
+    player_turn: $("paneMain"),
+    settlement: $("paneSettlement"),
+    ending: $("paneEnding"),
+    game_over: $("paneGameOver")
+  };
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const el = $("toastFloat");
+    el.textContent = msg;
+    el.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+  }
+
+  function setMessage(speaker, text, portraitChar = "社", addToLog = true) {
+    $("msgSpeaker").textContent = speaker;
+    $("portraitBadge").textContent = portraitChar;
+    if (stateUI.typeTimer) {
+      clearInterval(stateUI.typeTimer);
+      stateUI.typeTimer = null;
+    }
+
+    const msgEl = $("msgMain");
+    if (stateUI.fastText || !text) {
+      msgEl.textContent = text;
+    } else {
+      msgEl.textContent = "";
+      let idx = 0;
+      stateUI.typeTimer = setInterval(() => {
+        idx++;
+        msgEl.textContent = text.slice(0, idx);
+        if (idx % 2 === 1) audio.beepClick();
+        if (idx >= text.length) {
+          clearInterval(stateUI.typeTimer);
+          stateUI.typeTimer = null;
+        }
+      }, 18);
+    }
+
+    if (addToLog && text) {
+      stateUI.msgLogs.unshift(`[${engine.BC}年${calcDisplayMonth(engine.BE)}月] ${text}`);
+      if (stateUI.msgLogs.length > 20) stateUI.msgLogs.pop();
+      renderMsgLog();
+    }
+  }
+
+  function renderMsgLog() {
+    const box = $("msgLog");
+    box.innerHTML = "";
+    for (const line of stateUI.msgLogs.slice(0, 5)) {
+      const div = document.createElement("div");
+      div.textContent = line;
+      box.appendChild(div);
+    }
+  }
+
+  function pushEventLogs(events) {
+    for (const ev of events) {
+      if (ev.type === "cpu_turn") {
+        const actLabel = {
+          double_sell: "積極販売（2回行動）",
+          hire: "社員雇用",
+          raise_salary: "昇給",
+          tech: "技術強化"
+        }[ev.action] || "コマンド実行";
+        stateUI.msgLogs.unshift(`[${engine.BC}年${calcDisplayMonth(engine.BE)}月] ${COMPANY_NAMES[ev.companyId]}: ${actLabel}`);
+      } else if (ev.type === "player_sales") {
+        stateUI.msgLogs.unshift(
+          `[${engine.BC}年${calcDisplayMonth(engine.BE)}月] 自社PC売上: ${Math.floor(ev.totalSold).toLocaleString()}台 / +${formatManYen(ev.totalRev)}`
+        );
+      }
+    }
+    if (stateUI.msgLogs.length > 20) stateUI.msgLogs.length = 20;
+    renderMsgLog();
+  }
+
+  function syncModeUI() {
+    const isFix = engine.bugFixMode;
+    const badge = $("hudModeBadge");
+    badge.textContent = isFix ? "バグ修正モード" : "原作準拠モード";
+    badge.classList.toggle("original", !isFix);
+
+    const btn = $("btnMode");
+    btn.textContent = "モード: " + (isFix ? "バグ修正" : "原作準拠");
+    btn.classList.toggle("success", isFix);
+    btn.classList.toggle("warn", !isFix);
+  }
+
+  function renderHUD() {
+    const month = calcDisplayMonth(engine.BE);
+    $("hudDate").textContent = `${engine.BC}年 ${month}月`;
+
+    if (engine.PM >= 1 && engine.PM <= 5) {
+      drawDotLogo($("hudLogoCanvas"), engine.PM);
+      $("hudCompanyName").textContent = COMPANY_NAMES[engine.PM];
+      const cash = engine.ST[engine.PM][0];
+      const cashEl = $("hudCash");
+      cashEl.textContent = formatManYen(cash);
+      cashEl.classList.toggle("neg", cash < 0);
+      $("hudCashSub").textContent = formatManYenSub(cash);
+      $("msgTurnInfo").textContent = `${COMPANY_NAMES[engine.PM]} 社長の番`;
+    } else {
+      drawDotLogo($("hudLogoCanvas"), 0);
+      $("hudCompanyName").textContent = "会社未選択";
+      $("hudCash").textContent = "---";
+      $("hudCash").classList.remove("neg");
+      $("hudCashSub").textContent = "";
+      $("msgTurnInfo").textContent = engine.phase === "select" ? "会社を選択してください" : "タイトル画面";
+    }
+
+    // 5社市場シェア横棒グラフ
+    const track = $("shareBarTrack");
+    const legend = $("shareLegend");
+    track.innerHTML = "";
+    legend.innerHTML = "";
+
+    let totalPct = 0;
+    for (let i = 1; i <= 5; i++) {
+      if (engine.ST[i][9]) totalPct += Math.max(0, engine.ST[i][7]);
+    }
+    const denom = totalPct > 0 ? totalPct : 100;
+
+    for (let i = 1; i <= 5; i++) {
+      const alive = engine.ST[i][9] !== 0;
+      const pct = alive ? Math.max(0, Math.floor(engine.ST[i][7])) : 0;
+
+      if (alive && pct > 0) {
+        const seg = document.createElement("div");
+        seg.className = "share-seg";
+        seg.style.width = `${(pct / denom) * 100}%`;
+        seg.style.backgroundColor = COMPANY_COLORS[i];
+        seg.title = `${COMPANY_NAMES[i]}: ${pct}%`;
+        track.appendChild(seg);
+      }
+
+      const item = document.createElement("div");
+      item.className = "share-item" + (i === engine.PM ? " is-player" : "") + (!alive ? " bankrupt" : "");
+      item.innerHTML = `
+        <span class="share-dot" style="background:${alive ? COMPANY_COLORS[i] : "#858c99"}"></span>
+        <span class="share-name">${i}.${COMPANY_NAMES[i]}</span>
+        <span class="share-pct num">${alive ? pct + "%" : "倒産"}</span>
+      `;
+      legend.appendChild(item);
+    }
+  }
+
+  function renderSelectCards() {
+    const grid = $("selectGrid");
+    grid.innerHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      const st = INITIAL_ST[i];
+      const card = document.createElement("div");
+      card.className = "company-card";
+      card.innerHTML = `
+        <div class="company-logo-box"><canvas width="156" height="16"></canvas></div>
+        <div class="diff-tag">${i}. ${COMPANY_NAMES[i]} ／ ${COMPANY_DIFF[i]}</div>
+        <dl class="company-stats-mini num">
+          <dt>運営金</dt><dd>${formatManYen(st[0])}</dd>
+          <dt>社員数</dt><dd>${st[4].toLocaleString()}人</dd>
+          <dt>月給</dt><dd>${st[5]}万円</dd>
+          <dt>技術</dt><dd>${st[6].toLocaleString()}</dd>
+          <dt>シェア</dt><dd>${st[7]}%</dd>
+        </dl>
+        <button class="sfc-btn primary" type="button">この会社で開始 (${i})</button>
+      `;
+      drawDotLogo(card.querySelector("canvas"), i);
+      card.querySelector("button").addEventListener("click", () => {
+        audio.unlock();
+        audio.beepClick();
+        const res = engine.selectCompany(i);
+        if (res.ok) {
+          stateUI.selectedCmd = null;
+          stateUI.rightTab = "status";
+          stateUI.viewingCompanyId = engine.PM;
+          stateUI.msgLogs = [];
+          pushEventLogs(res.events);
+          saveAutosave();
+          renderAll();
+          setMessage(`${COMPANY_NAMES[engine.PM]}`, `ｱﾅﾀﾉ ﾊﾞﾝﾃﾞｽ — コマンド(1〜12)を選んでください。`, "社");
+        }
+      });
+      grid.appendChild(card);
+    }
+  }
+
+  function renderCommands() {
+    const grid = $("cmdGrid");
+    grid.innerHTML = "";
+    for (const c of COMMAND_DEFS) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className =
+        "sfc-btn cmd-btn" +
+        (c.nonTurn ? " non-turn" : "") +
+        (stateUI.selectedCmd === c.id ? " selected" : "");
+      btn.innerHTML = `<span class="cmd-num">${c.id}</span><span>${c.name}</span>`;
+      btn.addEventListener("click", () => {
+        audio.unlock();
+        audio.beepClick();
+        onSelectCommand(c.id);
+      });
+      grid.appendChild(btn);
+    }
+  }
+
+  function renderStatusView() {
+    const cid = stateUI.viewingCompanyId || engine.PM;
+    if (!cid || !engine.ST[cid]) return;
+    const st = engine.ST[cid];
+    drawDotLogo($("statusLogoCanvas"), cid);
+    $("statusCompanyLabel").textContent = `${cid}. ${COMPANY_NAMES[cid]} のステータス`;
+    $("statusViewingNote").textContent =
+      cid === engine.PM
+        ? "自社"
+        : (st[9] ? "他社（閲覧中）" : "買収済み（倒産）");
+
+    const rows = [
+      ["運営金残高", formatManYen(st[0]), formatManYenSub(st[0]), st[0] < 0],
+      ["売上",       formatManYen(st[1]), formatManYenSub(st[1]), false],
+      ["支出",       formatManYen(st[2]), formatManYenSub(st[2]), false],
+      ["利益",       formatManYen(st[3]), formatManYenSub(st[3]), st[3] < 0],
+      ["社員数",     `${Math.round(st[4]).toLocaleString("ja-JP")}人`, "", false],
+      ["給料（月給）", `${Math.round(st[5]).toLocaleString("ja-JP")}万円`, "", false],
+      ["技術",       Math.round(st[6]).toLocaleString("ja-JP"), "", false],
+      ["シェア",     `${Math.floor(st[7])}%`, `累計販売: ${Math.floor(st[8]).toLocaleString("ja-JP")}台`, false]
+    ];
+
+    const tbody = $("statusTableBody");
+    tbody.innerHTML = "";
+    for (const [label, mainVal, subVal, isNeg] of rows) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <th>${label}</th>
+        <td class="num ${isNeg ? "val-neg" : "val-pos"}">
+          ${mainVal}
+          ${subVal ? `<span class="sub-unit">${subVal}</span>` : ""}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function renderPcCards() {
+    const grid = $("pcCardGrid");
+    grid.innerHTML = "";
+    for (let u = 0; u <= 7; u++) {
+      const sd = engine.SD[u];
+      const developed = sd[4] !== 0;
+      const bits = sd[3];
+      const card = document.createElement("div");
+      card.className = "pc-card" + (developed ? "" : " empty");
+
+      const badgeCls = developed ? (bits === 8 ? "b8" : bits === 16 ? "b16" : "b32") : "none";
+      const badgeMain = bits ? `${bits}bit` : "空き";
+      const badgeSub = developed ? "仮枠" : "未開発";
+
+      card.innerHTML = `
+        <div class="pc-card-top">
+          <div class="pc-icon-placeholder ${badgeCls}" title="Phase 3 ドットアイコン仮枠">
+            <span>${badgeMain}</span>
+            <span style="font-size:9px;opacity:0.75;">${badgeSub}</span>
+          </div>
+          <div class="pc-card-head">
+            <div class="pc-no">NO.${u} ${bits}BIT</div>
+            <div class="pc-name">${developed ? escapeHtml(engine.PN[u]) : "（未開発）"}</div>
+          </div>
+        </div>
+        ${developed ? `
+          <dl class="pc-specs num">
+            <dt>定価</dt><dd>${Math.round(sd[0]).toLocaleString()}円</dd>
+            <dt>原価</dt><dd>${Math.round(sd[1]).toLocaleString()}円</dd>
+            <dt>在庫</dt><dd>${Math.floor(sd[2]).toLocaleString()}台</dd>
+          </dl>
+        ` : `<div style="font-size:11px;color:#5b6270;">コマンド2「パソコン開発」で作成できます</div>`}
+      `;
+      grid.appendChild(card);
+    }
+  }
+
+  function renderRightPane() {
+    const isPc = stateUI.rightTab === "pc_list";
+    $("viewStatus").style.display = isPc ? "none" : "block";
+    $("viewPcList").style.display = isPc ? "block" : "none";
+    $("tabStatus").classList.toggle("active", !isPc);
+    $("tabPcList").classList.toggle("active", isPc);
+    $("rightPaneTitle").textContent = isPc ? "開発パソコン一覧 (NO.0〜7)" : "会社ステータス";
+
+    if (isPc) renderPcCards();
+    else renderStatusView();
+  }
+
+  // Phase 1: シンプルな標準入力フォームの組み立て
+  function onSelectCommand(cmdId) {
+    stateUI.selectedCmd = cmdId;
+    renderCommands();
+
+    const panel = $("cmdInputPanel");
+    panel.innerHTML = "";
+
+    // 即時実行系（6:売る, 9:技術あげる, 11:パソコン見る, 12:なにもしない）
+    if (cmdId === 11) {
+      panel.classList.remove("active");
+      const res = engine.executeCommand(11);
+      stateUI.rightTab = "pc_list";
+      renderRightPane();
+      setMessage("パソコン一覧", res.message, "機", false);
+      return;
+    }
+
+    panel.classList.add("active");
+
+    if (cmdId === 6 || cmdId === 9 || cmdId === 12) {
+      const desc = {
+        6: "今月のパソコン販売を促進します（ターン消費）。",
+        9: "費用なしで技術力を1.1倍に引き上げます（ターン消費）。",
+        12: "何も実行せず今月のターンを終了します。"
+      }[cmdId];
+      panel.innerHTML = `
+        <div class="cmd-input-title">${cmdId}. ${COMMAND_DEFS[cmdId - 1].name}</div>
+        <div class="cmd-input-hint">${desc}</div>
+        <div class="cmd-input-actions">
+          <button id="btnExecSimple" class="sfc-btn primary" type="button">実行する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">キャンセル</button>
+        </div>
+      `;
+      $("btnExecSimple").addEventListener("click", () => runEngineCommand(cmdId, {}));
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+      return;
+    }
+
+    // 1: 企業買う
+    if (cmdId === 1) {
+      panel.innerHTML = `
+        <div class="cmd-input-title">1. 企業買う</div>
+        <div class="form-row">
+          <label for="inpBuyTarget">買収する会社 (1〜5)</label>
+          <select id="inpBuyTarget" class="sfc-select">
+            ${[1,2,3,4,5].map((i) => `<option value="${i}">${i}. ${COMPANY_NAMES[i]} ${i===engine.PM?"(自社)":(engine.ST[i][9]?"(ｼｪｱ"+Math.floor(engine.ST[i][7])+"%)":"(倒産済)")}</option>`).join("")}
+          </select>
+        </div>
+        <div id="buyPriceHint" class="cmd-input-hint num"></div>
+        <div class="cmd-input-actions">
+          <button id="btnExecBuy" class="sfc-btn danger" type="button">買収を実行する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">キャンセル</button>
+        </div>
+      `;
+      const sel = $("inpBuyTarget");
+      const updateHint = () => {
+        const u = Number(sel.value);
+        if (u === engine.PM || !engine.ST[u][9]) {
+          $("buyPriceHint").textContent = TEXTS.selfBuy;
+        } else {
+          const p = engine.getCompanyBuyPrice(u);
+          $("buyPriceHint").textContent = `買収費用: ${formatManYen(p)} ${formatManYenSub(p)}`;
+        }
+      };
+      sel.addEventListener("change", updateHint);
+      updateHint();
+      $("btnExecBuy").addEventListener("click", () => {
+        runEngineCommand(1, { targetId: Number(sel.value), confirm: true });
+      });
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+      return;
+    }
+
+    // 2: パソコン開発
+    if (cmdId === 2) {
+      stateUI.rightTab = "pc_list";
+      renderRightPane();
+      panel.innerHTML = `
+        <div class="cmd-input-title">2. パソコン開発</div>
+        <div class="form-row">
+          <label for="inpDevSlot">開発スロット NO (0〜7)</label>
+          <select id="inpDevSlot" class="sfc-select">
+            ${[0,1,2,3,4,5,6,7].map((u) => `<option value="${u}">NO.${u} ${engine.SD[u][4]?"[開発済: "+escapeHtml(engine.PN[u])+"]":"[空き]"}</option>`).join("")}
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="inpDevBits">ビット数 (8 / 16 / 32)</label>
+          <select id="inpDevBits" class="sfc-select">
+            <option value="8">8 BIT</option>
+            <option value="16" selected>16 BIT</option>
+            <option value="32">32 BIT</option>
+          </select>
+        </div>
+        <div id="devCostHint" class="cmd-input-hint num"></div>
+        <div class="form-row">
+          <label for="inpDevName">パソコン名 (最大10文字)</label>
+          <input id="inpDevName" class="sfc-input" type="text" maxlength="10" placeholder="例: ｶｹﾞmk2">
+        </div>
+        <div class="form-row">
+          <label for="inpDevPrice">1台あたりの定価 (円)</label>
+          <input id="inpDevPrice" class="sfc-input num" type="number" min="0" step="1000" placeholder="原価の2倍以内が売れやすい">
+        </div>
+        <div class="cmd-input-actions">
+          <button id="btnExecDev" class="sfc-btn primary" type="button">開発する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">キャンセル</button>
+        </div>
+      `;
+      const selBits = $("inpDevBits");
+      const updateHint = () => {
+        const b = Number(selBits.value);
+        const dc = engine.getDevCost(b);
+        const uc = engine.getUnitCost(b);
+        $("devCostHint").innerHTML =
+          `開発費: <strong>${formatManYen(dc)}</strong> ${formatManYenSub(dc)}<br>` +
+          `1台原価: <strong>${uc.toLocaleString()}円</strong>`;
+      };
+      selBits.addEventListener("change", updateHint);
+      updateHint();
+      $("btnExecDev").addEventListener("click", () => {
+        runEngineCommand(2, {
+          slot: Number($("inpDevSlot").value),
+          bits: Number(selBits.value),
+          name: $("inpDevName").value.trim(),
+          price: Number($("inpDevPrice").value)
+        });
+      });
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+      return;
+    }
+
+    // 3: 製造中止
+    if (cmdId === 3) {
+      stateUI.rightTab = "pc_list";
+      renderRightPane();
+      panel.innerHTML = `
+        <div class="cmd-input-title">3. 製造中止</div>
+        <div class="form-row">
+          <label for="inpStopSlot">製造中止する機種 NO (0〜7)</label>
+          <select id="inpStopSlot" class="sfc-select">
+            ${[0,1,2,3,4,5,6,7].map((u) => `<option value="${u}">NO.${u} ${engine.SD[u][4]?"("+escapeHtml(engine.PN[u])+")":"[未開発]"}</option>`).join("")}
+          </select>
+        </div>
+        <div class="cmd-input-actions">
+          <button id="btnExecStop" class="sfc-btn danger" type="button">製造中止する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">キャンセル</button>
+        </div>
+      `;
+      $("btnExecStop").addEventListener("click", () => {
+        runEngineCommand(3, { slot: Number($("inpStopSlot").value) });
+      });
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+      return;
+    }
+
+    // 4: 価格変える
+    if (cmdId === 4) {
+      stateUI.rightTab = "pc_list";
+      renderRightPane();
+      panel.innerHTML = `
+        <div class="cmd-input-title">4. 価格変える</div>
+        <div class="form-row">
+          <label for="inpPriceSlot">機種 NO (0〜7)</label>
+          <select id="inpPriceSlot" class="sfc-select">
+            ${[0,1,2,3,4,5,6,7].map((u) => `<option value="${u}">NO.${u} ${engine.SD[u][4]?"("+escapeHtml(engine.PN[u])+" / 現定価 "+engine.SD[u][0].toLocaleString()+"円)":"[未開発]"}</option>`).join("")}
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="inpNewPrice">新しい定価 (円)</label>
+          <input id="inpNewPrice" class="sfc-input num" type="number" min="0" step="1000" placeholder="例: 200000">
+        </div>
+        <div class="cmd-input-actions">
+          <button id="btnExecPrice" class="sfc-btn primary" type="button">変更する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">キャンセル</button>
+        </div>
+      `;
+      $("btnExecPrice").addEventListener("click", () => {
+        runEngineCommand(4, {
+          slot: Number($("inpPriceSlot").value),
+          price: Number($("inpNewPrice").value)
+        });
+      });
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+      return;
+    }
+
+    // 5: パソコン生産
+    if (cmdId === 5) {
+      stateUI.rightTab = "pc_list";
+      renderRightPane();
+      const maxProd = engine.getMaxProduction();
+      panel.innerHTML = `
+        <div class="cmd-input-title">5. パソコン生産</div>
+        <div class="form-row">
+          <label for="inpProdSlot">生産する機種 NO (0〜7)</label>
+          <select id="inpProdSlot" class="sfc-select">
+            ${[0,1,2,3,4,5,6,7].map((u) => `<option value="${u}">NO.${u} ${engine.SD[u][4]?"("+escapeHtml(engine.PN[u])+" / 原価 "+engine.SD[u][1].toLocaleString()+"円)":"[未開発]"}</option>`).join("")}
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="inpProdQty">生産台数 (0〜${maxProd.toLocaleString()}台)</label>
+          <input id="inpProdQty" class="sfc-input num" type="number" min="0" max="${maxProd}" placeholder="台数を入力">
+        </div>
+        <div id="prodCostHint" class="cmd-input-hint num">必要費用: 0万円</div>
+        <div class="cmd-input-actions">
+          <button id="btnExecProd" class="sfc-btn primary" type="button">生産する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">キャンセル</button>
+        </div>
+      `;
+      const updateProdHint = () => {
+        const u = Number($("inpProdSlot").value);
+        const q = Number($("inpProdQty").value) || 0;
+        const cost = (engine.SD[u][1] / 10000) * q;
+        $("prodCostHint").textContent = `必要費用: ${formatManYen(cost)} ${formatManYenSub(cost)}`;
+      };
+      $("inpProdSlot").addEventListener("change", updateProdHint);
+      $("inpProdQty").addEventListener("input", updateProdHint);
+      $("btnExecProd").addEventListener("click", () => {
+        runEngineCommand(5, {
+          slot: Number($("inpProdSlot").value),
+          qty: Number($("inpProdQty").value)
+        });
+      });
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+      return;
+    }
+
+    // 7: 社員雇う
+    if (cmdId === 7) {
+      panel.innerHTML = `
+        <div class="cmd-input-title">7. 社員雇う</div>
+        <div class="form-row">
+          <label for="inpHireCount">雇う人数（人）${engine.bugFixMode ? " ※上限100,000人" : ""}</label>
+          <input id="inpHireCount" class="sfc-input num" type="number" min="0" placeholder="例: 1000">
+        </div>
+        <div class="cmd-input-actions">
+          <button id="btnExecHire" class="sfc-btn primary" type="button">雇用する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">キャンセル</button>
+        </div>
+      `;
+      $("btnExecHire").addEventListener("click", () => {
+        runEngineCommand(7, { count: Number($("inpHireCount").value) });
+      });
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+      return;
+    }
+
+    // 8: 給料変える
+    if (cmdId === 8) {
+      panel.innerHTML = `
+        <div class="cmd-input-title">8. 給料変える</div>
+        <div class="form-row">
+          <label for="inpSalary">1人あたり月給（万円）現在: ${Math.round(engine.ST[engine.PM][5])}万円</label>
+          <input id="inpSalary" class="sfc-input num" type="number" min="${engine.bugFixMode ? 1 : 0}" value="${Math.round(engine.ST[engine.PM][5])}">
+        </div>
+        <div class="cmd-input-actions">
+          <button id="btnExecSal" class="sfc-btn primary" type="button">変更する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">キャンセル</button>
+        </div>
+      `;
+      $("btnExecSal").addEventListener("click", () => {
+        runEngineCommand(8, { salary: Number($("inpSalary").value) });
+      });
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+      return;
+    }
+
+    // 10: 他社見る
+    if (cmdId === 10) {
+      panel.innerHTML = `
+        <div class="cmd-input-title">10. 他社見る（ターン消費なし）</div>
+        <div class="form-row">
+          <label for="inpViewComp">見る会社 (1〜5)</label>
+          <select id="inpViewComp" class="sfc-select">
+            ${[1,2,3,4,5].map((i) => `<option value="${i}">${i}. ${COMPANY_NAMES[i]}</option>`).join("")}
+          </select>
+        </div>
+        <div class="cmd-input-actions">
+          <button id="btnExecView" class="sfc-btn success" type="button">表示する</button>
+          <button id="btnCancelCmd" class="sfc-btn" type="button">閉じる</button>
+        </div>
+      `;
+      $("btnExecView").addEventListener("click", () => {
+        const res = engine.executeCommand(10, { targetId: Number($("inpViewComp").value) });
+        if (res.ok) {
+          stateUI.rightTab = "status";
+          stateUI.viewingCompanyId = res.viewTarget;
+          renderRightPane();
+          setMessage("調査レポート", res.message, "調", false);
+        }
+      });
+      $("btnCancelCmd").addEventListener("click", closeCmdPanel);
+    }
+  }
+
+  function closeCmdPanel() {
+    stateUI.selectedCmd = null;
+    $("cmdInputPanel").classList.remove("active");
+    renderCommands();
+  }
+
+  function runEngineCommand(cmdId, params) {
+    audio.unlock();
+    audio.beepClick();
+    const res = engine.executeCommand(cmdId, params);
+
+    if (!res.ok) {
+      setMessage("コマンド確認", res.message, "警", false);
+      renderRightPane();
+      return;
+    }
+
+    pushEventLogs(res.events);
+    closeCmdPanel();
+    stateUI.viewingCompanyId = engine.PM;
+    stateUI.rightTab = "status";
+
+    if (engine.phase === "player_turn") {
+      saveAutosave();
+    } else if (engine.phase === "game_over") {
+      audio.stopBGM();
+      audio.playGameOverJingle();
+    }
+
+    renderAll();
+
+    const pChar = cmdId === 6 ? "売" : (cmdId === 9 ? "技" : (engine.phase === "settlement" ? "決" : "社"));
+    setMessage(COMPANY_NAMES[engine.PM] || "進行", res.message, pChar, true);
+  }
+
+  function renderSettlement() {
+    const r = engine.lastSettlement;
+    if (!r) return;
+    $("settlementTitleBar").textContent = `${r.fiscalYear} 年度決算報告`;
+    $("settlementContent").innerHTML = `
+      <div class="report-heading">${r.fiscalYear} 年ﾄﾞ ｹｯｻﾝ ﾎｳｺｸ</div>
+      <table class="status-table">
+        <tbody>
+          <tr><th>売上（ｳﾘｱｹﾞ）</th><td class="num val-pos">${formatManYen(r.sales)}<span class="sub-unit">${formatManYenSub(r.sales)}</span></td></tr>
+          <tr><th>支出（ｼｼｭﾂ）</th><td class="num">${formatManYen(r.expense)}<span class="sub-unit">${formatManYenSub(r.expense)}</span></td></tr>
+          <tr><th>利益（ﾘｴｷ）</th><td class="num ${r.profit < 0 ? "val-neg" : "val-pos"}">${formatManYen(r.profit)}<span class="sub-unit">${formatManYenSub(r.profit)}</span></td></tr>
+        </tbody>
+      </table>
+      <div class="tax-notice">ｾﾞｲｷﾝｦ ｳﾘｱｹﾞﾉ 3%ｵｻﾒﾏｽ（税引後売上金: ${formatManYen(Math.floor(r.afterTaxSales))}）</div>
+      <table class="status-table">
+        <tbody>
+          <tr><th>${r.fiscalYear}年度 繰越運営金</th><td class="num ${r.prevCash < 0 ? "val-neg" : "val-pos"}">${formatManYen(Math.floor(r.prevCash))}</td></tr>
+          <tr><th>${r.nextYear}年度 運営金</th><td class="num ${r.newCash < 0 ? "val-neg" : "val-pos"}">${formatManYen(Math.floor(r.newCash))}<span class="sub-unit">${formatManYenSub(r.newCash)}</span></td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;justify-content:center;">
+        <button id="btnConfirmSettlement" class="sfc-btn primary" type="button">次年度（${r.nextYear}年4月）へ進む (SPACE)</button>
+      </div>
+    `;
+    $("btnConfirmSettlement").addEventListener("click", () => {
+      audio.beepClick();
+      const res = engine.confirmSettlement();
+      pushEventLogs(res.events);
+      if (engine.phase === "player_turn") saveAutosave();
+      renderAll();
+      setMessage(COMPANY_NAMES[engine.PM], `${engine.BC}年度が始まりました！ｱﾅﾀﾉ ﾊﾞﾝﾃﾞｽ`, "社", true);
+    });
+  }
+
+  function renderEnding() {
+    const box = $("staffRollBox");
+    box.innerHTML = TEXTS.endingLines.map((line) => `<div>${escapeHtml(line)}</div>`).join("");
+  }
+
+  function renderGameOver() {
+    const buyer = engine.gameOverBuyerId || 1;
+    drawDotLogo($("gameOverLogoCanvas"), buyer);
+    $("gameOverMsg").innerHTML =
+      `ｱﾅﾀﾉﾌﾟﾚｲｼﾃｲﾙｶｲｼｬﾊ <strong>${COMPANY_NAMES[buyer]}</strong> ﾆ ﾖｯﾃ ｶｲﾄﾗﾚﾃｼﾏｲﾏｼﾀ<br>` +
+      `ﾂﾏﾘ ﾄｰｻﾝ‥<br>GAME OVER････････ﾏﾀ ﾌﾟﾚｲｼﾃﾈ!`;
+    $("btnGameOverLoadAuto").style.display = saveManager.getSlot("auto") ? "inline-flex" : "none";
+  }
+
+  function saveAutosave() {
+    const snap = engine.exportSnapshot();
+    if (snap) {
+      saveManager.saveToSlot("auto", snap);
+      renderSaveSlots();
+    }
+  }
+
+  function renderSaveSlots() {
+    const grid = $("slotGrid");
+    const defs = [
+      { key: "auto",  label: "AUTOSAVE (自動)", isAuto: true },
+      { key: "slot1", label: "スロット 1", isAuto: false },
+      { key: "slot2", label: "スロット 2", isAuto: false },
+      { key: "slot3", label: "スロット 3", isAuto: false }
+    ];
+    const canSave = !!engine.exportSnapshot();
+    grid.innerHTML = "";
+
+    // タイトル画面の「AUTOSAVEから再開」ボタン連動
+    $("btnContinueAuto").style.display = saveManager.getSlot("auto") ? "inline-flex" : "none";
+
+    for (const def of defs) {
+      const data = saveManager.getSlot(def.key);
+      const card = document.createElement("div");
+      card.className = "slot-card" + (def.isAuto ? " autosave" : "");
+
+      let metaHtml = "データなし";
+      if (data) {
+        const comp = COMPANY_NAMES[data.PM] || `No.${data.PM}`;
+        const mo = calcDisplayMonth(data.BE);
+        const share = data.ST[data.PM] ? Math.floor(data.ST[data.PM][7]) : 0;
+        const mTag = data.bugFixMode === false ? "原作" : "修正";
+        metaHtml = `<strong>${comp}</strong> ${data.BC}年${mo}月 / ｼｪｱ${share}% [${mTag}]<br>${data.savedAt || ""}`;
+      }
+
+      card.innerHTML = `
+        <div class="slot-head">${def.label}</div>
+        <div class="slot-meta">${metaHtml}</div>
+        <div class="slot-actions">
+          ${def.isAuto ? "" : `<button type="button" class="sfc-btn sm primary save-btn" ${canSave ? "" : "disabled"}>セーブ</button>`}
+          <button type="button" class="sfc-btn sm success load-btn" ${data ? "" : "disabled"}>ロード</button>
+          <button type="button" class="sfc-btn sm danger del del-btn" ${data ? "" : "disabled"} title="削除">×</button>
+        </div>
+      `;
+
+      const saveBtn = card.querySelector(".save-btn");
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+          const snap = engine.exportSnapshot();
+          if (!snap) return;
+          saveManager.saveToSlot(def.key, snap);
+          renderSaveSlots();
+          showToast(`${def.label} にセーブしました`);
+        });
+      }
+
+      const loadBtn = card.querySelector(".load-btn");
+      if (loadBtn) {
+        loadBtn.addEventListener("click", () => {
+          const d = saveManager.getSlot(def.key);
+          if (!d) return;
+          loadGameFromData(d, `${def.label} をロードしました`);
+        });
+      }
+
+      const delBtn = card.querySelector(".del-btn");
+      if (delBtn) {
+        delBtn.addEventListener("click", () => {
+          saveManager.deleteSlot(def.key);
+          renderSaveSlots();
+          showToast(`${def.label} を削除しました`);
+        });
+      }
+
+      grid.appendChild(card);
+    }
+  }
+
+  function loadGameFromData(data, toastMsg) {
+    if (!engine.importSnapshot(data)) {
+      showToast("セーブデータの読み込みに失敗しました");
+      return;
+    }
+    audio.unlock();
+    audio.startBGM();
+    stateUI.selectedCmd = null;
+    stateUI.rightTab = "status";
+    stateUI.viewingCompanyId = engine.PM;
+    closeCmdPanel();
+    syncModeUI();
+    renderAll();
+    setMessage(COMPANY_NAMES[engine.PM], "セーブデータから再開しました！ｱﾅﾀﾉ ﾊﾞﾝﾃﾞｽ", "社", true);
+    showToast(toastMsg);
+  }
+
+  function renderAll() {
+    for (const [key, el] of Object.entries(panes)) {
+      el.classList.toggle("active", key === engine.phase);
+    }
+    syncModeUI();
+    renderHUD();
+    renderSaveSlots();
+
+    if (engine.phase === "title") {
+      drawDotLogo($("titleLogoCanvas"), 5);
+    } else if (engine.phase === "select") {
+      renderSelectCards();
+    } else if (engine.phase === "player_turn") {
+      renderCommands();
+      renderRightPane();
+    } else if (engine.phase === "settlement") {
+      renderSettlement();
+    } else if (engine.phase === "ending") {
+      renderEnding();
+    } else if (engine.phase === "game_over") {
+      renderGameOver();
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+  }
+
+  // =========================================================================
+  // 7. イベント配線
+  // =========================================================================
+  $("btnStartNew").addEventListener("click", () => {
+    audio.unlock();
+    audio.startBGM();
+    engine.goToSelect();
+    renderAll();
+    setMessage("会社選択", "ｶｲｼｬｦ ｴﾗﾝﾃﾞｸﾀﾞｻｲ — 社長となる1社を選んでください。", "案", false);
+  });
+
+  $("btnContinueAuto").addEventListener("click", () => {
+    const d = saveManager.getSlot("auto");
+    if (d) loadGameFromData(d, "AUTOSAVEから再開しました");
+  });
+
+  $("btnBackTitle").addEventListener("click", () => {
+    audio.stopBGM();
+    engine.resetToTitle();
+    renderAll();
+  });
+
+  $("tabStatus").addEventListener("click", () => {
+    stateUI.rightTab = "status";
+    stateUI.viewingCompanyId = engine.PM;
+    renderRightPane();
+  });
+
+  $("tabPcList").addEventListener("click", () => {
+    stateUI.rightTab = "pc_list";
+    renderRightPane();
+  });
+
+  $("btnEndingContinue").addEventListener("click", () => {
+    const res = engine.confirmEnding();
+    pushEventLogs(res.events);
+    if (engine.phase === "player_turn") saveAutosave();
+    renderAll();
+    setMessage(COMPANY_NAMES[engine.PM], "全社制覇後も経営を継続できます！", "王", true);
+  });
+
+  $("btnEndingTitle").addEventListener("click", () => {
+    audio.stopBGM();
+    engine.resetToTitle();
+    renderAll();
+  });
+
+  $("btnGameOverReset").addEventListener("click", () => {
+    audio.stopBGM();
+    engine.resetToTitle();
+    renderAll();
+    setMessage("案内", "タイトルに戻りました。再挑戦してください！", "社", false);
+  });
+
+  $("btnGameOverLoadAuto").addEventListener("click", () => {
+    const d = saveManager.getSlot("auto");
+    if (d) loadGameFromData(d, "AUTOSAVEからやり直しました");
+  });
+
+  // 音源・設定ボタン
+  $("btnBgm").addEventListener("click", () => {
+    audio.bgmEnabled = !audio.bgmEnabled;
+    $("btnBgm").textContent = "BGM: " + (audio.bgmEnabled ? "ON" : "OFF");
+    $("btnBgm").classList.toggle("active-toggle", audio.bgmEnabled);
+    if (!audio.bgmEnabled) {
+      for (const osc of audio.activeNodes) { try { osc.stop(); } catch (_) {} }
+      audio.activeNodes.clear();
+    }
+  });
+
+  $("btnSfx").addEventListener("click", () => {
+    audio.sfxEnabled = !audio.sfxEnabled;
+    $("btnSfx").textContent = "効果音: " + (audio.sfxEnabled ? "ON" : "OFF");
+    $("btnSfx").classList.toggle("active-toggle", audio.sfxEnabled);
+  });
+
+  $("btnTone").addEventListener("click", () => {
+    audio.setToneMode(!audio.fm77Tone);
+    $("btnTone").textContent = "音色: " + (audio.fm77Tone ? "FM-77風" : "生PSG");
+    $("btnTone").classList.toggle("active-toggle", audio.fm77Tone);
+    showToast(audio.fm77Tone ? "FM-77実機風 (S13M512＋スピーカー特性)" : "生PSG矩形波");
+  });
+
+  $("volSlider").addEventListener("input", () => {
+    audio.setVolume(parseInt($("volSlider").value, 10) / 100);
+  });
+
+  $("btnMode").addEventListener("click", () => {
+    engine.bugFixMode = !engine.bugFixMode;
+    syncModeUI();
+    showToast(engine.bugFixMode ? "バグ修正モードに切替えました" : "原作準拠モードに切替えました");
+  });
+
+  $("btnSpeed").addEventListener("click", () => {
+    stateUI.fastText = !stateUI.fastText;
+    $("btnSpeed").textContent = "文字送り: " + (stateUI.fastText ? "一瞬" : "通常");
+    $("btnSpeed").classList.toggle("active-toggle", stateUI.fastText);
+  });
+
+  $("btnReset").addEventListener("click", () => {
+    audio.stopBGM();
+    stateUI.selectedCmd = null;
+    stateUI.msgLogs = [];
+    engine.resetToTitle();
+    renderAll();
+    setMessage("案内", "ゲームをリセットしました。", "社", false);
+  });
+
+  // JSON エクスポート / インポート
+  $("btnExportSave").addEventListener("click", () => {
+    const snap = engine.exportSnapshot();
+    if (!snap) {
+      showToast("会社選択後にJSON保存できます");
+      return;
+    }
+    const blob = new Blob([JSON.stringify(snap, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const comp = (COMPANY_NAMES[snap.PM] || "SAVE").replace(/\s+/g, "_");
+    a.href = url;
+    a.download = `HARD_MAKER_REMAKE_${comp}_${snap.BC}_${calcDisplayMonth(snap.BE)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast("セーブファイルを書き出しました");
+  });
+
+  $("btnImportSave").addEventListener("click", () => {
+    $("fileImportInput").value = "";
+    $("fileImportInput").click();
+  });
+
+  $("fileImportInput").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        if (!saveManager.validateSave(parsed)) {
+          showToast("セーブデータの形式が正しくありません");
+          return;
+        }
+        loadGameFromData(parsed, "JSONファイルからロードしました");
+      } catch (_) {
+        showToast("JSONファイルの読み込みに失敗しました");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // SPACEキーによるタイトル開始／決算送りショートカット
+  window.addEventListener("keydown", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA")) return;
+    if (e.key === " ") {
+      if (engine.phase === "title") {
+        e.preventDefault();
+        $("btnStartNew").click();
+      } else if (engine.phase === "settlement") {
+        e.preventDefault();
+        const btn = $("btnConfirmSettlement");
+        if (btn) btn.click();
+      }
+    }
+  });
+
+  // テスト・後続フェーズ拡張用フック
+  window.__HARD_MAKER_REMAKE__ = { engine, audio, saveManager, HardMakerEngine, SAVE_STORAGE_KEY };
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

@@ -471,52 +471,88 @@
   }
 
   @media (max-width: 680px) {
-    .left-cmd-rail {
-      left: 6px;
-      top: 78px;
-      gap: 6px;
-    }
-    .cat-btn {
-      width: 82px;
-      padding: 8px 7px;
-      font-size: 12.5px;
-      gap: 5px;
-      border-radius: 10px;
-    }
-    .cat-ico {
-      width: 21px;
-      height: 21px;
-      flex: 0 0 21px;
-      font-size: 12.5px;
-    }
+    /* スマホ縦画面：上部バー直下に自社ステータスを2列×4行でコンパクト配置 */
     .right-status-panel {
+      left: 6px;
       right: 6px;
-      top: 78px;
-      bottom: 162px;
-      width: clamp(202px, 58%, 256px);
+      top: 74px;
+      bottom: auto;
+      width: auto;
       border-radius: 10px;
     }
     .rsp-head {
-      padding: 5px 9px;
-      font-size: 12px;
+      padding: 3px 9px;
+      font-size: 11px;
     }
     .rsp-list {
-      padding: 4px 9px 6px;
-      gap: 0 6px;
-      font-size: 12px;
+      padding: 3px 8px 5px;
+      flex: none;
+      grid-template-columns: auto minmax(0, 1.15fr) auto minmax(0, 1fr);
+      grid-template-rows: repeat(4, auto);
+      gap: 0 5px;
+      font-size: 11px;
     }
-    .rsp-list dt { font-size: 11px; }
-    .rsp-list dd { font-size: 12.5px; }
-    .rsp-val-cash  { font-size: 13px !important; }
-    .rsp-val-share { font-size: 13px !important; }
+    .rsp-list dt {
+      font-size: 9.5px;
+      padding: 2.5px 0;
+      height: auto;
+    }
+    .rsp-list dd {
+      font-size: 10.8px;
+      letter-spacing: -0.02em;
+      padding: 2.5px 0;
+      height: auto;
+    }
+    .rsp-list dd:nth-of-type(odd) {
+      padding-right: 6px;
+      border-right: 1px solid rgba(148, 163, 184, 0.24);
+    }
+    .rsp-list dt:nth-of-type(even) {
+      padding-left: 2px;
+    }
+    .rsp-list dt:nth-last-of-type(-n+2),
+    .rsp-list dd:nth-last-of-type(-n+2) {
+      border-bottom: none;
+    }
+    .rsp-val-cash  { font-size: 11.2px !important; }
+    .rsp-val-share { font-size: 11.5px !important; }
+
+    /* 中央エリア：開けた社長室背景にキャラ立ち絵をゆったり中央〜右寄り配置 */
     .char-stage-layer {
-      right: auto;
-      left: 4px;
-      bottom: 160px;
-      width: 40%;
-      max-width: 158px;
-      height: 31%;
-      max-height: 210px;
+      left: auto;
+      right: 8px;
+      bottom: 196px;
+      width: 58%;
+      max-width: 230px;
+      height: min(37dvh, 275px);
+    }
+
+    /* 4大カテゴリボタン：セリフ枠の直上に横1列（均等4分割）で親指操作しやすく */
+    .left-cmd-rail {
+      left: 6px;
+      right: 6px;
+      top: auto;
+      bottom: 164px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .cat-btn {
+      width: 100%;
+      padding: 8px 4px;
+      font-size: 12.5px;
+      gap: 4px;
+      justify-content: center;
+      border-radius: 10px;
+    }
+    .cat-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+    .cat-ico {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      font-size: 12px;
     }
   }
 
@@ -697,12 +733,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: flex;
-    justify-content: space-between;
+    align-items: baseline;
     gap: 5px;
   }
   .pc-dock-stock {
     color: #fde047;
+    font-size: 13.5px;
     font-weight: 800;
+    letter-spacing: 0.01em;
   }
   .pc-dock-stock.zero {
     color: #f87171;
@@ -726,7 +764,7 @@
       -webkit-overflow-scrolling: touch;
     }
     .pc-dock-card {
-      flex: 0 0 156px;
+      flex: 0 0 152px;
       scroll-snap-align: start;
       padding: 5px 6px;
     }
@@ -734,6 +772,7 @@
     .pc-dock-top { font-size: 12px; }
     .pc-dock-no { font-size: 10px; }
     .pc-dock-meta { font-size: 11px; }
+    .pc-dock-stock { font-size: 12.5px; }
   }
 
   .dock-date {
@@ -4618,7 +4657,7 @@
       btn.className = "pc-dock-card" + (dev ? "" : " empty");
       if (btn.setAttribute) btn.setAttribute("data-dock-slot", String(u));
       btn.title = dev
-        ? `NO.${u} ${engine.PN[u]} (${bits}bit) — タップで生産・価格変更・中止`
+        ? `NO.${u} ${engine.PN[u]} (${bits}bit / 定価 ${formatYen(price)}) — タップで生産・価格変更・中止`
         : `NO.${u} 空き枠 — タップして新規パソコンを開発`;
 
       btn.innerHTML = `
@@ -4630,8 +4669,7 @@
           </span>
           ${dev ? `
             <span class="pc-dock-meta num">
-              <span>${formatYen(price)}</span>
-              <span class="pc-dock-stock ${stock <= 0 ? "zero" : ""}">在庫${stock.toLocaleString()}</span>
+              <span class="pc-dock-stock ${stock <= 0 ? "zero" : ""}">在庫 ${stock.toLocaleString()}台</span>
             </span>
           ` : `
             <span class="pc-dock-meta"><span>＋ タップで開発</span></span>

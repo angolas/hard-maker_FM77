@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HARD MAKER - Remake (Phase 4)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
 <style>
   /* =========================================================================
      A列車×ADV風 フル背景オーバーレイUI スタイル
@@ -35,7 +38,8 @@
     --c4: #10b981; /* DEMPA */
     --c5: #3b82f6; /* MORIYA GAMES */
 
-    --font-ui: "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+    --font-ui: "M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", "Meiryo", system-ui, sans-serif;
+    --text-shadow-dark: 0 1px 2px rgba(0, 0, 0, 0.65);
   }
 
   * { box-sizing: border-box; }
@@ -50,30 +54,32 @@
     background: radial-gradient(circle at top, #1e293b 0%, #0b1120 75%);
     color: var(--ink);
     font-family: var(--font-ui);
+    font-weight: 700;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 10px 10px calc(84px + env(safe-area-inset-bottom));
-    font-size: 14px;
+    font-size: 14.5px;
     line-height: 1.45;
   }
 
   .num {
-    font-family: "Consolas", "Segoe UI", monospace;
+    font-family: var(--font-ui);
     font-variant-numeric: tabular-nums;
+    font-weight: 800;
   }
 
   /* =========================================================================
      1. 開放的なフル背景ゲーム画面フレーム (.game-screen)
-        ・PC: 中央に横長 16:10 見やすいフレーム
+        ・PC: 大画面モニタでも迫力と視認性を確保するワイドフレーム
         ・スマホ縦持ち: 100dvh ちょうど一杯で1画面完結
      ========================================================================= */
   .game-screen {
     position: relative;
     width: 100%;
-    max-width: 960px;
-    height: min(calc(100dvh - 20px), 620px);
-    min-height: 520px;
+    max-width: 1120px;
+    height: min(calc(100dvh - 20px), 740px);
+    min-height: 600px;
     border-radius: 14px;
     overflow: hidden;
     border: 1.5px solid rgba(255, 255, 255, 0.22);
@@ -143,50 +149,107 @@
     pointer-events: none;
   }
 
-  /* 左上・社名ウォールプレート（背景に馴染む控えめ演出） */
-  .office-wall-brand {
+  /* =========================================================================
+     2.5 画面上部：スリム半透明トップバー（年月・社名ロゴ・季節/モード・5社シェア）
+     ========================================================================= */
+  .top-hud-bar {
     position: absolute;
-    top: 14px;
-    left: 16px;
-    z-index: 2;
+    top: 8px;
+    left: 12px;
+    right: 12px;
+    z-index: 7;
+    background: rgba(11, 18, 34, 0.84);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(148, 197, 255, 0.34);
+    border-radius: 11px;
+    padding: 6px 12px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 5px 10px;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.56);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    font-size: 11px;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34);
+    text-shadow: var(--text-shadow-dark);
+  }
+  .top-identity {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+  .top-season-meta {
+    font-size: 12.5px;
+    font-weight: 700;
     color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
   }
   .mode-pill-mini {
-    padding: 1px 7px;
+    padding: 2px 9px;
     border-radius: 999px;
-    font-size: 10px;
-    font-weight: 700;
-    background: rgba(52, 211, 153, 0.22);
-    border: 1px solid rgba(52, 211, 153, 0.6);
+    font-size: 11.5px;
+    font-weight: 800;
+    background: rgba(52, 211, 153, 0.24);
+    border: 1px solid rgba(52, 211, 153, 0.65);
     color: #a7f3d0;
+    white-space: nowrap;
   }
   .mode-pill-mini.original {
-    background: rgba(251, 191, 36, 0.22);
-    border-color: rgba(251, 191, 36, 0.65);
+    background: rgba(251, 191, 36, 0.24);
+    border-color: rgba(251, 191, 36, 0.7);
     color: #fde68a;
+  }
+  .top-share-area {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 310px;
+    flex: 0 1 400px;
+  }
+
+  @media (max-width: 680px) {
+    .top-hud-bar {
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      padding: 5px 8px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+    .top-identity {
+      justify-content: space-between;
+      gap: 5px;
+    }
+    .top-season-meta {
+      max-width: 118px;
+      font-size: 10.5px;
+    }
+    .mode-pill-mini {
+      font-size: 10px;
+      padding: 1px 7px;
+    }
+    .top-share-area {
+      min-width: 0;
+      flex: none;
+      width: 100%;
+    }
   }
 
   /* =========================================================================
-     3. 右側：キャラクター立ち絵レイヤー（ADV風バストアップ・枠線なし透過配置）
+     3. 画面中央寄り：キャラクター立ち絵レイヤー（右側ステータス左横に寄り添うADV構図）
         ※Phase 3: 4キャラ×3表情の内蔵SVG立ち絵 ＋ ASSET_MANIFEST外部PNG差し替え対応
      ========================================================================= */
   .char-stage-layer {
     position: absolute;
-    right: 2%;
-    bottom: 72px;
+    right: 378px;
+    bottom: 196px;
     z-index: 3;
-    width: clamp(175px, 30%, 280px);
-    height: clamp(235px, 58%, 360px);
+    width: clamp(200px, 24%, 285px);
+    height: clamp(240px, 48%, 365px);
     pointer-events: none;
     display: flex;
     flex-direction: column;
@@ -232,8 +295,8 @@
   .char-svg-host svg {
     width: 100%;
     height: 100%;
-    max-width: 270px;
-    max-height: 350px;
+    max-width: 245px;
+    max-height: 315px;
     filter: drop-shadow(0 10px 20px rgba(15, 23, 42, 0.48));
   }
   /* 話者バッジのキャラ別カラー */
@@ -243,17 +306,100 @@
   .speaker-badge.role-sales     { background: linear-gradient(135deg, #047857, #059669); }
 
   /* =========================================================================
+     3.5 画面右側：自社ステータス常時表示ウィンドウ（原作準拠8項目・縦拡張＆見やすい太字）
+     ========================================================================= */
+  .right-status-panel {
+    position: absolute;
+    right: 14px;
+    top: 72px;
+    bottom: 214px;
+    z-index: 6;
+    width: 356px;
+    background: rgba(11, 18, 34, 0.86);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(148, 197, 255, 0.40);
+    border-radius: 13px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    transition: opacity 0.2s, transform 0.2s;
+    text-shadow: var(--text-shadow-dark);
+  }
+  .right-status-panel.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(10px);
+  }
+  .rsp-head {
+    padding: 8px 14px;
+    background: linear-gradient(90deg, rgba(30, 58, 138, 0.85), rgba(15, 23, 42, 0.88));
+    border-bottom: 1px solid rgba(148, 197, 255, 0.30);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 800;
+    color: #e0f2fe;
+    letter-spacing: 0.04em;
+    flex: 0 0 auto;
+  }
+  .rsp-list {
+    margin: 0;
+    padding: 6px 14px 8px;
+    flex: 1;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: repeat(8, 1fr);
+    align-items: center;
+    gap: 0 12px;
+    font-size: 16px;
+  }
+  .rsp-list dt {
+    color: #93c5fd;
+    font-weight: 700;
+    font-size: 14.5px;
+    white-space: nowrap;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  }
+  .rsp-list dd {
+    margin: 0;
+    text-align: right;
+    font-weight: 800;
+    font-size: 17.5px;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  }
+  .rsp-list dt:last-of-type,
+  .rsp-list dd:last-of-type {
+    border-bottom: none;
+  }
+  .rsp-val-cash  { color: #7dd3fc !important; font-size: 18.5px !important; }
+  .rsp-val-neg   { color: #fca5a5 !important; }
+  .rsp-val-share { color: #fde047 !important; font-size: 18.5px !important; }
+
+  /* =========================================================================
      4. 左側：縦並び4大カテゴリ コマンドメニュー（背景の上にフロート配置）
      ========================================================================= */
   .left-cmd-rail {
     position: absolute;
     left: 14px;
-    top: 50%;
-    transform: translateY(-60%);
+    top: 72px;
     z-index: 6;
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 10px;
     transition: opacity 0.2s;
   }
   .left-cmd-rail.hidden {
@@ -263,27 +409,28 @@
 
   .cat-btn {
     appearance: none;
-    width: 92px;
-    padding: 10px 10px;
-    border-radius: 12px;
-    border: 1.5px solid rgba(255, 255, 255, 0.34);
-    background: rgba(15, 23, 42, 0.72);
+    width: 112px;
+    padding: 12px 12px;
+    border-radius: 13px;
+    border: 1.5px solid rgba(255, 255, 255, 0.36);
+    background: rgba(15, 23, 42, 0.78);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     color: #f8fafc;
     font-family: var(--font-ui);
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 800;
+    text-shadow: var(--text-shadow-dark);
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    gap: 9px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.24);
     transition: transform 0.1s, background 0.15s, border-color 0.15s;
   }
   .cat-btn:hover:not(:disabled) {
-    background: rgba(30, 58, 138, 0.86);
-    border-color: rgba(125, 211, 252, 0.85);
+    background: rgba(30, 58, 138, 0.88);
+    border-color: rgba(125, 211, 252, 0.88);
     transform: translateX(3px);
   }
   .cat-btn:active:not(:disabled) {
@@ -298,14 +445,14 @@
     cursor: not-allowed;
   }
   .cat-ico {
-    width: 24px;
-    height: 24px;
-    border-radius: 7px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    flex: 0 0 24px;
+    font-size: 16px;
+    flex: 0 0 28px;
     background: rgba(255, 255, 255, 0.14);
   }
   .cat-btn[data-cat="mfg"] .cat-ico   { background: rgba(56, 189, 248, 0.28); }
@@ -313,22 +460,68 @@
   .cat-btn[data-cat="hr"] .cat-ico    { background: rgba(52, 211, 153, 0.28); }
   .cat-btn[data-cat="info"] .cat-ico  { background: rgba(192, 132, 252, 0.28); }
 
+  /* 中幅PC（ノートPC・狭めウィンドウ）でも重なり・桁崩れを防ぐ中間調整 */
+  @media (max-width: 960px) and (min-width: 681px) {
+    .right-status-panel { width: 318px; }
+    .rsp-list dt { font-size: 13px; }
+    .rsp-list dd { font-size: 15.5px; }
+    .rsp-val-cash, .rsp-val-share { font-size: 16.5px !important; }
+    .char-stage-layer { right: 334px; width: clamp(170px, 23%, 235px); }
+    .cat-btn { width: 100px; padding: 10px 10px; font-size: 14px; }
+  }
+
   @media (max-width: 680px) {
     .left-cmd-rail {
-      left: 10px;
-      top: 58px;
-      transform: none;
-      gap: 7px;
+      left: 6px;
+      top: 78px;
+      gap: 6px;
     }
     .cat-btn {
-      width: 84px;
-      padding: 8px 8px;
+      width: 82px;
+      padding: 8px 7px;
+      font-size: 12.5px;
+      gap: 5px;
+      border-radius: 10px;
+    }
+    .cat-ico {
+      width: 21px;
+      height: 21px;
+      flex: 0 0 21px;
+      font-size: 12.5px;
+    }
+    .right-status-panel {
+      right: 6px;
+      top: 78px;
+      bottom: 162px;
+      width: clamp(202px, 58%, 256px);
+      border-radius: 10px;
+    }
+    .rsp-head {
+      padding: 5px 9px;
       font-size: 12px;
+    }
+    .rsp-list {
+      padding: 4px 9px 6px;
+      gap: 0 6px;
+      font-size: 12px;
+    }
+    .rsp-list dt { font-size: 11px; }
+    .rsp-list dd { font-size: 12.5px; }
+    .rsp-val-cash  { font-size: 13px !important; }
+    .rsp-val-share { font-size: 13px !important; }
+    .char-stage-layer {
+      right: auto;
+      left: 4px;
+      bottom: 160px;
+      width: 40%;
+      max-width: 158px;
+      height: 31%;
+      max-height: 210px;
     }
   }
 
   /* =========================================================================
-     5. 下部一体ゾーン：ADV風セリフウィンドウ ＋ 最下部A列車ステータスバー
+     5. 下部一体ゾーン：ADV風セリフウィンドウ ＋ 最下部 開発パソコン常時表示ドック
      ========================================================================= */
   .bottom-overlay-stack {
     position: absolute;
@@ -343,44 +536,46 @@
 
   /* ADV風セリフウィンドウ（立ち絵の手前に重なる半透明ダークガラス枠） */
   .dialogue-wrap {
-    padding: 0 12px 8px;
+    padding: 0 12px 7px;
     pointer-events: auto;
   }
   .dialogue-box {
     position: relative;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.84) 0%, rgba(10, 16, 30, 0.90) 100%);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1.5px solid rgba(148, 197, 255, 0.42);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(10, 16, 30, 0.94) 100%);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    border: 1.5px solid rgba(148, 197, 255, 0.46);
     border-radius: 12px;
-    padding: 12px 14px 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.16);
-    min-height: 68px;
+    padding: 13px 16px 9px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    min-height: 64px;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
   .speaker-badge {
     position: absolute;
-    top: -12px;
+    top: -13px;
     left: 14px;
     background: linear-gradient(135deg, #2563eb, #0284c7);
     color: #fff;
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 800;
-    padding: 2px 12px;
+    padding: 2px 14px;
     border-radius: 999px;
-    border: 1.5px solid rgba(255, 255, 255, 0.55);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    text-shadow: var(--text-shadow-dark);
     letter-spacing: 0.04em;
   }
   .dialogue-text {
-    font-size: 13.5px;
-    font-weight: 600;
+    font-size: 15.5px;
+    font-weight: 700;
     color: #f8fafc;
-    line-height: 1.48;
-    min-height: 38px;
-    max-height: 44px;
+    text-shadow: var(--text-shadow-dark);
+    line-height: 1.44;
+    min-height: 42px;
+    max-height: 48px;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -388,47 +583,174 @@
     word-break: break-word;
   }
 
-  /* 最下部：A列車風 常時表示ステータスバー */
-  .status-dock {
+  /* 最下部：開発パソコン一覧（NO.0〜7）常時表示ドック */
+  .pc-dock {
     pointer-events: auto;
-    background: rgba(11, 18, 34, 0.93);
+    background: rgba(10, 17, 32, 0.94);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-top: 1.5px solid rgba(148, 197, 255, 0.32);
-    padding: 6px 12px 7px;
+    border-top: 1.5px solid rgba(148, 197, 255, 0.36);
+    padding: 6px 12px 8px;
     display: flex;
     flex-direction: column;
     gap: 5px;
+    text-shadow: var(--text-shadow-dark);
   }
-
-  .dock-row-main {
+  .pc-dock-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    flex-wrap: wrap;
+    font-size: 12px;
+    font-weight: 800;
+    color: #7dd3fc;
+    letter-spacing: 0.03em;
   }
-  .dock-identity {
+  .pc-dock-hint {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+  }
+  .pc-dock-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .pc-dock-card {
+    appearance: none;
+    font-family: var(--font-ui);
+    text-align: left;
+    background: rgba(30, 41, 59, 0.88);
+    border: 1px solid rgba(148, 197, 255, 0.34);
+    border-radius: 9px;
+    padding: 5px 8px;
+    color: #f8fafc;
+    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 7px;
     min-width: 0;
+    transition: background 0.12s, border-color 0.12s, transform 0.08s;
   }
+  .pc-dock-card:hover {
+    background: rgba(30, 58, 138, 0.78);
+    border-color: #7dd3fc;
+    transform: translateY(-1px);
+  }
+  .pc-dock-card:active {
+    transform: translateY(0);
+  }
+  .pc-dock-card.empty {
+    background: rgba(15, 23, 42, 0.56);
+    border-style: dashed;
+    border-color: rgba(148, 163, 184, 0.32);
+    color: #94a3b8;
+  }
+  .pc-dock-card.empty:hover {
+    background: rgba(30, 41, 59, 0.78);
+    border-color: #38bdf8;
+    color: #e2e8f0;
+  }
+  .pc-dock-card .pc-icon-box.sm {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 7px;
+  }
+  .pc-dock-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.2;
+  }
+  .pc-dock-top {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pc-dock-no {
+    font-size: 11px;
+    font-weight: 800;
+    color: #93c5fd;
+    flex: 0 0 auto;
+  }
+  .pc-dock-name {
+    font-weight: 800;
+    color: #f8fafc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pc-dock-card.empty .pc-dock-name {
+    font-weight: 700;
+    color: #94a3b8;
+  }
+  .pc-dock-meta {
+    font-size: 12px;
+    font-weight: 700;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+  }
+  .pc-dock-stock {
+    color: #fde047;
+    font-weight: 800;
+  }
+  .pc-dock-stock.zero {
+    color: #f87171;
+  }
+
+  @media (max-width: 680px) {
+    .dialogue-wrap { padding: 0 6px 5px; }
+    .dialogue-box { min-height: 52px; padding: 10px 10px 7px; }
+    .speaker-badge { font-size: 11px; top: -11px; padding: 2px 11px; }
+    .dialogue-text { font-size: 13px; min-height: 34px; max-height: 38px; }
+    .pc-dock { padding: 5px 6px 6px; gap: 3px; }
+    .pc-dock-head { font-size: 11px; }
+    .pc-dock-hint { display: none; }
+    .pc-dock-grid {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 6px;
+      padding-bottom: 2px;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pc-dock-card {
+      flex: 0 0 156px;
+      scroll-snap-align: start;
+      padding: 5px 6px;
+    }
+    .pc-dock-card .pc-icon-box.sm { width: 30px; height: 30px; flex: 0 0 30px; }
+    .pc-dock-top { font-size: 12px; }
+    .pc-dock-no { font-size: 10px; }
+    .pc-dock-meta { font-size: 11px; }
+  }
+
   .dock-date {
-    background: rgba(56, 189, 248, 0.18);
-    border: 1px solid rgba(56, 189, 248, 0.55);
+    background: rgba(56, 189, 248, 0.22);
+    border: 1px solid rgba(56, 189, 248, 0.62);
     color: #fef08a;
     font-weight: 800;
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 6px;
+    font-size: 15px;
+    padding: 3px 10px;
+    border-radius: 7px;
     white-space: nowrap;
   }
   .dock-logo-pill {
     background: #fff;
-    border-radius: 5px;
-    padding: 2px 5px;
-    height: 22px;
+    border-radius: 6px;
+    padding: 2px 6px;
+    height: 26px;
     display: inline-flex;
     align-items: center;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
@@ -438,66 +760,15 @@
     image-rendering: pixelated;
     image-rendering: crisp-edges;
   }
-  .dock-cash {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 5px;
-    white-space: nowrap;
-  }
-  .dock-cash .lbl {
-    font-size: 10px;
-    color: #94a3b8;
-    font-weight: 700;
-  }
-  .dock-cash .val {
-    font-size: 15px;
-    font-weight: 900;
-    color: #7dd3fc;
-  }
-  .dock-cash .val.neg { color: #fca5a5; }
-  .dock-cash .sub {
-    font-size: 10px;
-    color: #cbd5e1;
-  }
-
-  .dock-row-sub {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 10px;
-  }
-  .dock-kpis {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    font-size: 11px;
-  }
-  .dock-kpi {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 3px;
-    white-space: nowrap;
-  }
-  .dock-kpi .k { color: #94a3b8; font-size: 10px; }
-  .dock-kpi .v { color: #f8fafc; font-weight: 800; }
-  .dock-kpi .v.neg { color: #fca5a5; }
-  .dock-kpi .v.share { color: #fde047; }
 
   /* スリムな5社シェア横棒グラフ */
-  .dock-share-area {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 150px;
-  }
   .share-bar-slim {
     display: flex;
     height: 8px;
     border-radius: 999px;
     overflow: hidden;
     background: rgba(148, 163, 184, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.24);
   }
   .share-seg {
     height: 100%;
@@ -509,8 +780,14 @@
     display: flex;
     justify-content: space-between;
     gap: 4px;
-    font-size: 9.5px;
-    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 800;
+    color: #e2e8f0;
+  }
+  @media (max-width: 680px) {
+    .dock-date { font-size: 12.5px; padding: 2px 7px; }
+    .dock-logo-pill { height: 22px; padding: 2px 4px; }
+    .share-mini-legend { font-size: 10.5px; gap: 2px; }
   }
   .share-mini-item {
     appearance: none;
@@ -1124,7 +1401,7 @@
      ========================================================================= */
   .below-deck {
     width: 100%;
-    max-width: 960px;
+    max-width: 1120px;
     margin-top: 14px;
     background: rgba(15, 23, 42, 0.88);
     border: 1.5px solid rgba(255, 255, 255, 0.18);
@@ -1331,12 +1608,21 @@
     <div class="office-bg-custom"></div>
   </div>
 
-  <!-- 背景左上に溶け込む控えめなタイトル・モード表示 -->
-  <div class="office-wall-brand">
-    <strong style="letter-spacing:0.06em;">HARD MAKER</strong>
-    <span id="wallSeasonText" style="color:#cbd5e1;">社長室</span>
-    <span id="hudModeChip" class="mode-pill-mini">バグ修正</span>
-  </div>
+  <!-- 1.5 画面上部：スリムな半透明トップバー（年月・自社ロゴ・季節/モード・5社シェア） -->
+  <header class="top-hud-bar">
+    <div class="top-identity">
+      <span id="hudDate" class="dock-date num">1989年 4月</span>
+      <span class="dock-logo-pill" title="自社ロゴ">
+        <canvas id="hudLogoCanvas" width="84" height="14"></canvas>
+      </span>
+      <span id="wallSeasonText" class="top-season-meta">春の社長室 ♪ボサノバ</span>
+      <span id="hudModeChip" class="mode-pill-mini">バグ修正</span>
+    </div>
+    <div class="top-share-area">
+      <div id="shareBarTrack" class="share-bar-slim" aria-label="5社市場シェア横棒グラフ"></div>
+      <div id="shareLegend" class="share-mini-legend"></div>
+    </div>
+  </header>
 
   <!-- 2. 左側：縦並び4大カテゴリ コマンドメニュー（背景にフロート） -->
   <nav id="leftCmdRail" class="left-cmd-rail hidden" aria-label="経営カテゴリメニュー">
@@ -1354,7 +1640,7 @@
     </button>
   </nav>
 
-  <!-- 3. 右側：キャラクター立ち絵レイヤー（ADV風バストアップ・4キャラ×3表情＋外部PNG差し替え対応） -->
+  <!-- 3. 画面中央寄り：キャラクター立ち絵レイヤー（右側ステータスのすぐ左に寄り添うADV構図） -->
   <div id="charStageLayer" class="char-stage-layer hidden" aria-hidden="true">
     <div id="charVisualFrame" class="char-visual-frame">
       <img id="charStandingImg" alt="キャラクター立ち絵">
@@ -1362,7 +1648,24 @@
     </div>
   </div>
 
-  <!-- 4. 下部オーバーレイ：ADV風セリフ枠 ＋ 最下部 A列車風ステータスバー -->
+  <!-- 3.5 画面右側：自社ステータス常時表示ウィンドウ（原作準拠8項目・コンパクト） -->
+  <aside id="selfStatusPanel" class="right-status-panel hidden" aria-label="自社ステータス常時表示">
+    <div class="rsp-head">
+      <span id="rspCompanyTitle">自社ステータス</span>
+    </div>
+    <dl class="rsp-list num">
+      <dt>運営金残高</dt><dd id="stCash" class="rsp-val-cash">---</dd>
+      <dt>売上</dt><dd id="stSales">---</dd>
+      <dt>支出</dt><dd id="stExpense">---</dd>
+      <dt>利益</dt><dd id="stProfit">---</dd>
+      <dt>社員数</dt><dd id="stStaff">---</dd>
+      <dt>給料(月給)</dt><dd id="stSalary">---</dd>
+      <dt>技術</dt><dd id="stTech">---</dd>
+      <dt>シェア</dt><dd id="stShare" class="rsp-val-share">---</dd>
+    </dl>
+  </aside>
+
+  <!-- 4. 下部オーバーレイ：ADV風セリフ枠 ＋ 最下部 開発パソコン一覧（NO.0〜7）常時表示ドック -->
   <div class="bottom-overlay-stack">
     <div class="dialogue-wrap">
       <div class="dialogue-box" aria-live="polite">
@@ -1371,33 +1674,12 @@
       </div>
     </div>
 
-    <footer class="status-dock">
-      <div class="dock-row-main">
-        <div class="dock-identity">
-          <span id="hudDate" class="dock-date num">1989年 4月</span>
-          <span class="dock-logo-pill" title="自社ロゴ">
-            <canvas id="hudLogoCanvas" width="88" height="14"></canvas>
-          </span>
-        </div>
-        <div class="dock-cash">
-          <span class="lbl">運営金</span>
-          <span id="hudCash" class="val num">---</span>
-          <span id="hudCashSub" class="sub"></span>
-        </div>
+    <footer id="pcDockPanel" class="pc-dock" aria-label="開発パソコン一覧常時表示ドック">
+      <div class="pc-dock-head">
+        <span>開発パソコン一覧 (NO.0〜7)</span>
+        <span class="pc-dock-hint">カードをタップで生産・価格・中止／空き枠で新規開発</span>
       </div>
-
-      <div class="dock-row-sub">
-        <div class="dock-kpis num">
-          <span class="dock-kpi"><span class="k">社員</span><span id="kpiStaff" class="v">---</span></span>
-          <span class="dock-kpi"><span class="k">技術</span><span id="kpiTech" class="v">---</span></span>
-          <span class="dock-kpi"><span class="k">利益</span><span id="kpiProfit" class="v">---</span></span>
-          <span class="dock-kpi"><span class="k">シェア</span><span id="kpiShare" class="v share">---</span></span>
-        </div>
-        <div class="dock-share-area">
-          <div id="shareBarTrack" class="share-bar-slim" aria-label="5社市場シェア横棒グラフ"></div>
-          <div id="shareLegend" class="share-mini-legend"></div>
-        </div>
-      </div>
+      <div id="pcDockGrid" class="pc-dock-grid"></div>
     </footer>
   </div>
 
@@ -3451,28 +3733,60 @@
   }
 
   // =========================================================================
-  // 5. フォーマットユーティリティ
+  // 5. フォーマットユーティリティ（桃鉄風「兆・億・万」日本語位取り表記）
   // =========================================================================
-  function formatManYen(val) {
-    return `${Math.round(val).toLocaleString("ja-JP")}万円`;
-  }
-  function formatManYenShort(val) {
-    const abs = Math.abs(Math.round(val));
-    const sign = val < 0 ? "-" : "";
-    if (abs >= 100000000) return `${sign}${(abs / 100000000).toFixed(2)}兆円`;
-    if (abs >= 10000) return `${sign}${(abs / 10000).toFixed(1)}億円`;
-    return `${sign}${abs.toLocaleString("ja-JP")}万円`;
-  }
-  function formatManYenSub(val) {
-    const abs = Math.abs(Math.round(val));
-    if (abs < 10000) return "";
-    const sign = val < 0 ? "-" : "";
-    const cho = Math.floor(abs / 100000000);
-    const oku = Math.floor((abs % 100000000) / 10000);
+  function _buildManYenParts(absMan) {
+    const kei = Math.floor(absMan / 1000000000000);
+    const cho = Math.floor((absMan % 1000000000000) / 100000000);
+    const oku = Math.floor((absMan % 100000000) / 10000);
+    const man = absMan % 10000;
     const parts = [];
-    if (cho > 0) parts.push(`${cho.toLocaleString("ja-JP")}兆`);
-    if (oku > 0) parts.push(`${oku.toLocaleString("ja-JP")}億`);
-    return `（約${sign}${parts.join("")}円）`;
+    if (kei > 0) parts.push(`${kei}京`);
+    if (cho > 0) parts.push(`${cho}兆`);
+    if (oku > 0) parts.push(`${oku}億`);
+    if (man > 0) parts.push(`${man}万`);
+    return parts;
+  }
+
+  // 万円単位の完全な日本語表記（例: 154076668 -> "1兆5407億6668万円", 10000 -> "1億円", 0 -> "0万円"）
+  function formatManYen(val, { signed = false } = {}) {
+    const rounded = Math.round(Number(val) || 0);
+    if (rounded === 0) return "0万円";
+    const sign = rounded < 0 ? "-" : (signed ? "+" : "");
+    const parts = _buildManYenParts(Math.abs(rounded));
+    return `${sign}${parts.join("")}円`;
+  }
+
+  // 狭いカード向けの上位2位短縮表記（例: 156325200 -> "1兆5632億円", 52 -> "52万円"）
+  function formatManYenShort(val) {
+    const rounded = Math.round(Number(val) || 0);
+    if (rounded === 0) return "0万円";
+    const sign = rounded < 0 ? "-" : "";
+    const parts = _buildManYenParts(Math.abs(rounded));
+    return `${sign}${parts.slice(0, 2).join("")}円`;
+  }
+
+  // 桃鉄風表記への統一に伴い、重複する括弧書き補助表記は廃止
+  function formatManYenSub() {
+    return "";
+  }
+
+  // 円単位の日本語表記（例: 256000 -> "25万6000円", 143360 -> "14万3360円", 150000 -> "15万円"）
+  function formatYen(val, { signed = false } = {}) {
+    const rounded = Math.round(Number(val) || 0);
+    if (rounded === 0) return "0円";
+    const sign = rounded < 0 ? "-" : (signed ? "+" : "");
+    const abs = Math.abs(rounded);
+    const cho = Math.floor(abs / 1000000000000);
+    const oku = Math.floor((abs % 1000000000000) / 100000000);
+    const man = Math.floor((abs % 100000000) / 10000);
+    const yen = abs % 10000;
+    const parts = [];
+    if (cho > 0) parts.push(`${cho}兆`);
+    if (oku > 0) parts.push(`${oku}億`);
+    if (man > 0) parts.push(`${man}万`);
+    if (yen > 0) parts.push(`${yen}`);
+    return `${sign}${parts.join("")}円`;
   }
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
@@ -4271,7 +4585,7 @@
     else if (m === 12 || m <= 2){ cls = "season-winter"; label = "冬の社長室"; }
     bg.classList.add(cls);
     const bgmTag = audio.getModeBadgeText();
-    $("wallSeasonText").textContent = engine.PM ? `${COMPANY_NAMES[engine.PM]} ${label} ${bgmTag}` : `${label} ${bgmTag}`;
+    $("wallSeasonText").textContent = `${label} ${bgmTag}`;
   }
 
   function syncModeUI() {
@@ -4286,38 +4600,145 @@
     btn.classList.toggle("warn", !isFix);
   }
 
+  // 下部：開発パソコン一覧（NO.0〜7）常時表示ドックの描画
+  function renderPcDock() {
+    const grid = $("pcDockGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    for (let u = 0; u < 8; u++) {
+      const sd = engine.SD[u];
+      const dev = sd[4] !== 0;
+      const bits = sd[3];
+      const stock = Math.floor(sd[2]);
+      const price = Math.round(sd[0]);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pc-dock-card" + (dev ? "" : " empty");
+      if (btn.setAttribute) btn.setAttribute("data-dock-slot", String(u));
+      btn.title = dev
+        ? `NO.${u} ${engine.PN[u]} (${bits}bit) — タップで生産・価格変更・中止`
+        : `NO.${u} 空き枠 — タップして新規パソコンを開発`;
+
+      btn.innerHTML = `
+        ${renderPcIcon(dev ? bits : 0, { small: true })}
+        <span class="pc-dock-info">
+          <span class="pc-dock-top">
+            <span class="pc-dock-no num">NO.${u}</span>
+            <span class="pc-dock-name">${dev ? escapeHtml(engine.PN[u]) : "空き枠"}</span>
+          </span>
+          ${dev ? `
+            <span class="pc-dock-meta num">
+              <span>${formatYen(price)}</span>
+              <span class="pc-dock-stock ${stock <= 0 ? "zero" : ""}">在庫${stock.toLocaleString()}</span>
+            </span>
+          ` : `
+            <span class="pc-dock-meta"><span>＋ タップで開発</span></span>
+          `}
+        </span>
+      `;
+
+      btn.addEventListener("click", () => {
+        if (engine.phase !== "player_turn") return;
+        audio.unlock();
+        audio.playSE("confirm");
+        if (dev) {
+          openPcQuickActionModal(u);
+        } else {
+          openCommandForm(2, { slot: u });
+        }
+      });
+
+      grid.appendChild(btn);
+    }
+  }
+
+  // 開発済みPCカードタップ時のクイック操作モーダル（生産／価格変更／製造中止へ1タップ遷移）
+  function openPcQuickActionModal(slot) {
+    const sd = engine.SD[slot];
+    if (!sd || sd[4] === 0) {
+      openCommandForm(2, { slot });
+      return;
+    }
+    const bits = sd[3];
+    const name = engine.PN[slot];
+    renderCharacter("factory", determineCharacterMood({ phase: engine.phase }));
+
+    openModal(`NO.${slot} ${name} (${bits}BIT) — クイック操作`, `
+      <div style="display:flex;align-items:center;gap:10px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:9px;padding:9px 10px;">
+        ${renderPcIcon(bits)}
+        <div style="min-width:0;flex:1;">
+          <div style="font-size:11px;color:#64748b;font-weight:700;">NO.${slot} / ${bits}BIT パソコン</div>
+          <div style="font-size:15px;font-weight:900;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(name)}</div>
+          <div class="num" style="font-size:11.5px;color:#334155;margin-top:2px;">
+            定価 <strong>${formatYen(sd[0])}</strong> ／ 原価 ${formatYen(sd[1])} ／ 在庫 <strong>${Math.floor(sd[2]).toLocaleString()}台</strong>
+          </div>
+        </div>
+      </div>
+      <div class="submenu-list">
+        <button type="button" id="qActProduce" class="ui-btn submenu-item">
+          <span><strong>5. パソコン生産</strong><br><span class="submenu-meta">この機種の在庫を追加生産する</span></span>
+          <span style="color:#2563eb;">▶</span>
+        </button>
+        <button type="button" id="qActPrice" class="ui-btn submenu-item">
+          <span><strong>4. 価格変える</strong><br><span class="submenu-meta">この機種の定価を調整する</span></span>
+          <span style="color:#2563eb;">▶</span>
+        </button>
+        <button type="button" id="qActStop" class="ui-btn submenu-item" style="border-color:#fca5a5;">
+          <span><strong style="color:#b91c1c;">3. 製造中止</strong><br><span class="submenu-meta">この機種スロットを削除する</span></span>
+          <span style="color:#dc2626;">▶</span>
+        </button>
+      </div>
+      <button id="mCancel" class="ui-btn" type="button">閉じる</button>
+    `, {
+      onReady: () => {
+        $("qActProduce").addEventListener("click", () => { audio.playSE("confirm"); openCommandForm(5, { slot }); });
+        $("qActPrice").addEventListener("click",   () => { audio.playSE("confirm"); openCommandForm(4, { slot }); });
+        $("qActStop").addEventListener("click",    () => { audio.playSE("confirm"); openCommandForm(3, { slot }); });
+        $("mCancel").addEventListener("click",     () => { audio.playSE("cancel"); closeModal(); });
+      }
+    });
+  }
+
   function renderStatusDock() {
     const month = calcDisplayMonth(engine.BE);
     $("hudDate").textContent = `${engine.BC}年 ${month}月`;
     updateSeasonBackground();
 
+    // 右側：原作準拠8項目 自社ステータス常時表示ウィンドウの更新（桃鉄風「兆・億・万」表記）
     if (engine.PM >= 1 && engine.PM <= 5) {
       const st = engine.ST[engine.PM];
       drawDotLogo($("hudLogoCanvas"), engine.PM);
-      const cashEl = $("hudCash");
-      cashEl.textContent = formatManYen(st[0]);
-      cashEl.classList.toggle("neg", st[0] < 0);
-      $("hudCashSub").textContent = formatManYenSub(st[0]);
+      $("rspCompanyTitle").textContent = COMPANY_NAMES[engine.PM];
 
-      $("kpiStaff").textContent = `${Math.round(st[4]).toLocaleString()}人`;
-      $("kpiTech").textContent = Math.round(st[6]).toLocaleString();
-      const profEl = $("kpiProfit");
-      profEl.textContent = formatManYenShort(st[3]);
-      profEl.classList.toggle("neg", st[3] < 0);
-      $("kpiShare").textContent = `${Math.floor(st[7])}%`;
+      const cashEl = $("stCash");
+      cashEl.textContent = formatManYen(st[0]);
+      cashEl.classList.toggle("rsp-val-neg", st[0] < 0);
+      cashEl.classList.toggle("rsp-val-cash", st[0] >= 0);
+
+      $("stSales").textContent = formatManYen(st[1]);
+      $("stExpense").textContent = formatManYen(st[2]);
+
+      const profEl = $("stProfit");
+      profEl.textContent = formatManYen(st[3]);
+      profEl.classList.toggle("rsp-val-neg", st[3] < 0);
+
+      $("stStaff").textContent = `${Math.round(st[4]).toLocaleString("ja-JP")}人`;
+      $("stSalary").textContent = formatManYen(st[5]);
+      $("stTech").textContent = Math.round(st[6]).toLocaleString("ja-JP");
+      $("stShare").textContent = `${Math.floor(st[7])}%`;
     } else {
       drawDotLogo($("hudLogoCanvas"), 0);
-      $("hudCash").textContent = "---";
-      $("hudCash").classList.remove("neg");
-      $("hudCashSub").textContent = "";
-      $("kpiStaff").textContent = "---";
-      $("kpiTech").textContent = "---";
-      $("kpiProfit").textContent = "---";
-      $("kpiProfit").classList.remove("neg");
-      $("kpiShare").textContent = "---";
+      $("rspCompanyTitle").textContent = "自社ステータス";
+      for (const id of ["stCash", "stSales", "stExpense", "stProfit", "stStaff", "stSalary", "stTech", "stShare"]) {
+        $(id).textContent = "---";
+      }
+      $("stCash").classList.remove("rsp-val-neg");
+      $("stProfit").classList.remove("rsp-val-neg");
     }
 
-    // スリムな5社シェア横棒グラフ
+    // 上部トップバー：スリムな5社シェア横棒グラフ＆凡例（タップで他社詳細確認）
     const track = $("shareBarTrack");
     const legend = $("shareLegend");
     track.innerHTML = "";
@@ -4353,7 +4774,7 @@
       item.addEventListener("click", () => {
         if (engine.phase !== "player_turn") return;
         audio.unlock();
-        audio.beepClick();
+        audio.playSE("confirm");
         const res = engine.executeCommand(10, { targetId: i });
         if (res.ok) {
           setDialogue("調査報告", res.message, "秘書");
@@ -4362,6 +4783,9 @@
       });
       legend.appendChild(item);
     }
+
+    // 下部：開発パソコン一覧（NO.0〜7）常時表示ドックを更新
+    renderPcDock();
   }
 
   // =========================================================================
@@ -4464,12 +4888,12 @@
     if (!st) return;
     renderCharacter("secretary", determineCharacterMood({ phase: engine.phase }));
     const rows = [
-      ["運営金残高", formatManYen(st[0]), formatManYenSub(st[0]), st[0] < 0],
-      ["売上",       formatManYen(st[1]), formatManYenSub(st[1]), false],
-      ["支出",       formatManYen(st[2]), formatManYenSub(st[2]), false],
-      ["利益",       formatManYen(st[3]), formatManYenSub(st[3]), st[3] < 0],
+      ["運営金残高", formatManYen(st[0]), "", st[0] < 0],
+      ["売上",       formatManYen(st[1]), "", false],
+      ["支出",       formatManYen(st[2]), "", false],
+      ["利益",       formatManYen(st[3]), "", st[3] < 0],
       ["社員数",     `${Math.round(st[4]).toLocaleString("ja-JP")}人`, "", false],
-      ["給料（月給）", `${Math.round(st[5]).toLocaleString("ja-JP")}万円`, "", false],
+      ["給料（月給）", formatManYen(st[5]), "", false],
       ["技術",       Math.round(st[6]).toLocaleString("ja-JP"), "", false],
       ["シェア",     `${Math.floor(st[7])}%`, `累計販売: ${Math.floor(st[8]).toLocaleString()}台`, false]
     ];
@@ -4524,8 +4948,8 @@
               </div>
               ${dev ? `
                 <dl class="mini-dl num">
-                  <dt>定価</dt><dd>${Math.round(sd[0]).toLocaleString()}円</dd>
-                  <dt>原価</dt><dd>${Math.round(sd[1]).toLocaleString()}円</dd>
+                  <dt>定価</dt><dd>${formatYen(sd[0])}</dd>
+                  <dt>原価</dt><dd>${formatYen(sd[1])}</dd>
                   <dt>在庫</dt><dd>${Math.floor(sd[2]).toLocaleString()}台</dd>
                 </dl>
                 <div class="pc-quick-actions">
@@ -4665,7 +5089,7 @@
             <strong>${COMPANY_NAMES[targetId]}</strong>
           </div>
           <div class="hint-box ${canAfford ? "warn" : "danger"} num">
-            買収額: <strong>${formatManYen(price)}</strong> ${formatManYenSub(price)}<br>
+            買収額: <strong>${formatManYen(price)}</strong><br>
             現在の運営金: ${formatManYen(curCash)}<br>
             買収後の残高: <strong>${formatManYen(afterCash)}</strong>
             ${canAfford ? "" : `<br><strong>※ ${TEXTS.noMoney}</strong>`}
@@ -4777,8 +5201,8 @@
 
             preview.className = "hint-box num" + ((!canAfford || occupied) ? " danger" : (rate.isDangerOrig || rate.profitPerUnit < 0 ? " warn" : ""));
             preview.innerHTML =
-              `開発費: <strong>${formatManYen(dc)}</strong> ${formatManYenSub(dc)}${canAfford ? "" : " <strong>[資金不足]</strong>"}<br>` +
-              `1台原価: <strong>${uc.toLocaleString()}円</strong> ／ 1台粗利: <strong>${rate.profitPerUnit >= 0 ? "+" : ""}${rate.profitPerUnit.toLocaleString()}円</strong><br>` +
+              `開発費: <strong>${formatManYen(dc)}</strong>${canAfford ? "" : " <strong>[資金不足]</strong>"}<br>` +
+              `1台原価: <strong>${formatYen(uc)}</strong> ／ 1台粗利: <strong>${formatYen(rate.profitPerUnit, { signed: true })}</strong><br>` +
               `1ヶ月予想販売率: <strong>在庫の約 ${rate.displayRate}%</strong>` +
               (rate.isDangerOrig ? " <br><strong>⚠ 原作モードでは定価が低すぎると在庫マイナス暴走します</strong>" : "") +
               (occupied ? `<br><strong>※ NO.${selectedSlot} は開発済みです（空き枠を選択してください）</strong>` : "");
@@ -4916,7 +5340,7 @@
                   <div class="pc-pick-card-info">
                     <span style="font-size:10px;color:#64748b;">NO.${u} ${engine.SD[u][3]}BIT</span>
                     <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(engine.PN[u])}</strong>
-                    <span class="num" style="font-size:11px;color:#475569;">現 ${Math.round(engine.SD[u][0]).toLocaleString()}円</span>
+                    <span class="num" style="font-size:11px;color:#475569;">現 ${formatYen(engine.SD[u][0])}</span>
                   </div>
                 </div>
               </button>
@@ -4965,7 +5389,7 @@
             const rate = calcExpectedSellRate(uc, p);
             prev.className = "hint-box num" + (rate.isDangerOrig || rate.profitPerUnit < 0 ? " warn" : "");
             prev.innerHTML =
-              `1台原価: <strong>${uc.toLocaleString()}円</strong> ／ 1台粗利: <strong>${rate.profitPerUnit >= 0 ? "+" : ""}${rate.profitPerUnit.toLocaleString()}円</strong><br>` +
+              `1台原価: <strong>${formatYen(uc)}</strong> ／ 1台粗利: <strong>${formatYen(rate.profitPerUnit, { signed: true })}</strong><br>` +
               `1ヶ月予想販売率: <strong>在庫の約 ${rate.displayRate}%</strong>` +
               (rate.isDangerOrig ? "<br><strong>⚠ 原作モードでは定価が低すぎると在庫マイナス暴走します</strong>" : "");
           };
@@ -5036,7 +5460,7 @@
                   <div class="pc-pick-card-info">
                     <span style="font-size:10px;color:#64748b;">NO.${u} ${engine.SD[u][3]}BIT / 在庫${Math.floor(engine.SD[u][2]).toLocaleString()}</span>
                     <strong style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(engine.PN[u])}</strong>
-                    <span class="num" style="font-size:11px;color:#475569;">原価 ${Math.round(engine.SD[u][1]).toLocaleString()}円</span>
+                    <span class="num" style="font-size:11px;color:#475569;">原価 ${formatYen(engine.SD[u][1])}</span>
                   </div>
                 </div>
               </button>
@@ -5085,8 +5509,8 @@
 
             hint.className = "hint-box num" + (overBudget ? " danger" : (afterCash < 0 ? " warn" : ""));
             hint.innerHTML =
-              `必要費用: <strong>${formatManYen(cost)}</strong> ${formatManYenSub(cost)}<br>` +
-              `生産後の予想運営金残高: <strong>${formatManYen(afterCash)}</strong> ${formatManYenSub(afterCash)}` +
+              `必要費用: <strong>${formatManYen(cost)}</strong><br>` +
+              `生産後の予想運営金残高: <strong>${formatManYen(afterCash)}</strong>` +
               (overBudget ? `<br><strong>※ ${TEXTS.noMoney}（資金MAX以内にしてください）</strong>` : "");
           };
 
@@ -5244,8 +5668,8 @@
             const afterPayroll = curStaff * applied;
             const diff = afterPayroll - curPayroll;
             hint.innerHTML =
-              `現在の月給: ${curSal.toLocaleString()}万円 → 変更後: <strong>${applied.toLocaleString()}万円</strong><br>` +
-              `毎月の人件費目安: <strong>${formatManYen(afterPayroll)}</strong>（${diff >= 0 ? "+" : ""}${formatManYen(diff)}）`;
+              `現在の月給: ${formatManYen(curSal)} → 変更後: <strong>${formatManYen(applied)}</strong><br>` +
+              `毎月の人件費目安: <strong>${formatManYen(afterPayroll)}</strong>（${formatManYen(diff, { signed: true })}）`;
           };
 
           rng.addEventListener("input", () => { inp.value = rng.value; upd(); });
@@ -5401,16 +5825,16 @@
     $("settlementContent").innerHTML = `
       <table class="info-table">
         <tbody>
-          <tr><th>売上（ｳﾘｱｹﾞ）</th><td class="num val-pos">${formatManYen(r.sales)}<span class="sub">${formatManYenSub(r.sales)}</span></td></tr>
-          <tr><th>支出（ｼｼｭﾂ）</th><td class="num">${formatManYen(r.expense)}<span class="sub">${formatManYenSub(r.expense)}</span></td></tr>
-          <tr><th>利益（ﾘｴｷ）</th><td class="num ${r.profit < 0 ? "val-neg" : "val-pos"}">${formatManYen(r.profit)}<span class="sub">${formatManYenSub(r.profit)}</span></td></tr>
+          <tr><th>売上（ｳﾘｱｹﾞ）</th><td class="num val-pos">${formatManYen(r.sales)}</td></tr>
+          <tr><th>支出（ｼｼｭﾂ）</th><td class="num">${formatManYen(r.expense)}</td></tr>
+          <tr><th>利益（ﾘｴｷ）</th><td class="num ${r.profit < 0 ? "val-neg" : "val-pos"}">${formatManYen(r.profit)}</td></tr>
         </tbody>
       </table>
       <div class="tax-banner">ｾﾞｲｷﾝｦ ｳﾘｱｹﾞﾉ 3%ｵｻﾒﾏｽ（税引後売上金: ${formatManYen(Math.floor(r.afterTaxSales))}）</div>
       <table class="info-table">
         <tbody>
           <tr><th>${r.fiscalYear}年度 繰越運営金</th><td class="num ${r.prevCash < 0 ? "val-neg" : "val-pos"}">${formatManYen(Math.floor(r.prevCash))}</td></tr>
-          <tr><th>${r.nextYear}年度 運営金</th><td class="num ${r.newCash < 0 ? "val-neg" : "val-pos"}">${formatManYen(Math.floor(r.newCash))}<span class="sub">${formatManYenSub(r.newCash)}</span></td></tr>
+          <tr><th>${r.nextYear}年度 運営金</th><td class="num ${r.newCash < 0 ? "val-neg" : "val-pos"}">${formatManYen(Math.floor(r.newCash))}</td></tr>
         </tbody>
       </table>
       <button id="btnConfirmSettlement" class="ui-btn primary" type="button">次年度（${r.nextYear}年4月）へ進む (SPACE)</button>
@@ -5537,6 +5961,7 @@
     const inMain = engine.phase === "player_turn";
     const showChar = (engine.phase === "player_turn" || engine.phase === "settlement" || engine.phase === "ending" || engine.phase === "game_over");
     $("leftCmdRail").classList.toggle("hidden", !inMain);
+    $("selfStatusPanel").classList.toggle("hidden", !inMain);
     $("charStageLayer").classList.toggle("hidden", !showChar);
 
     syncModeUI();
@@ -5730,8 +6155,9 @@
     engine, audio, saveManager, HardMakerEngine, SAVE_STORAGE_KEY,
     FM7Audio, JupiterArrangeAudio, RemakeAudio, SEASON_STYLE_DEFAULTS,
     ASSET_MANIFEST, CHARACTER_META, CMD_ROLE_MAP,
+    formatManYen, formatManYenShort, formatYen,
     determineCharacterMood, renderCharacter, renderPcIcon, buildCharacterSvg, buildPcIconSvg, applyManifestBackground,
-    CATEGORIES, openCategoryMenu, openCommandForm, closeModal, renderAll
+    CATEGORIES, openCategoryMenu, openCommandForm, openPcQuickActionModal, renderPcDock, closeModal, renderAll
   };
 
   applyManifestBackground();

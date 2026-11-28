@@ -460,6 +460,116 @@
   .cat-btn[data-cat="hr"] .cat-ico    { background: rgba(52, 211, 153, 0.28); }
   .cat-btn[data-cat="info"] .cat-ico  { background: rgba(192, 132, 252, 0.28); }
 
+  /* カイロソフト風 隣接サブメニュー・ポップオーバー（背景ぼかしなし・キャラ非干渉） */
+  .cat-submenu-popover {
+    position: absolute;
+    left: 134px;
+    top: 72px;
+    width: 226px;
+    z-index: 12;
+    background: rgba(15, 23, 42, 0.94);
+    border: 2px solid #60a5fa;
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    text-shadow: var(--text-shadow-dark);
+  }
+  .cat-submenu-popover.open {
+    display: flex;
+    animation: popoverPopIn 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes popoverPopIn {
+    0%   { opacity: 0; transform: translateX(-8px) scale(0.97); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  .cat-sub-head {
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(90deg, #1d4ed8, #0284c7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .cat-submenu-popover[data-cat="sales"] .cat-sub-head { background: linear-gradient(90deg, #b45309, #d97706); }
+  .cat-submenu-popover[data-cat="hr"]    .cat-sub-head { background: linear-gradient(90deg, #047857, #059669); }
+  .cat-submenu-popover[data-cat="info"]  .cat-sub-head { background: linear-gradient(90deg, #6d28d9, #7c3aed); }
+  .cat-sub-close {
+    appearance: none;
+    border: none;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cat-sub-close:hover { background: rgba(255, 255, 255, 0.32); }
+  .cat-sub-list {
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .cat-sub-item {
+    appearance: none;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font-ui);
+    padding: 8px 10px;
+    border-radius: 9px;
+    border: 1.5px solid rgba(148, 197, 255, 0.28);
+    background: rgba(30, 41, 59, 0.90);
+    color: #f8fafc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    transition: background 0.12s, border-color 0.12s, transform 0.08s;
+  }
+  .cat-sub-item:hover {
+    background: rgba(37, 99, 235, 0.82);
+    border-color: #fde047;
+    transform: translateX(2px);
+  }
+  .cat-sub-item:active { transform: translateX(0) scale(0.98); }
+  .cat-sub-label {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #f8fafc;
+    line-height: 1.25;
+  }
+  .cat-sub-meta {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #cbd5e1;
+    line-height: 1.2;
+    margin-top: 1px;
+  }
+  .cat-sub-badge {
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.25);
+    border: 1px solid rgba(52, 211, 153, 0.6);
+    color: #a7f3d0;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
   /* 中幅PC（ノートPC・狭めウィンドウ）でも重なり・桁崩れを防ぐ中間調整 */
   @media (max-width: 960px) and (min-width: 681px) {
     .right-status-panel { width: 318px; }
@@ -468,6 +578,8 @@
     .rsp-val-cash, .rsp-val-share { font-size: 16.5px !important; }
     .char-stage-layer { right: 334px; width: clamp(170px, 23%, 235px); }
     .cat-btn { width: 100px; padding: 10px 10px; font-size: 14px; }
+    .cat-submenu-popover { left: 120px; width: 204px; }
+    .cat-sub-label { font-size: 12.5px; }
   }
 
   @media (max-width: 680px) {
@@ -554,6 +666,25 @@
       flex: 0 0 20px;
       font-size: 12px;
     }
+
+    /* スマホ縦画面：横4カテゴリボタンのすぐ上（左〜中央寄り）に展開し右側キャラを隠さない */
+    .cat-submenu-popover {
+      left: 6px;
+      top: auto;
+      bottom: 208px;
+      width: min(216px, 58vw);
+      max-width: 224px;
+      border-radius: 11px;
+    }
+    @keyframes popoverPopIn {
+      0%   { opacity: 0; transform: translateY(8px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .cat-sub-head { padding: 5px 9px; font-size: 11px; }
+    .cat-sub-list { padding: 5px; gap: 4px; }
+    .cat-sub-item { padding: 7px 8px; }
+    .cat-sub-label { font-size: 12.5px; }
+    .cat-sub-meta { font-size: 9.5px; }
   }
 
   /* =========================================================================
@@ -1507,6 +1638,11 @@
     border-color: rgba(56, 189, 248, 0.55);
     background: rgba(15, 36, 66, 0.82);
   }
+  .slot-card.autosave-prev {
+    border-color: rgba(251, 191, 36, 0.55);
+    background: rgba(52, 36, 16, 0.72);
+  }
+  .slot-card.autosave-prev .slot-head { color: #fde68a; }
   .slot-head { font-size: 12px; font-weight: 800; color: #7dd3fc; }
   .slot-meta { font-size: 11px; color: #94a3b8; min-height: 30px; }
   .slot-meta strong { color: #fde047; }
@@ -1679,6 +1815,12 @@
     </button>
   </nav>
 
+  <!-- 2.5 カイロソフト風 隣接サブメニュー・ポップオーバー（背景ぼかしなし・キャラ非干渉） -->
+  <div id="catSubmenuPopover" class="cat-submenu-popover" role="menu" aria-hidden="true">
+    <div id="catSubmenuHead" class="cat-sub-head"></div>
+    <div id="catSubmenuList" class="cat-sub-list"></div>
+  </div>
+
   <!-- 3. 画面中央寄り：キャラクター立ち絵レイヤー（右側ステータスのすぐ左に寄り添うADV構図） -->
   <div id="charStageLayer" class="char-stage-layer hidden" aria-hidden="true">
     <div id="charVisualFrame" class="char-visual-frame">
@@ -1803,6 +1945,7 @@
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
           <button id="btnGameOverReset" class="ui-btn primary" type="button">最初からやり直す</button>
           <button id="btnGameOverLoadAuto" class="ui-btn success" type="button">AUTOSAVEから再開</button>
+          <button id="btnGameOverLoadPrev" class="ui-btn warn" type="button" style="display:none;">前月からやり直す</button>
         </div>
       </div>
     </div>
@@ -1849,7 +1992,7 @@
 
     <div style="border-top:1px solid rgba(255,255,255,0.14);padding-top:10px;">
       <div class="toolbar-row" style="margin-bottom:8px;">
-        <strong style="font-size:12px;color:#7dd3fc;">セーブ / ロード（自動保存 ＋ 手動3スロット ＋ JSON入出力）</strong>
+        <strong style="font-size:12px;color:#7dd3fc;">セーブ / ロード（2世代自動保存 ＋ 手動3スロット ＋ JSON入出力）</strong>
         <div class="toolbar-group">
           <button id="btnExportSave" class="ui-btn sm" type="button">JSON保存</button>
           <button id="btnImportSave" class="ui-btn sm" type="button">JSON読込</button>
@@ -3182,7 +3325,7 @@
 
   class SaveManager {
     constructor() {
-      this.slots = { auto: null, slot1: null, slot2: null, slot3: null };
+      this.slots = { auto: null, autoPrev: null, slot1: null, slot2: null, slot3: null };
       this.loadAllFromStorage();
     }
 
@@ -3193,7 +3336,7 @@
         if (!raw) return;
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === "object") {
-          for (const k of ["auto", "slot1", "slot2", "slot3"]) {
+          for (const k of ["auto", "autoPrev", "slot1", "slot2", "slot3"]) {
             if (this.validateSave(parsed[k])) this.slots[k] = parsed[k];
           }
         }
@@ -3220,6 +3363,25 @@
     saveToSlot(slotKey, snapshot) {
       if (!this.validateSave(snapshot)) return false;
       this.slots[slotKey] = JSON.parse(JSON.stringify(snapshot));
+      this.persist();
+      return true;
+    }
+
+    // 2世代オートセーブ（auto: 最新 / autoPrev: 前月）ローテーション保存
+    saveAutosaveRotated(snapshot, { resetPrev = false } = {}) {
+      if (!this.validateSave(snapshot)) return false;
+      const next = JSON.parse(JSON.stringify(snapshot));
+      if (resetPrev) {
+        // 新規プレイ開始時は別プレイの前月履歴が残らないようクリア
+        this.slots.autoPrev = null;
+      } else {
+        const cur = this.slots.auto;
+        // 既存autoと年月(BC/BE)または会社(PM)が異なる場合のみautoPrevへ退避
+        if (cur && (cur.BC !== next.BC || cur.BE !== next.BE || cur.PM !== next.PM)) {
+          this.slots.autoPrev = JSON.parse(JSON.stringify(cur));
+        }
+      }
+      this.slots.auto = next;
       this.persist();
       return true;
     }
@@ -4827,9 +4989,20 @@
   }
 
   // =========================================================================
-  // 7. 4カテゴリ サブメニュー & コマンド入力モーダル（Phase 2 操作系統）
+  // 7. 4カテゴリ 隣接ポップオーバー & コマンド入力モーダル
   // =========================================================================
+  function closeCategoryMenu() {
+    const pop = $("catSubmenuPopover");
+    if (pop) {
+      pop.classList.remove("open");
+      if (pop.setAttribute) pop.setAttribute("aria-hidden", "true");
+    }
+    stateUI.activeCategory = null;
+    document.querySelectorAll(".cat-btn").forEach((b) => b.classList.remove("active"));
+  }
+
   function openModal(title, html, { wide = false, onReady = null } = {}) {
+    closeCategoryMenu();
     $("modalTitle").textContent = title;
     $("modalCard").classList.toggle("wide", wide);
     const body = $("modalBody");
@@ -4840,8 +5013,7 @@
 
   function closeModal() {
     $("ovModal").classList.remove("active");
-    stateUI.activeCategory = null;
-    document.querySelectorAll(".cat-btn").forEach((b) => b.classList.remove("active"));
+    closeCategoryMenu();
   }
 
   // 4大カテゴリ定義（全12コマンド＋自社詳細を網羅）
@@ -4885,38 +5057,72 @@
     }
   };
 
-  function openCategoryMenu(catKey) {
+  function openCategoryMenu(catKey, { fromButton = false } = {}) {
     if (engine.phase !== "player_turn") return;
     const cat = CATEGORIES[catKey];
     if (!cat) return;
+
+    const pop = $("catSubmenuPopover");
+    // 同じカテゴリボタンを再タップした場合はトグルで閉じる（ターン消費なし）
+    if (fromButton && stateUI.activeCategory === catKey && pop && pop.classList.contains("open")) {
+      audio.playSE("cancel");
+      closeCategoryMenu();
+      return;
+    }
+
+    // 入力モーダルが開いていた場合は閉じてポップオーバーを表示
+    $("ovModal").classList.remove("active");
+
     stateUI.activeCategory = catKey;
     document.querySelectorAll(".cat-btn").forEach((b) => {
       b.classList.toggle("active", b.getAttribute("data-cat") === catKey);
     });
+    // ボタンを押した瞬間に担当キャラクターへ切替（背景ぼかしなしで顔が見える）
     renderCharacter(cat.role, determineCharacterMood({ phase: engine.phase }));
+    if (fromButton) audio.playSE("confirm");
 
-    openModal(cat.title, `
-      <div class="submenu-list">
-        ${cat.items.map((it, idx) => `
-          <button type="button" class="ui-btn submenu-item" data-idx="${idx}">
-            <span>
-              <strong>${it.label}</strong><br>
-              <span class="submenu-meta">${it.meta}</span>
-            </span>
-            ${it.nonTurn ? '<span class="tag-noturn">ターン消費なし</span>' : '<span style="color:#64748b;">▶</span>'}
-          </button>
-        `).join("")}
-      </div>
-    `, {
-      onReady: (body) => {
-        body.querySelectorAll(".submenu-item").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            audio.beepClick();
-            const item = cat.items[Number(btn.getAttribute("data-idx"))];
-            if (item) item.action();
-          });
-        });
-      }
+    if (!pop) return;
+    if (pop.setAttribute) {
+      pop.setAttribute("data-cat", catKey);
+      pop.setAttribute("aria-hidden", "false");
+    }
+    const shortTitles = { mfg: "⚙ 製造コマンド", sales: "💼 営業コマンド", hr: "👥 社内コマンド", info: "📊 情報（消費なし）" };
+    $("catSubmenuHead").innerHTML = `
+      <span>${shortTitles[catKey] || cat.title}</span>
+      <button type="button" id="btnCatSubClose" class="cat-sub-close" aria-label="閉じる">×</button>
+    `;
+    const listEl = $("catSubmenuList");
+    listEl.innerHTML = cat.items.map((it, idx) => `
+      <button type="button" class="cat-sub-item" data-idx="${idx}">
+        <span style="min-width:0;flex:1;">
+          <div class="cat-sub-label">${it.label}</div>
+          <div class="cat-sub-meta">${it.meta}</div>
+        </span>
+        ${it.nonTurn ? '<span class="cat-sub-badge">消費なし</span>' : '<span style="color:#93c5fd;font-size:12px;">▶</span>'}
+      </button>
+    `).join("");
+
+    // 再アニメーション発火しつつ展開
+    pop.classList.remove("open");
+    void pop.offsetWidth;
+    pop.classList.add("open");
+
+    const closeBtn = $("btnCatSubClose");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", (e) => {
+        if (e && e.stopPropagation) e.stopPropagation();
+        audio.playSE("cancel");
+        closeCategoryMenu();
+      });
+    }
+    listEl.querySelectorAll(".cat-sub-item").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        if (e && e.stopPropagation) e.stopPropagation();
+        audio.playSE("confirm");
+        const item = cat.items[Number(btn.getAttribute("data-idx"))];
+        closeCategoryMenu();
+        if (item) item.action();
+      });
     });
   }
 
@@ -5847,7 +6053,7 @@
         audio.playSE("confirm");
         const res = engine.selectCompany(i);
         if (res.ok) {
-          saveAutosave();
+          saveAutosave({ isNewGame: true });
           renderAll();
           setDialogue("秘書", `${COMPANY_NAMES[engine.PM]} 社長、ｱﾅﾀﾉ ﾊﾞﾝﾃﾞｽ。左のメニューからご指示ください。`, "秘書");
         }
@@ -5897,12 +6103,13 @@
       `ｱﾅﾀﾉﾌﾟﾚｲｼﾃｲﾙｶｲｼｬﾊ <strong>${COMPANY_NAMES[buyer]}</strong> ﾆ ﾖｯﾃ ｶｲﾄﾗﾚﾃｼﾏｲﾏｼﾀ<br>` +
       `ﾂﾏﾘ ﾄｰｻﾝ‥ GAME OVER････････ﾏﾀ ﾌﾟﾚｲｼﾃﾈ!`;
     $("btnGameOverLoadAuto").style.display = saveManager.getSlot("auto") ? "inline-flex" : "none";
+    $("btnGameOverLoadPrev").style.display = saveManager.getSlot("autoPrev") ? "inline-flex" : "none";
   }
 
-  function saveAutosave() {
+  function saveAutosave({ isNewGame = false } = {}) {
     const snap = engine.exportSnapshot();
     if (snap) {
-      saveManager.saveToSlot("auto", snap);
+      saveManager.saveAutosaveRotated(snap, { resetPrev: isNewGame });
       renderSaveSlots();
     }
   }
@@ -5910,10 +6117,11 @@
   function renderSaveSlots() {
     const grid = $("slotGrid");
     const defs = [
-      { key: "auto",  label: "AUTOSAVE (自動)", isAuto: true },
-      { key: "slot1", label: "スロット 1", isAuto: false },
-      { key: "slot2", label: "スロット 2", isAuto: false },
-      { key: "slot3", label: "スロット 3", isAuto: false }
+      { key: "auto",     label: "AUTOSAVE (自動)",           isAuto: true,  isPrev: false, loadLabel: "ロード" },
+      { key: "autoPrev", label: "AUTOSAVE (前月 / 1手戻る)", isAuto: true,  isPrev: true,  loadLabel: "1手戻る" },
+      { key: "slot1",    label: "スロット 1",                 isAuto: false, isPrev: false, loadLabel: "ロード" },
+      { key: "slot2",    label: "スロット 2",                 isAuto: false, isPrev: false, loadLabel: "ロード" },
+      { key: "slot3",    label: "スロット 3",                 isAuto: false, isPrev: false, loadLabel: "ロード" }
     ];
     const canSave = !!engine.exportSnapshot();
     grid.innerHTML = "";
@@ -5922,7 +6130,7 @@
     for (const def of defs) {
       const data = saveManager.getSlot(def.key);
       const card = document.createElement("div");
-      card.className = "slot-card" + (def.isAuto ? " autosave" : "");
+      card.className = "slot-card" + (def.isPrev ? " autosave-prev" : (def.isAuto ? " autosave" : ""));
 
       let metaHtml = "データなし";
       if (data) {
@@ -5938,7 +6146,7 @@
         <div class="slot-meta">${metaHtml}</div>
         <div class="slot-actions">
           ${def.isAuto ? "" : `<button type="button" class="ui-btn sm primary save-btn" ${canSave ? "" : "disabled"}>セーブ</button>`}
-          <button type="button" class="ui-btn sm success load-btn" ${data ? "" : "disabled"}>ロード</button>
+          <button type="button" class="ui-btn sm ${def.isPrev ? "warn" : "success"} load-btn" ${data ? "" : "disabled"}>${def.loadLabel}</button>
           <button type="button" class="ui-btn sm danger del del-btn" ${data ? "" : "disabled"} title="削除">×</button>
         </div>
       `;
@@ -6001,6 +6209,7 @@
     $("leftCmdRail").classList.toggle("hidden", !inMain);
     $("selfStatusPanel").classList.toggle("hidden", !inMain);
     $("charStageLayer").classList.toggle("hidden", !showChar);
+    if (!inMain) closeCategoryMenu();
 
     syncModeUI();
     renderStatusDock();
@@ -6028,12 +6237,33 @@
   // 9. イベント配線
   // =========================================================================
   document.querySelectorAll(".cat-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
+      if (e && e.stopPropagation) e.stopPropagation();
       audio.unlock();
-      audio.playSE("confirm");
-      openCategoryMenu(btn.getAttribute("data-cat"));
+      openCategoryMenu(btn.getAttribute("data-cat"), { fromButton: true });
     });
   });
+
+  // ポップオーバー内クリックは外クリック扱いしない
+  const catPopEl = $("catSubmenuPopover");
+  if (catPopEl) {
+    catPopEl.addEventListener("click", (e) => {
+      if (e && e.stopPropagation) e.stopPropagation();
+    });
+  }
+
+  // メニュー外の背景タップでサブメニュー・ポップオーバーを閉じる（ターン消費なし）
+  if (document.addEventListener) {
+    document.addEventListener("click", (e) => {
+      const pop = $("catSubmenuPopover");
+      if (!pop || !pop.classList.contains("open")) return;
+      const rail = $("leftCmdRail");
+      const tgt = e && e.target;
+      if (tgt && pop.contains && pop.contains(tgt)) return;
+      if (tgt && rail && rail.contains && rail.contains(tgt)) return;
+      closeCategoryMenu();
+    });
+  }
 
   $("btnModalClose").addEventListener("click", () => {
     audio.playSE("cancel");
@@ -6088,6 +6318,10 @@
   $("btnGameOverLoadAuto").addEventListener("click", () => {
     const d = saveManager.getSlot("auto");
     if (d) loadGameFromData(d, "AUTOSAVEからやり直しました");
+  });
+  $("btnGameOverLoadPrev").addEventListener("click", () => {
+    const d = saveManager.getSlot("autoPrev");
+    if (d) loadGameFromData(d, "前月（AUTOSAVE）からやり直しました");
   });
 
   // システム設定＆サウンド
@@ -6171,9 +6405,17 @@
   });
 
   window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && $("ovModal").classList.contains("active")) {
-      closeModal();
-      return;
+    if (e.key === "Escape") {
+      if ($("ovModal").classList.contains("active")) {
+        audio.playSE("cancel");
+        closeModal();
+        return;
+      }
+      if ($("catSubmenuPopover") && $("catSubmenuPopover").classList.contains("open")) {
+        audio.playSE("cancel");
+        closeCategoryMenu();
+        return;
+      }
     }
     if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA")) return;
     if (e.key === " ") {
@@ -6195,7 +6437,7 @@
     ASSET_MANIFEST, CHARACTER_META, CMD_ROLE_MAP,
     formatManYen, formatManYenShort, formatYen,
     determineCharacterMood, renderCharacter, renderPcIcon, buildCharacterSvg, buildPcIconSvg, applyManifestBackground,
-    CATEGORIES, openCategoryMenu, openCommandForm, openPcQuickActionModal, renderPcDock, closeModal, renderAll
+    CATEGORIES, openCategoryMenu, closeCategoryMenu, openCommandForm, openPcQuickActionModal, renderPcDock, saveAutosave, loadGameFromData, closeModal, renderAll
   };
 
   applyManifestBackground();

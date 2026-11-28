@@ -241,15 +241,15 @@
 
   /* =========================================================================
      3. 画面中央寄り：キャラクター立ち絵レイヤー（右側ステータス左横に寄り添うADV構図）
-        ※Phase 3: 4キャラ×3表情の内蔵SVG立ち絵 ＋ ASSET_MANIFEST外部PNG差し替え対応
+        ※Phase 3: 3キャラ×3表情の内蔵SVG立ち絵 ＋ ASSET_MANIFEST外部PNG差し替え対応
      ========================================================================= */
   .char-stage-layer {
     position: absolute;
     right: 378px;
-    bottom: 196px;
+    bottom: 192px;
     z-index: 3;
-    width: clamp(200px, 24%, 285px);
-    height: clamp(240px, 48%, 365px);
+    width: clamp(210px, 28%, 325px);
+    height: clamp(260px, 55%, 420px);
     pointer-events: none;
     display: flex;
     flex-direction: column;
@@ -279,9 +279,14 @@
   /* 外部立ち絵画像差し替え用（ASSET_MANIFEST設定時に自動表示） */
   #charStandingImg {
     display: none;
+    width: auto;
+    height: auto;
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+    object-position: bottom center;
+    user-select: none;
+    -webkit-user-drag: none;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45));
   }
   /* 内蔵透過バストアップSVGホスト */
@@ -295,15 +300,15 @@
   .char-svg-host svg {
     width: 100%;
     height: 100%;
-    max-width: 245px;
-    max-height: 315px;
+    max-width: 265px;
+    max-height: 345px;
     filter: drop-shadow(0 10px 20px rgba(15, 23, 42, 0.48));
   }
-  /* 話者バッジのキャラ別カラー */
-  .speaker-badge.role-secretary { background: linear-gradient(135deg, #2563eb, #0284c7); }
-  .speaker-badge.role-engineer  { background: linear-gradient(135deg, #0f766e, #0891b2); }
-  .speaker-badge.role-factory   { background: linear-gradient(135deg, #c2410c, #ea580c); }
-  .speaker-badge.role-sales     { background: linear-gradient(135deg, #047857, #059669); }
+  /* 話者バッジのキャラ別カラー（4キャラ体制） */
+  .speaker-badge.role-secretary       { background: linear-gradient(135deg, #2563eb, #0284c7); }
+  .speaker-badge.role-engineer        { background: linear-gradient(135deg, #0f766e, #0891b2); }
+  .speaker-badge.role-sales           { background: linear-gradient(135deg, #047857, #059669); }
+  .speaker-badge.role-general-affairs { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
 
   /* =========================================================================
      3.5 画面右側：自社ステータス常時表示ウィンドウ（原作準拠8項目・縦拡張＆見やすい太字）
@@ -576,7 +581,7 @@
     .rsp-list dt { font-size: 13px; }
     .rsp-list dd { font-size: 15.5px; }
     .rsp-val-cash, .rsp-val-share { font-size: 16.5px !important; }
-    .char-stage-layer { right: 334px; width: clamp(170px, 23%, 235px); }
+    .char-stage-layer { right: 334px; bottom: 192px; width: clamp(185px, 26%, 260px); height: clamp(250px, 50%, 375px); }
     .cat-btn { width: 100px; padding: 10px 10px; font-size: 14px; }
     .cat-submenu-popover { left: 120px; width: 204px; }
     .cat-sub-label { font-size: 12.5px; }
@@ -633,10 +638,10 @@
     .char-stage-layer {
       left: auto;
       right: 8px;
-      bottom: 196px;
-      width: 58%;
-      max-width: 230px;
-      height: min(37dvh, 275px);
+      bottom: 194px;
+      width: 60%;
+      max-width: 245px;
+      height: min(39dvh, 295px);
     }
 
     /* 4大カテゴリボタン：セリフ枠の直上に横1列（均等4分割）で親指操作しやすく */
@@ -1035,6 +1040,180 @@
     background: rgba(15, 23, 42, 0.92);
     color: #f8fafc;
     border-color: rgba(148, 197, 255, 0.4);
+  }
+
+  /* =========================================================================
+     6.5 全オーバーレイ共通 一体型ユニット（左SDキャラ＋右ウィンドウ＋下段メッセージボード）
+     ========================================================================= */
+  .modal-unit {
+    width: 100%;
+    max-width: 720px;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .modal-unit.wide {
+    max-width: 860px;
+  }
+  .modal-unit-top {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    min-height: 0;
+    max-height: calc(100% - 86px);
+    flex: 0 1 auto;
+    pointer-events: none;
+  }
+  .modal-sd-stage {
+    flex: 0 0 152px;
+    width: 152px;
+    height: 224px;
+    max-height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+    pointer-events: none;
+    margin-bottom: -6px;
+    z-index: 2;
+  }
+  .modal-sd-img,
+  #modalSdImg {
+    display: none;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    user-select: none;
+    -webkit-user-drag: none;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.52));
+  }
+  .modal-sd-svg-host {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-sd-svg-host svg {
+    width: 100%;
+    height: 100%;
+    max-width: 148px;
+    max-height: 205px;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.52));
+  }
+  .modal-unit .glass-card {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    max-width: none;
+    max-height: 100%;
+    pointer-events: auto;
+  }
+  .modal-unit .card-head {
+    flex: 0 0 auto;
+  }
+  .modal-unit .card-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .modal-dialogue-box {
+    position: relative;
+    flex: 0 0 auto;
+    pointer-events: auto;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.93) 0%, rgba(10, 16, 30, 0.97) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(251, 146, 60, 0.72);
+    border-radius: 12px;
+    padding: 14px 16px 10px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    min-height: 66px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 3;
+  }
+  .modal-dialogue-box .speaker-badge {
+    top: -14px;
+    left: 16px;
+  }
+  .modal-dialogue-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f8fafc;
+    text-shadow: var(--text-shadow-dark);
+    line-height: 1.44;
+    min-height: 42px;
+    max-height: 50px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+
+  /* 中幅PC（681〜960px）：SDキャラ幅をややコンパクトに */
+  @media (max-width: 960px) and (min-width: 681px) {
+    .modal-unit { max-width: 96%; }
+    .modal-unit.wide { max-width: 98%; }
+    .modal-sd-stage { flex: 0 0 132px; width: 132px; height: 196px; }
+  }
+
+  /* スマホ縦画面（680px以下）：設定画面を全幅確保し、縮小SDキャラをメッセージ枠の左上へ寄せる */
+  @media (max-width: 680px) {
+    .center-overlay { padding: 8px; }
+    .modal-unit, .modal-unit.wide {
+      max-width: 100%;
+      height: 100%;
+      max-height: 100%;
+      gap: 4px;
+    }
+    .modal-unit-top {
+      flex-direction: column-reverse;
+      align-items: stretch;
+      gap: 4px;
+      max-height: calc(100% - 70px);
+    }
+    .modal-unit .glass-card {
+      flex: 0 1 auto;
+      max-height: calc(100% - 92px);
+    }
+    .modal-sd-stage {
+      flex: 0 0 auto;
+      width: 74px;
+      height: 96px;
+      align-self: flex-start;
+      margin-left: 8px;
+      margin-bottom: -10px;
+    }
+    .modal-sd-svg-host svg {
+      max-width: 72px;
+      max-height: 94px;
+    }
+    .modal-dialogue-box {
+      padding: 12px 11px 8px;
+      min-height: 54px;
+      border-radius: 10px;
+    }
+    .modal-dialogue-box .speaker-badge {
+      left: 86px;
+      top: -12px;
+      font-size: 11px;
+      padding: 2px 11px;
+    }
+    .modal-dialogue-text {
+      font-size: 13px;
+      min-height: 36px;
+      max-height: 42px;
+    }
   }
 
   .card-head {
@@ -1866,99 +2045,171 @@
 
   <!-- 5. 中央オーバーレイ群（タイトル / 会社選択 / 決算 / エンディング / GAME OVER / サブメニュー＆入力モーダル） -->
 
-  <!-- 5-A. タイトル画面 -->
+  <!-- 5-A. タイトル画面（一体型ユニット：左秘書SD＋右タイトル＋下段メッセージボード） -->
   <div id="ovTitle" class="center-overlay active">
-    <div class="glass-card dark">
-      <div class="card-body title-hero">
-        <div style="background:#fff;border-radius:8px;padding:6px 14px;display:inline-flex;flex-direction:column;align-items:center;gap:2px;">
-          <canvas id="titleLogoCanvas" width="210" height="12"></canvas>
-          <span style="font-size:10px;font-weight:800;color:#475569;letter-spacing:0.16em;">PRESENTS</span>
+    <div class="modal-unit">
+      <div class="modal-unit-top">
+        <div class="modal-sd-stage sync-sd-stage" data-fixed-role="secretary" aria-hidden="true">
+          <img class="modal-sd-img" alt="秘書SD立ち絵">
+          <div class="modal-sd-svg-host"></div>
         </div>
-        <div class="title-main-text">HARD MAKER</div>
-        <div class="title-sub-pill">&lt;&lt; ハード メーカー &gt;&gt;</div>
-        <div style="font-size:12.5px;color:#cbd5e1;max-width:400px;">
-          1989年、パソコン戦国時代。<br>
-          5社から1社の社長となり、他4社をすべて買収せよ！
+        <div class="glass-card dark">
+          <div class="card-body title-hero">
+            <div style="background:#fff;border-radius:8px;padding:6px 14px;display:inline-flex;flex-direction:column;align-items:center;gap:2px;">
+              <canvas id="titleLogoCanvas" width="210" height="12"></canvas>
+              <span style="font-size:10px;font-weight:800;color:#475569;letter-spacing:0.16em;">PRESENTS</span>
+            </div>
+            <div class="title-main-text">HARD MAKER</div>
+            <div class="title-sub-pill">&lt;&lt; ハード メーカー &gt;&gt;</div>
+            <div style="font-size:12.5px;color:#cbd5e1;max-width:400px;">
+              1989年、パソコン戦国時代。<br>
+              5社から1社の社長となり、他4社をすべて買収せよ！
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+              <button id="btnStartNew" class="ui-btn primary" type="button">ゲームスタート (SPACE)</button>
+              <button id="btnContinueAuto" class="ui-btn success" type="button" style="display:none;">AUTOSAVEから再開</button>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
-          <button id="btnStartNew" class="ui-btn primary" type="button">ゲームスタート (SPACE)</button>
-          <button id="btnContinueAuto" class="ui-btn success" type="button" style="display:none;">AUTOSAVEから再開</button>
-        </div>
+      </div>
+      <div class="modal-dialogue-box" aria-live="polite">
+        <div class="speaker-badge role-secretary sync-modal-msg-speaker" data-fixed-role="secretary">秘書</div>
+        <div class="modal-dialogue-text sync-modal-msg-main">HARD MAKER へようこそ！ゲームスタートを押してください。</div>
       </div>
     </div>
   </div>
 
-  <!-- 5-B. 会社選択画面 -->
+  <!-- 5-B. 会社選択画面（一体型ユニット：左秘書SD＋右会社選択＋下段メッセージボード） -->
   <div id="ovSelect" class="center-overlay">
-    <div class="glass-card wide">
-      <div class="card-head green">
-        <span>会社選択 — 社長となる会社を選択 (1〜5)</span>
-        <button id="btnBackTitle" class="ui-btn sm ghost" type="button">戻る</button>
+    <div class="modal-unit wide">
+      <div class="modal-unit-top">
+        <div class="modal-sd-stage sync-sd-stage" data-fixed-role="secretary" aria-hidden="true">
+          <img class="modal-sd-img" alt="秘書SD立ち絵">
+          <div class="modal-sd-svg-host"></div>
+        </div>
+        <div class="glass-card wide">
+          <div class="card-head green">
+            <span>会社選択 — 社長となる会社を選択</span>
+            <button id="btnBackTitle" class="ui-btn sm ghost" type="button">戻る</button>
+          </div>
+          <div class="card-body">
+            <div id="selectGrid" class="select-grid"></div>
+          </div>
+        </div>
       </div>
-      <div class="card-body">
-        <div id="selectGrid" class="select-grid"></div>
+      <div class="modal-dialogue-box" aria-live="polite">
+        <div class="speaker-badge role-secretary sync-modal-msg-speaker" data-fixed-role="secretary">秘書</div>
+        <div class="modal-dialogue-text sync-modal-msg-main">ｶｲｼｬｦ ｴﾗﾝﾃﾞｸﾀﾞｻｲ — 社長となる1社を選んでください。</div>
       </div>
     </div>
   </div>
 
-  <!-- 5-C. 年度決算報告画面 (4月) -->
+  <!-- 5-C. 年度決算報告画面 (4月・一体型ユニット：左秘書SD＋右決算報告＋下段メッセージボード) -->
   <div id="ovSettlement" class="center-overlay">
-    <div class="glass-card">
-      <div class="card-head gold">
-        <span id="settlementTitleBar">年度決算報告</span>
-        <span>4月決算</span>
+    <div class="modal-unit">
+      <div class="modal-unit-top">
+        <div class="modal-sd-stage sync-sd-stage" data-fixed-role="secretary" aria-hidden="true">
+          <img class="modal-sd-img" alt="秘書SD立ち絵">
+          <div class="modal-sd-svg-host"></div>
+        </div>
+        <div class="glass-card">
+          <div class="card-head gold">
+            <span id="settlementTitleBar">年度決算報告</span>
+            <span>4月決算</span>
+          </div>
+          <div id="settlementContent" class="card-body"></div>
+        </div>
       </div>
-      <div id="settlementContent" class="card-body"></div>
+      <div class="modal-dialogue-box" aria-live="polite">
+        <div class="speaker-badge role-secretary sync-modal-msg-speaker" data-fixed-role="secretary">秘書</div>
+        <div class="modal-dialogue-text sync-modal-msg-main"></div>
+      </div>
     </div>
   </div>
 
-  <!-- 5-D. エンディング画面 -->
+  <!-- 5-D. エンディング画面（一体型ユニット：左秘書SD＋右エンディング＋下段メッセージボード） -->
   <div id="ovEnding" class="center-overlay">
-    <div class="glass-card dark">
-      <div class="card-head gold">
-        <span>CONGRATULATIONS! — 全社買収達成</span>
-        <span>ENDING</span>
-      </div>
-      <div class="card-body" style="text-align:center;">
-        <div id="staffRollBox" style="display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700;color:#fef08a;padding:6px 0;"></div>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <button id="btnEndingContinue" class="ui-btn primary" type="button">原作通り経営を続ける</button>
-          <button id="btnEndingTitle" class="ui-btn" type="button">タイトルへ戻る</button>
+    <div class="modal-unit">
+      <div class="modal-unit-top">
+        <div class="modal-sd-stage sync-sd-stage" data-fixed-role="secretary" aria-hidden="true">
+          <img class="modal-sd-img" alt="秘書SD立ち絵">
+          <div class="modal-sd-svg-host"></div>
         </div>
+        <div class="glass-card dark">
+          <div class="card-head gold">
+            <span>CONGRATULATIONS! — 全社買収達成</span>
+            <span>ENDING</span>
+          </div>
+          <div class="card-body" style="text-align:center;">
+            <div id="staffRollBox" style="display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700;color:#fef08a;padding:6px 0;"></div>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+              <button id="btnEndingContinue" class="ui-btn primary" type="button">原作通り経営を続ける</button>
+              <button id="btnEndingTitle" class="ui-btn" type="button">タイトルへ戻る</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-dialogue-box" aria-live="polite">
+        <div class="speaker-badge role-secretary sync-modal-msg-speaker" data-fixed-role="secretary">秘書</div>
+        <div class="modal-dialogue-text sync-modal-msg-main"></div>
       </div>
     </div>
   </div>
 
-  <!-- 5-E. ゲームオーバー画面 -->
+  <!-- 5-E. ゲームオーバー画面（一体型ユニット：左秘書SD＋右ゲームオーバー＋下段メッセージボード） -->
   <div id="ovGameOver" class="center-overlay">
-    <div class="glass-card dark">
-      <div class="card-head red">
-        <span>GAME OVER — 買収により倒産</span>
-        <span>TOOSAN</span>
+    <div class="modal-unit">
+      <div class="modal-unit-top">
+        <div class="modal-sd-stage sync-sd-stage" data-fixed-role="secretary" aria-hidden="true">
+          <img class="modal-sd-img" alt="秘書SD立ち絵">
+          <div class="modal-sd-svg-host"></div>
+        </div>
+        <div class="glass-card dark">
+          <div class="card-head red">
+            <span>GAME OVER — 買収により倒産</span>
+            <span>TOOSAN</span>
+          </div>
+          <div class="card-body" style="text-align:center;align-items:center;">
+            <div style="font-size:24px;font-weight:900;color:#fca5a5;letter-spacing:0.14em;">GAME OVER</div>
+            <div style="background:#fff;border-radius:6px;padding:6px 14px;">
+              <canvas id="gameOverLogoCanvas" width="160" height="14"></canvas>
+            </div>
+            <div id="gameOverMsg" style="font-size:13px;line-height:1.7;"></div>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+              <button id="btnGameOverReset" class="ui-btn primary" type="button">最初からやり直す</button>
+              <button id="btnGameOverLoadAuto" class="ui-btn success" type="button">AUTOSAVEから再開</button>
+              <button id="btnGameOverLoadPrev" class="ui-btn warn" type="button" style="display:none;">前月からやり直す</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card-body" style="text-align:center;align-items:center;">
-        <div style="font-size:24px;font-weight:900;color:#fca5a5;letter-spacing:0.14em;">GAME OVER</div>
-        <div style="background:#fff;border-radius:6px;padding:6px 14px;">
-          <canvas id="gameOverLogoCanvas" width="160" height="14"></canvas>
-        </div>
-        <div id="gameOverMsg" style="font-size:13px;line-height:1.7;"></div>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <button id="btnGameOverReset" class="ui-btn primary" type="button">最初からやり直す</button>
-          <button id="btnGameOverLoadAuto" class="ui-btn success" type="button">AUTOSAVEから再開</button>
-          <button id="btnGameOverLoadPrev" class="ui-btn warn" type="button" style="display:none;">前月からやり直す</button>
-        </div>
+      <div class="modal-dialogue-box" aria-live="polite">
+        <div class="speaker-badge role-secretary sync-modal-msg-speaker" data-fixed-role="secretary">秘書</div>
+        <div class="modal-dialogue-text sync-modal-msg-main"></div>
       </div>
     </div>
   </div>
 
-  <!-- 5-F. 4カテゴリ サブメニュー／入力／情報閲覧ポップアップ -->
+  <!-- 5-F. 詳細モーダル一体型ユニット（SDキャラ＋設定画面＋メッセージ枠） -->
   <div id="ovModal" class="center-overlay" role="dialog" aria-modal="true">
-    <div id="modalCard" class="glass-card">
-      <div class="card-head">
-        <span id="modalTitle">メニュー</span>
-        <button id="btnModalClose" class="ui-btn sm ghost" type="button">戻る</button>
+    <div id="modalUnit" class="modal-unit">
+      <div class="modal-unit-top">
+        <div id="modalSdStage" class="modal-sd-stage" aria-hidden="true">
+          <img id="modalSdImg" class="modal-sd-img" alt="担当キャラクターSD立ち絵">
+          <div id="modalSdSvgHost" class="modal-sd-svg-host"></div>
+        </div>
+        <div id="modalCard" class="glass-card">
+          <div class="card-head">
+            <span id="modalTitle">メニュー</span>
+            <button id="btnModalClose" class="ui-btn sm ghost" type="button">戻る</button>
+          </div>
+          <div id="modalBody" class="card-body"></div>
+        </div>
       </div>
-      <div id="modalBody" class="card-body"></div>
+      <div id="modalDialogueBox" class="modal-dialogue-box" aria-live="polite">
+        <div id="modalMsgSpeaker" class="speaker-badge role-secretary">秘書</div>
+        <div id="modalMsgMain" class="modal-dialogue-text"></div>
+      </div>
     </div>
   </div>
 
@@ -2017,10 +2268,30 @@
   const ASSET_MANIFEST = {
     bgOffice: "", // 例: "assets/bg_office.png"
     characters: {
-      secretary: { normal: "", happy: "", worried: "" }, // 例: "assets/characters/secretary_normal.png"
-      engineer:  { normal: "", happy: "", worried: "" }, // 例: "assets/characters/engineer_normal.png"
-      factory:   { normal: "", happy: "", worried: "" }, // 例: "assets/characters/factory_normal.png"
-      sales:     { normal: "", happy: "", worried: "" }  // 例: "assets/characters/sales_normal.png"
+      secretary: {
+        normal:  "assets/characters/secretary_normal.webp",
+        happy:   "assets/characters/secretary_happy.webp",
+        worried: "assets/characters/secretary_worried.webp",
+        sd:      "assets/characters/secretary_sd.webp"
+      },
+      engineer: {
+        normal:  "assets/characters/engineer_normal.webp",
+        happy:   "assets/characters/engineer_happy.webp",
+        worried: "assets/characters/engineer_worried.webp",
+        sd:      "assets/characters/engineer_sd.webp"
+      },
+      sales: {
+        normal:  "assets/characters/sales_normal.webp",
+        happy:   "assets/characters/sales_happy.webp",
+        worried: "assets/characters/sales_worried.webp",
+        sd:      "assets/characters/sales_sd.webp"
+      },
+      general_affairs: {
+        normal:  "assets/characters/general_affairs_normal.webp",
+        happy:   "assets/characters/general_affairs_happy.webp",
+        worried: "assets/characters/general_affairs_worried.webp",
+        sd:      "assets/characters/general_affairs_sd.webp"
+      }
     },
     products: {
       8:  "", // 例: "assets/products/pc_8bit.png"
@@ -2029,28 +2300,28 @@
     }
   };
 
-  // 4キャラクター定義と担当コマンドマップ
+  // 4キャラクター定義と担当コマンドマップ（秘書・開発部長・営業担当・総務部長）
   const CHARACTER_META = {
-    secretary: { id: "secretary", name: "秘書",     badgeClass: "role-secretary" },
-    engineer:  { id: "engineer",  name: "開発部長", badgeClass: "role-engineer" },
-    factory:   { id: "factory",   name: "工場長",   badgeClass: "role-factory" },
-    sales:     { id: "sales",     name: "営業担当", badgeClass: "role-sales" }
+    secretary:       { id: "secretary",       name: "秘書",     badgeClass: "role-secretary" },
+    engineer:        { id: "engineer",        name: "開発部長", badgeClass: "role-engineer" },
+    sales:           { id: "sales",           name: "営業担当", badgeClass: "role-sales" },
+    general_affairs: { id: "general_affairs", name: "総務部長", badgeClass: "role-general-affairs" }
   };
 
-  // コマンド番号 → 担当キャラID
+  // コマンド番号 → 担当キャラID（4大カテゴリと完全一致）
   const CMD_ROLE_MAP = {
-    1: "sales",     // 企業買う（選択・確認中は営業担当／買収成立報告は秘書）
-    2: "engineer",  // パソコン開発
-    3: "factory",   // 製造中止
-    4: "sales",     // 価格変える
-    5: "factory",   // パソコン生産
-    6: "sales",     // パソコン売る
-    7: "sales",     // 社員雇う
-    8: "sales",     // 給料変える
-    9: "engineer",  // 技術あげる
-    10: "secretary",// 他社見る
-    11: "factory",  // パソコン一覧
-    12: "secretary" // なにもしない
+    1: "sales",           // 企業買う（営業）
+    2: "engineer",        // パソコン開発（製造）
+    3: "engineer",        // 製造中止（製造）
+    4: "engineer",        // 価格変える（製造）
+    5: "engineer",        // パソコン生産（製造）
+    6: "sales",           // パソコン売る（営業）
+    7: "general_affairs", // 社員雇う（社内）
+    8: "general_affairs", // 給料変える（社内）
+    9: "general_affairs", // 技術あげる（社内）
+    10: "secretary",      // 他社を見る（情報）
+    11: "secretary",      // パソコン一覧（情報）
+    12: "sales"           // なにもしない（営業）
   };
 
   // =========================================================================
@@ -3999,10 +4270,21 @@
   //     ※ASSET_MANIFEST に外部PNGパスを設定すればゲームロジック無変更で差し替え可能
   // =========================================================================
 
-  // 日本語ロール名やIDを正規のキャラIDへ正規化
+  // 日本語ロール名やIDを正規のキャラIDへ正規化（廃止済み factory / 工場長 は安全に engineer へフォールバック）
   function normalizeRoleId(roleOrLabel) {
     if (CHARACTER_META[roleOrLabel]) return roleOrLabel;
-    const map = { "秘書": "secretary", "開発部長": "engineer", "工場長": "factory", "営業担当": "sales", "営業部長": "sales", "人事部長": "sales" };
+    const map = {
+      "秘書": "secretary",
+      "開発部長": "engineer",
+      "factory": "engineer",
+      "工場長": "engineer",
+      "営業担当": "sales",
+      "営業部長": "sales",
+      "総務部長": "general_affairs",
+      "人事部長": "general_affairs",
+      "総務": "general_affairs",
+      "hr": "general_affairs"
+    };
     return map[roleOrLabel] || "secretary";
   }
 
@@ -4015,7 +4297,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // A. 4キャラクター × 3表情（normal / happy / worried）内蔵透過SVG生成
+  // A. 3キャラクター × 3表情（normal / happy / worried）内蔵透過SVG生成
   // -------------------------------------------------------------------------
   function buildSecretarySvg(mood) {
     // 表情パーツ（最優先で親しみやすく可愛い秘書）
@@ -4279,110 +4561,6 @@
     `;
   }
 
-  function buildFactorySvg(mood) {
-    let eyes = `
-      <ellipse cx="109" cy="116" rx="5.5" ry="5.5" fill="#1e293b"/>
-      <circle cx="107.5" cy="114" r="1.8" fill="#ffffff"/>
-      <ellipse cx="151" cy="116" rx="5.5" ry="5.5" fill="#1e293b"/>
-      <circle cx="149.5" cy="114" r="1.8" fill="#ffffff"/>
-    `;
-    let brows = `
-      <path d="M95,103 L121,106" fill="none" stroke="#1c1917" stroke-width="4.4" stroke-linecap="round"/>
-      <path d="M139,106 L165,103" fill="none" stroke="#1c1917" stroke-width="4.4" stroke-linecap="round"/>
-    `;
-    let mouth = `<path d="M116,138 Q130,145 144,136" fill="none" stroke="#7c2d12" stroke-width="2.8" stroke-linecap="round"/>`;
-    let fx = "";
-
-    if (mood === "happy") {
-      eyes = `
-        <path d="M99,117 Q109,106 119,117" fill="none" stroke="#1e293b" stroke-width="3.4" stroke-linecap="round"/>
-        <path d="M141,117 Q151,106 161,117" fill="none" stroke="#1e293b" stroke-width="3.4" stroke-linecap="round"/>
-      `;
-      brows = `
-        <path d="M95,100 Q108,95 120,101" fill="none" stroke="#1c1917" stroke-width="4.2" stroke-linecap="round"/>
-        <path d="M140,101 Q152,95 165,100" fill="none" stroke="#1c1917" stroke-width="4.2" stroke-linecap="round"/>
-      `;
-      mouth = `
-        <path d="M113,134 Q130,153 147,134 Z" fill="#dc2626" stroke="#7c2d12" stroke-width="2"/>
-        <rect x="119" y="135" width="22" height="4" rx="1" fill="#ffffff"/>
-      `;
-      fx = `
-        <path d="M52,82 L56,92 L66,96 L56,100 L52,110 L48,100 L38,96 L48,92 Z" fill="#fde047" stroke="#ea580c" stroke-width="1.2"/>
-        <path d="M206,76 L209,84 L217,87 L209,90 L206,98 L203,90 L195,87 L203,84 Z" fill="#fb923c" stroke="#c2410c" stroke-width="1"/>
-      `;
-    } else if (mood === "worried") {
-      eyes = `
-        <circle cx="109" cy="117" r="4.6" fill="#1e293b"/>
-        <circle cx="108" cy="115.5" r="1.5" fill="#ffffff"/>
-        <circle cx="151" cy="117" r="4.6" fill="#1e293b"/>
-        <circle cx="150" cy="115.5" r="1.5" fill="#ffffff"/>
-      `;
-      brows = `
-        <path d="M96,107 L121,98" fill="none" stroke="#1c1917" stroke-width="4.4" stroke-linecap="round"/>
-        <path d="M139,98 L164,107" fill="none" stroke="#1c1917" stroke-width="4.4" stroke-linecap="round"/>
-      `;
-      mouth = `<path d="M115,142 L121,137 L127,142 L133,137 L139,142 L145,138" fill="none" stroke="#7c2d12" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
-      fx = `
-        <path d="M181,88 C186,99 190,106 184,112 C179,116 173,112 174,106 C175,100 178,94 181,88 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1.4"/>
-        <path d="M77,94 C81,102 84,107 79,111 C75,114 71,111 72,107 C72,102 75,98 77,94 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1.2"/>
-      `;
-    }
-
-    return `
-      <svg viewBox="0 0 260 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="工場長 (${mood})">
-        <defs>
-          <linearGradient id="fac_suit" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#334155"/>
-            <stop offset="100%" stop-color="#1e293b"/>
-          </linearGradient>
-          <linearGradient id="fac_helm" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#fde047"/>
-            <stop offset="65%" stop-color="#f59e0b"/>
-            <stop offset="100%" stop-color="#d97706"/>
-          </linearGradient>
-          <linearGradient id="fac_skin" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#f3c69f"/>
-            <stop offset="100%" stop-color="#dfa273"/>
-          </linearGradient>
-        </defs>
-        <!-- がっしりした濃紺作業着 -->
-        <path d="M106,154 L154,154 L164,174 C204,182 228,212 234,264 L240,320 L20,320 L26,264 C32,212 56,182 96,174 Z" fill="url(#fac_suit)" stroke="#0f172a" stroke-width="2.4"/>
-        <!-- 作業着ジップ＆オレンジライン -->
-        <line x1="130" y1="184" x2="130" y2="320" stroke="#94a3b8" stroke-width="2.5"/>
-        <rect x="46" y="218" width="168" height="8" rx="3" fill="#f97316" fill-opacity="0.88"/>
-        <!-- 胸ポケット＆名札 -->
-        <rect x="156" y="236" width="36" height="28" rx="3" fill="#1e293b" stroke="#64748b" stroke-width="1.6"/>
-        <rect x="70" y="238" width="32" height="12" rx="2" fill="#f8fafc" stroke="#64748b" stroke-width="1.2"/>
-        <!-- 首にかけた白い現場タオル -->
-        <path d="M98,166 C94,192 98,224 102,248 L120,248 C118,224 116,196 118,176 L142,176 C144,196 142,224 140,248 L158,248 C162,224 166,192 162,166 C152,158 108,158 98,166 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
-        <!-- 首 -->
-        <path d="M111,146 L149,146 L151,174 Q130,184 109,174 Z" fill="url(#fac_skin)"/>
-        <!-- 耳 -->
-        <ellipse cx="82" cy="118" rx="7" ry="10" fill="#dfa273" stroke="#9a5c32" stroke-width="1.6"/>
-        <ellipse cx="178" cy="118" rx="7" ry="10" fill="#dfa273" stroke="#9a5c32" stroke-width="1.6"/>
-        <!-- 顔（頼もしい輪郭） -->
-        <path d="M84,92 C84,64 176,64 176,92 C176,128 168,152 130,160 C92,152 84,128 84,92 Z" fill="url(#fac_skin)" stroke="#9a5c32" stroke-width="2"/>
-        <!-- ほのかに無精ひげの影 -->
-        <path d="M100,140 Q130,158 160,140 Q154,154 130,158 Q106,154 100,140 Z" fill="#78350f" fill-opacity="0.14"/>
-        ${brows}
-        ${eyes}
-        <path d="M130,118 L126,129 L134,130" fill="none" stroke="#9a5c32" stroke-width="2" stroke-linecap="round"/>
-        ${mouth}
-        <!-- 額の白鉢巻（ヘルメット下からチラリ） -->
-        <rect x="83" y="82" width="94" height="10" rx="3" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4"/>
-        <!-- 黄色い安全ヘルメット＋緑の安全十字＆センターライン -->
-        <path d="M74,82 C74,40 100,26 130,26 C160,26 186,40 186,82 Z" fill="url(#fac_helm)" stroke="#92400e" stroke-width="2.2"/>
-        <path d="M68,84 Q130,72 192,84 Q188,92 174,90 Q130,82 86,90 Q72,92 68,84 Z" fill="#f59e0b" stroke="#92400e" stroke-width="2"/>
-        <!-- 緑の安全十字マーク -->
-        <rect x="125" y="42" width="10" height="24" rx="1.5" fill="#16a34a"/>
-        <rect x="118" y="49" width="24" height="10" rx="1.5" fill="#16a34a"/>
-        <!-- ヘルメットハイライト -->
-        <path d="M92,50 Q108,38 124,38" fill="none" stroke="#fef9c3" stroke-opacity="0.7" stroke-width="4" stroke-linecap="round"/>
-        ${fx}
-      </svg>
-    `;
-  }
-
   function buildSalesSvg(mood) {
     let eyes = `
       <ellipse cx="109" cy="114" rx="5.6" ry="6.2" fill="#1e293b"/>
@@ -4482,12 +4660,58 @@
     `;
   }
 
+  // 総務部長（general_affairs）内蔵フォールバックSVG（メガネ＋チャコールスーツ＋ファイル）
+  function buildGeneralAffairsSvg(mood) {
+    const eyes = mood === "happy"
+      ? `<path d="M98 118 Q106 111 114 118" fill="none" stroke="#1e293b" stroke-width="2.6" stroke-linecap="round"/>
+         <path d="M126 118 Q134 111 142 118" fill="none" stroke="#1e293b" stroke-width="2.6" stroke-linecap="round"/>`
+      : mood === "worried"
+      ? `<ellipse cx="106" cy="119" rx="5.5" ry="6" fill="#1e3a8a"/><circle cx="104" cy="117" r="2" fill="#fff"/>
+         <ellipse cx="134" cy="119" rx="5.5" ry="6" fill="#1e3a8a"/><circle cx="132" cy="117" r="2" fill="#fff"/>
+         <path d="M97 109 Q106 112 114 106" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+         <path d="M126 106 Q134 112 143 109" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+         <path d="M150 130 Q153 137 150 140 Q147 137 150 130 Z" fill="#93c5fd" stroke="#2563eb" stroke-width="1"/>`
+      : `<ellipse cx="106" cy="118" rx="5.5" ry="6" fill="#1e3a8a"/><circle cx="104" cy="116" r="2" fill="#fff"/>
+         <ellipse cx="134" cy="118" rx="5.5" ry="6" fill="#1e3a8a"/><circle cx="132" cy="116" r="2" fill="#fff"/>
+         <path d="M97 108 Q106 105 114 108" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+         <path d="M126 108 Q134 105 143 108" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round"/>`;
+    const mouth = mood === "happy"
+      ? `<path d="M111 138 Q120 148 129 138 Z" fill="#fb7185" stroke="#9f1239" stroke-width="1.4"/>`
+      : mood === "worried"
+      ? `<path d="M112 142 Q120 137 128 142" fill="none" stroke="#7f1d1d" stroke-width="2.2" stroke-linecap="round"/>`
+      : `<path d="M112 139 Q120 144 128 139" fill="none" stroke="#7f1d1d" stroke-width="2" stroke-linecap="round"/>`;
+    return `
+      <svg viewBox="0 0 240 300" xmlns="http://www.w3.org/2000/svg" aria-label="総務部長(${mood})">
+        <!-- 後ろ髪 -->
+        <path d="M68 110 C60 155 62 195 72 215 L168 215 C178 195 180 155 172 110 C166 56 146 38 120 38 C94 38 74 56 68 110 Z" fill="#574c45" stroke="#2d2622" stroke-width="2"/>
+        <!-- チャコールスーツ＆ブラウス＆社員証 -->
+        <path d="M40 300 L52 214 C56 196 78 186 100 182 L140 182 C162 186 184 196 188 214 L200 300 Z" fill="#334155" stroke="#1e293b" stroke-width="2"/>
+        <path d="M98 182 L120 246 L142 182 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+        <path d="M104 185 L120 258 L136 185" fill="none" stroke="#1d4ed8" stroke-width="3.5"/>
+        <rect x="108" y="256" width="24" height="18" rx="3" fill="#f8fafc" stroke="#475569" stroke-width="1.5"/>
+        <!-- 首・顔 -->
+        <rect x="108" y="152" width="24" height="34" rx="10" fill="#fde2cc"/>
+        <path d="M84 104 C84 74 100 62 120 62 C140 62 156 74 156 104 C156 138 140 158 120 160 C100 158 84 138 84 104 Z" fill="#ffe6d5" stroke="#c89b7e" stroke-width="1.6"/>
+        <!-- 前髪 -->
+        <path d="M78 106 C80 62 100 46 120 46 C140 46 160 62 162 106 C152 84 140 76 126 76 C118 92 104 102 86 108 Z" fill="#6b5e55" stroke="#2d2622" stroke-width="1.6"/>
+        <!-- 表情＆メガネ -->
+        ${eyes}
+        <ellipse cx="106" cy="118" rx="13" ry="9" fill="none" stroke="#334155" stroke-width="2"/>
+        <ellipse cx="134" cy="118" rx="13" ry="9" fill="none" stroke="#334155" stroke-width="2"/>
+        <line x1="119" y1="118" x2="121" y2="118" stroke="#334155" stroke-width="2"/>
+        ${mouth}
+        <!-- バインダーファイル -->
+        <polygon points="154,228 192,206 198,290 160,300" fill="#a88b6d" stroke="#5c4632" stroke-width="2"/>
+      </svg>
+    `;
+  }
+
   function buildCharacterSvg(role, mood) {
     const r = normalizeRoleId(role);
     const m = (mood === "happy" || mood === "worried") ? mood : "normal";
-    if (r === "engineer") return buildEngineerSvg(m);
-    if (r === "factory")  return buildFactorySvg(m);
-    if (r === "sales")    return buildSalesSvg(m);
+    if (r === "engineer")        return buildEngineerSvg(m);
+    if (r === "sales")           return buildSalesSvg(m);
+    if (r === "general_affairs") return buildGeneralAffairsSvg(m);
     return buildSecretarySvg(m);
   }
 
@@ -4653,6 +4877,95 @@
     return "normal";
   }
 
+  // SD画像が未配置(404)だったURLを記録し、次回以降のチラつきを防ぐキャッシュ
+  const sdMissingUrls = new Set();
+
+  // 指定ステージにSDキャラを描画（sd → normal → 内蔵SVG の3段階フォールバック）
+  function renderSdIntoStage(stage, img, host, role, mood) {
+    const r = normalizeRoleId(role);
+    const m = (mood === "happy" || mood === "worried") ? mood : "normal";
+    if (stage && stage.setAttribute) {
+      stage.setAttribute("data-char-role", r);
+      stage.setAttribute("data-char-mood", m);
+    }
+
+    const charCfg = ASSET_MANIFEST.characters[r] || {};
+    const sdUrl = charCfg.sd ? String(charCfg.sd).trim() : "";
+    const normalUrl = charCfg.normal ? String(charCfg.normal).trim() : "";
+
+    const showSvgFallback = () => {
+      if (img) {
+        img.style.display = "none";
+        if (img.setAttribute) img.setAttribute("data-sd-mode", "svg");
+      }
+      if (host) {
+        host.style.display = "flex";
+        host.innerHTML = buildCharacterSvg(r, m);
+      }
+    };
+
+    const loadImgUrl = (url, mode, onFail) => {
+      if (!img) { showSvgFallback(); return; }
+      if (host) {
+        host.innerHTML = buildCharacterSvg(r, m);
+        host.style.display = "none";
+      }
+      img.onerror = onFail;
+      img.onload = () => {
+        img.style.display = "block";
+        if (host) host.style.display = "none";
+      };
+      const prevExt = img.getAttribute ? img.getAttribute("data-ext-src") : "";
+      if (img.setAttribute) img.setAttribute("data-sd-mode", mode);
+      if (prevExt !== url || !img.src) {
+        if (img.setAttribute) img.setAttribute("data-ext-src", url);
+        img.src = url;
+      }
+      img.style.display = "block";
+    };
+
+    if (sdUrl && !sdMissingUrls.has(sdUrl)) {
+      loadImgUrl(sdUrl, "sd", () => {
+        sdMissingUrls.add(sdUrl);
+        if (normalUrl) {
+          loadImgUrl(normalUrl, "fallback-normal", showSvgFallback);
+        } else {
+          showSvgFallback();
+        }
+      });
+    } else if (normalUrl) {
+      loadImgUrl(normalUrl, "fallback-normal", showSvgFallback);
+    } else {
+      if (img && img.removeAttribute) {
+        img.removeAttribute("src");
+        img.removeAttribute("data-ext-src");
+      }
+      showSvgFallback();
+    }
+  }
+
+  // 全オーバーレイ一体型ユニットのSDキャラ＆名前バッジ同期描画
+  function renderModalCharacter(role, mood, speakerOverride) {
+    const r = normalizeRoleId(role);
+    const m = (mood === "happy" || mood === "worried") ? mood : "normal";
+    renderSdIntoStage($("modalSdStage"), $("modalSdImg"), $("modalSdSvgHost"), r, m);
+
+    const badge = $("modalMsgSpeaker");
+    if (badge) {
+      badge.textContent = speakerOverride || CHARACTER_META[r].name;
+      badge.classList.remove("role-secretary", "role-engineer", "role-sales", "role-general-affairs");
+      badge.classList.add(CHARACTER_META[r].badgeClass);
+    }
+
+    // タイトル・会社選択・決算・エンディング・ゲームオーバーの固定SDステージも同期
+    document.querySelectorAll(".sync-sd-stage").forEach((st) => {
+      const fixedRole = (st.getAttribute && st.getAttribute("data-fixed-role")) || r;
+      const stImg = st.querySelector ? st.querySelector(".modal-sd-img") : null;
+      const stHost = st.querySelector ? st.querySelector(".modal-sd-svg-host") : null;
+      renderSdIntoStage(st, stImg, stHost, fixedRole, m);
+    });
+  }
+
   // -------------------------------------------------------------------------
   // D. 独立キャラクター立ち絵描画関数（外部PNG差し替え＋ADV切替アニメ）
   // -------------------------------------------------------------------------
@@ -4688,12 +5001,19 @@
         img.style.display = "block";
         host.style.display = "none";
       };
-      img.src = extUrl;
+      const prevExt = img.getAttribute ? img.getAttribute("data-ext-src") : "";
+      if (prevExt !== extUrl || !img.src) {
+        if (img.setAttribute) img.setAttribute("data-ext-src", extUrl);
+        img.src = extUrl;
+      }
       img.style.display = "block";
     } else {
       if (img) {
         img.style.display = "none";
-        img.removeAttribute("src");
+        if (img.removeAttribute) {
+          img.removeAttribute("src");
+          img.removeAttribute("data-ext-src");
+        }
       }
       if (host) {
         host.style.display = "flex";
@@ -4704,9 +5024,12 @@
     // 話者バッジの色もキャラに合わせる
     const badge = $("msgSpeaker");
     if (badge) {
-      badge.classList.remove("role-secretary", "role-engineer", "role-factory", "role-sales");
+      badge.classList.remove("role-secretary", "role-engineer", "role-sales", "role-general-affairs");
       badge.classList.add(CHARACTER_META[r].badgeClass);
     }
+
+    // 詳細モーダル側のSDキャラ＆名前バッジも連動同期
+    renderModalCharacter(r, m);
 
     // 控えめなADV風スライド＆フェード演出（キャラまたは表情が変化した時）
     if (changed && frame) {
@@ -4729,7 +5052,8 @@
     fastText: false,
     typeTimer: null,
     currentRole: null,
-    currentMood: null
+    currentMood: null,
+    lastDialogueText: ""
   };
 
   let toastTimer = null;
@@ -4746,23 +5070,39 @@
     const mood = (typeof moodOrCtx === "string")
       ? moodOrCtx
       : determineCharacterMood(moodOrCtx || { phase: engine.phase });
-    $("msgSpeaker").textContent = speaker || CHARACTER_META[roleId].name;
+    const speakerLabel = speaker || CHARACTER_META[roleId].name;
+    $("msgSpeaker").textContent = speakerLabel;
     renderCharacter(roleId, mood);
+    renderModalCharacter(roleId, mood, speakerLabel);
+
+    stateUI.lastDialogueText = text || "";
 
     if (stateUI.typeTimer) {
       clearInterval(stateUI.typeTimer);
       stateUI.typeTimer = null;
     }
     const el = $("msgMain");
+    const modalEl = $("modalMsgMain");
+    const syncMains = document.querySelectorAll(".sync-modal-msg-main");
+    const syncSpeakers = document.querySelectorAll(".sync-modal-msg-speaker");
+    syncSpeakers.forEach((sp) => {
+      const fixed = sp.getAttribute && sp.getAttribute("data-fixed-role");
+      sp.textContent = fixed ? CHARACTER_META[normalizeRoleId(fixed)].name : speakerLabel;
+    });
+    const setAllMsgText = (t) => {
+      el.textContent = t;
+      if (modalEl) modalEl.textContent = t;
+      syncMains.forEach((mEl) => { mEl.textContent = t; });
+    };
     if (stateUI.fastText || !text) {
-      el.textContent = text;
+      setAllMsgText(text);
       return;
     }
-    el.textContent = "";
+    setAllMsgText("");
     let idx = 0;
     stateUI.typeTimer = setInterval(() => {
       idx++;
-      el.textContent = text.slice(0, idx);
+      setAllMsgText(text.slice(0, idx));
       if (idx % 2 === 1) audio.beepClick();
       if (idx >= text.length) {
         clearInterval(stateUI.typeTimer);
@@ -4863,7 +5203,7 @@
     }
     const bits = sd[3];
     const name = engine.PN[slot];
-    renderCharacter("factory", determineCharacterMood({ phase: engine.phase }));
+    renderCharacter("engineer", determineCharacterMood({ phase: engine.phase }));
 
     openModal(`NO.${slot} ${name} (${bits}BIT) — クイック操作`, `
       <div style="display:flex;align-items:center;gap:10px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:9px;padding:9px 10px;">
@@ -4878,15 +5218,15 @@
       </div>
       <div class="submenu-list">
         <button type="button" id="qActProduce" class="ui-btn submenu-item">
-          <span><strong>5. パソコン生産</strong><br><span class="submenu-meta">この機種の在庫を追加生産する</span></span>
+          <span><strong>パソコン生産</strong><br><span class="submenu-meta">この機種の在庫を追加生産する</span></span>
           <span style="color:#2563eb;">▶</span>
         </button>
         <button type="button" id="qActPrice" class="ui-btn submenu-item">
-          <span><strong>4. 価格変える</strong><br><span class="submenu-meta">この機種の定価を調整する</span></span>
+          <span><strong>価格変える</strong><br><span class="submenu-meta">この機種の定価を調整する</span></span>
           <span style="color:#2563eb;">▶</span>
         </button>
         <button type="button" id="qActStop" class="ui-btn submenu-item" style="border-color:#fca5a5;">
-          <span><strong style="color:#b91c1c;">3. 製造中止</strong><br><span class="submenu-meta">この機種スロットを削除する</span></span>
+          <span><strong style="color:#b91c1c;">製造中止</strong><br><span class="submenu-meta">この機種スロットを削除する</span></span>
           <span style="color:#dc2626;">▶</span>
         </button>
       </div>
@@ -5001,10 +5341,20 @@
     document.querySelectorAll(".cat-btn").forEach((b) => b.classList.remove("active"));
   }
 
-  function openModal(title, html, { wide = false, onReady = null } = {}) {
+  function openModal(title, html, { wide = false, role = null, onReady = null } = {}) {
     closeCategoryMenu();
     $("modalTitle").textContent = title;
     $("modalCard").classList.toggle("wide", wide);
+    const unit = $("modalUnit");
+    if (unit) unit.classList.toggle("wide", wide);
+    const activeRole = normalizeRoleId(role || stateUI.currentRole || "secretary");
+    const activeMood = stateUI.currentMood || determineCharacterMood({ phase: engine.phase });
+    renderModalCharacter(activeRole, activeMood);
+    const modalEl = $("modalMsgMain");
+    if (modalEl) {
+      const curText = ($("msgMain") && $("msgMain").textContent) || stateUI.lastDialogueText || "";
+      if (curText) modalEl.textContent = curText;
+    }
     const body = $("modalBody");
     body.innerHTML = html;
     $("ovModal").classList.add("active");
@@ -5016,34 +5366,34 @@
     closeCategoryMenu();
   }
 
-  // 4大カテゴリ定義（全12コマンド＋自社詳細を網羅）
+  // 4大カテゴリ定義（全12コマンド＋自社詳細を網羅・4キャラと1対1対応）
   const CATEGORIES = {
     mfg: {
       title: "⚙ 製造 — パソコンの開発・生産・価格",
       role: "engineer",
       items: [
-        { label: "2. パソコン開発", meta: "新機種を8/16/32bitで開発", nonTurn: false, action: () => openCommandForm(2) },
-        { label: "5. パソコン生産", meta: "開発済み機種の在庫を生産", nonTurn: false, action: () => openCommandForm(5) },
-        { label: "4. 価格変える",   meta: "発売中機種の定価を変更",   nonTurn: false, action: () => openCommandForm(4) },
-        { label: "3. 製造中止",     meta: "機種スロットを1つ削除",    nonTurn: false, action: () => openCommandForm(3) }
+        { label: "パソコン開発", meta: "新機種を8/16/32bitで開発", nonTurn: false, action: () => openCommandForm(2) },
+        { label: "パソコン生産", meta: "開発済み機種の在庫を生産", nonTurn: false, action: () => openCommandForm(5) },
+        { label: "価格変える",   meta: "発売中機種の定価を変更",   nonTurn: false, action: () => openCommandForm(4) },
+        { label: "製造中止",     meta: "機種スロットを1つ削除",    nonTurn: false, action: () => openCommandForm(3) }
       ]
     },
     sales: {
       title: "💼 営業 — 販売促進・企業買収・待機",
       role: "sales",
       items: [
-        { label: "6. パソコン売る", meta: "今月の販売を促進する",      nonTurn: false, action: () => openCommandForm(6) },
-        { label: "1. 企業買う",     meta: "ライバル他社を買収する",    nonTurn: false, action: () => openCommandForm(1) },
-        { label: "12. なにもしない", meta: "何もせず今月を終了する",    nonTurn: false, action: () => openCommandForm(12) }
+        { label: "パソコン売る", meta: "今月の販売を促進する",      nonTurn: false, action: () => openCommandForm(6) },
+        { label: "企業買う",     meta: "ライバル他社を買収する",    nonTurn: false, action: () => openCommandForm(1) },
+        { label: "なにもしない", meta: "何もせず今月を終了する",    nonTurn: false, action: () => openCommandForm(12) }
       ]
     },
     hr: {
       title: "👥 社内 — 人事・給与・技術研究",
-      role: "sales",
+      role: "general_affairs",
       items: [
-        { label: "7. 社員雇う",     meta: "社員を増やし技術も少し上昇", nonTurn: false, action: () => openCommandForm(7) },
-        { label: "8. 給料変える",   meta: "1人あたり月給を変更",        nonTurn: false, action: () => openCommandForm(8) },
-        { label: "9. 技術あげる",   meta: "無料で技術力を1.1倍に強化",  nonTurn: false, action: () => openCommandForm(9) }
+        { label: "社員雇う",     meta: "社員を増やし技術も少し上昇", nonTurn: false, action: () => openCommandForm(7) },
+        { label: "給料変える",   meta: "1人あたり月給を変更",        nonTurn: false, action: () => openCommandForm(8) },
+        { label: "技術あげる",   meta: "無料で技術力を1.1倍に強化",  nonTurn: false, action: () => openCommandForm(9) }
       ]
     },
     info: {
@@ -5051,8 +5401,8 @@
       role: "secretary",
       items: [
         { label: "自社ステータス詳細", meta: "自社の財務・人員の詳細を確認", nonTurn: true, action: () => openCompanyStatusModal(engine.PM) },
-        { label: "10. 他社見る",       meta: "ライバル各社のステータス調査", nonTurn: true, action: () => openCommandForm(10) },
-        { label: "11. パソコン一覧",   meta: "開発済みパソコン NO.0〜7",     nonTurn: true, action: () => openPcListModal() }
+        { label: "他社を見る",         meta: "ライバル各社のステータス調査", nonTurn: true, action: () => openCommandForm(10) },
+        { label: "パソコン一覧",       meta: "開発済みパソコン NO.0〜7",     nonTurn: true, action: () => openPcListModal() }
       ]
     }
   };
@@ -5141,7 +5491,7 @@
       ["技術",       Math.round(st[6]).toLocaleString("ja-JP"), "", false],
       ["シェア",     `${Math.floor(st[7])}%`, `累計販売: ${Math.floor(st[8]).toLocaleString()}台`, false]
     ];
-    openModal(`${cid}. ${COMPANY_NAMES[cid]} ステータス`, `
+    openModal(`${COMPANY_NAMES[cid]} ステータス`, `
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f1f5f9;padding:8px 10px;border-radius:8px;border:1px solid #cbd5e1;">
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="dock-logo-pill"><canvas id="mStatusLogo" width="120" height="14"></canvas></span>
@@ -5174,8 +5524,8 @@
 
   function openPcListModal() {
     const res = engine.executeCommand(11);
-    setDialogue("工場長", res.message, "factory");
-    openModal("11. 開発パソコン一覧 (NO.0〜7)", `
+    setDialogue("秘書", res.message, "secretary");
+    openModal("開発パソコン一覧 (NO.0〜7)", `
       <div class="pc-card-grid">
         ${Array.from({ length: 8 }, (_, u) => {
           const sd = engine.SD[u];
@@ -5248,7 +5598,7 @@
 
     // 6: パソコン売る / 9: 技術あげる / 12: なにもしない
     if (cmdId === 6 || cmdId === 9 || cmdId === 12) {
-      const titles = { 6: "6. パソコン売る", 9: "9. 技術あげる", 12: "12. なにもしない" };
+      const titles = { 6: "パソコン売る", 9: "技術あげる", 12: "なにもしない" };
       const hints = {
         6: "今月のパソコン販売を促進します（ターン消費）。",
         9: "費用なしで技術力を1.1倍に引き上げます（ターン消費）。",
@@ -5272,7 +5622,7 @@
     // 1: 企業買う（5社ボタン一覧 → 誤タップ防止の2ステップ確認）
     if (cmdId === 1) {
       const showBuyList = () => {
-        openModal("1. 企業買う — 買収対象を選択", `
+        openModal("企業買う — 買収対象を選択", `
           <div class="comp-pick-list">
             ${[1,2,3,4,5].map((i) => {
               const isSelf = i === engine.PM;
@@ -5290,7 +5640,7 @@
                 <button type="button" class="comp-pick-btn ${cls}" data-cid="${i}">
                   <span class="comp-pick-left">
                     <span class="dock-logo-pill"><canvas id="buyLogo_${i}" width="78" height="12"></canvas></span>
-                    <span><strong>${i}. ${COMPANY_NAMES[i]}</strong><br><span style="font-size:11px;color:#64748b;">シェア ${alive ? share + "%" : "0%"}</span></span>
+                    <span><strong>${COMPANY_NAMES[i]}</strong><br><span style="font-size:11px;color:#64748b;">シェア ${alive ? share + "%" : "0%"}</span></span>
                   </span>
                   <span class="comp-pick-right">${statusTxt}</span>
                 </button>
@@ -5327,7 +5677,7 @@
         const curCash = engine.ST[engine.PM][0];
         const afterCash = curCash - price;
         const canAfford = price <= curCash;
-        openModal(`1. 企業買う — 買収確認`, `
+        openModal(`企業買う — 買収確認`, `
           <div style="display:flex;align-items:center;justify-content:center;gap:10px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:9px;padding:10px;">
             <span class="dock-logo-pill"><canvas id="buyConfLogo" width="110" height="14"></canvas></span>
             <strong>${COMPANY_NAMES[targetId]}</strong>
@@ -5363,7 +5713,7 @@
       const initUnitCost = engine.getUnitCost(selectedBits);
       let currentPrice = Math.round(initUnitCost * 1.5 / 1000) * 1000;
 
-      openModal("2. パソコン開発", `
+      openModal("パソコン開発", `
         <div class="form-row">
           <label>開発スロット NO (0〜7)</label>
           <div id="mSlotGrid" class="slot-pick-grid">
@@ -5517,14 +5867,14 @@
     if (cmdId === 3) {
       const devSlots = Array.from({ length: 8 }, (_, u) => u).filter((u) => engine.SD[u][4] !== 0);
       if (devSlots.length === 0) {
-        openModal("3. 製造中止", `
+        openModal("製造中止", `
           <div class="hint-box warn">現在、開発済みのパソコンがありません。</div>
           <button id="mCancel" class="ui-btn primary" type="button">戻る</button>
         `, { onReady: () => $("mCancel").addEventListener("click", closeModal) });
         return;
       }
       let selectedSlot = devSlots.includes(opts.slot) ? opts.slot : devSlots[0];
-      openModal("3. 製造中止 — 機種を選択", `
+      openModal("製造中止 — 機種を選択", `
         <div id="mStopList" class="pc-pick-list">
           ${devSlots.map((u) => `
             <button type="button" class="pc-pick-card ${u === selectedSlot ? "selected" : ""}" data-slot="${u}">
@@ -5564,7 +5914,7 @@
     if (cmdId === 4) {
       const devSlots = Array.from({ length: 8 }, (_, u) => u).filter((u) => engine.SD[u][4] !== 0);
       if (devSlots.length === 0) {
-        openModal("4. 価格変える", `
+        openModal("価格変える", `
           <div class="hint-box warn">現在、開発済みのパソコンがありません。先に「パソコン開発」を行ってください。</div>
           <button id="mCancel" class="ui-btn primary" type="button">戻る</button>
         `, { onReady: () => $("mCancel").addEventListener("click", closeModal) });
@@ -5573,7 +5923,7 @@
       let selectedSlot = devSlots.includes(opts.slot) ? opts.slot : devSlots[0];
       let currentPrice = Math.round(engine.SD[selectedSlot][0]);
 
-      openModal("4. 価格変える", `
+      openModal("価格変える", `
         <div class="form-row">
           <label>価格を変える機種を選択</label>
           <div id="mPriceList" class="pc-pick-list">
@@ -5684,7 +6034,7 @@
     if (cmdId === 5) {
       const devSlots = Array.from({ length: 8 }, (_, u) => u).filter((u) => engine.SD[u][4] !== 0);
       if (devSlots.length === 0) {
-        openModal("5. パソコン生産", `
+        openModal("パソコン生産", `
           <div class="hint-box warn">現在、開発済みのパソコンがありません。先に「パソコン開発」を行ってください。</div>
           <button id="mCancel" class="ui-btn primary" type="button">戻る</button>
         `, { onReady: () => $("mCancel").addEventListener("click", closeModal) });
@@ -5693,7 +6043,7 @@
       let selectedSlot = devSlots.includes(opts.slot) ? opts.slot : devSlots[0];
       const maxProd = engine.getMaxProduction();
 
-      openModal("5. パソコン生産", `
+      openModal("パソコン生産", `
         <div class="form-row">
           <label>生産する機種を選択</label>
           <div id="mProdList" class="pc-pick-list">
@@ -5810,7 +6160,7 @@
       const sliderMax = 100000;
       const curStaff = engine.ST[engine.PM][4];
       const curSal = engine.ST[engine.PM][5];
-      openModal("7. 社員雇う", `
+      openModal("社員雇う", `
         <div class="slider-group">
           <div class="slider-top-row">
             <label for="mHireCount">雇う人数（人）${engine.bugFixMode ? " ※上限10万" : ""}</label>
@@ -5880,7 +6230,7 @@
       const curStaff = engine.ST[engine.PM][4];
       const maxSal = Math.max(200, curSal * 2);
 
-      openModal("8. 給料変える", `
+      openModal("給料変える", `
         <div class="slider-group">
           <div class="slider-top-row">
             <label for="mSalary">1人あたり月給（万円）</label>
@@ -5945,7 +6295,7 @@
 
     // 10: 他社見る（5社ボタン一覧から直接タップ・ターン消費なし）
     if (cmdId === 10) {
-      openModal("10. 他社見る（ターン消費なし）", `
+      openModal("他社を見る（ターン消費なし）", `
         <div class="comp-pick-list">
           ${[1,2,3,4,5].map((i) => {
             const isSelf = i === engine.PM;
@@ -5956,7 +6306,7 @@
               <button type="button" class="comp-pick-btn ${cls}" data-cid="${i}">
                 <span class="comp-pick-left">
                   <span class="dock-logo-pill"><canvas id="viewLogo_${i}" width="78" height="12"></canvas></span>
-                  <span><strong>${i}. ${COMPANY_NAMES[i]}</strong><br><span style="font-size:11px;color:#64748b;">${isSelf ? "自社" : (alive ? "ライバル（生存）" : "買収済（倒産）")}</span></span>
+                  <span><strong>${COMPANY_NAMES[i]}</strong><br><span style="font-size:11px;color:#64748b;">${isSelf ? "自社" : (alive ? "ライバル（生存）" : "買収済（倒産）")}</span></span>
                 </span>
                 <span class="comp-pick-right num"><strong>ｼｪｱ ${alive ? share + "%" : "0%"}</strong><br><span style="color:#2563eb;font-size:10px;">詳細を見る ▶</span></span>
               </button>
@@ -6016,8 +6366,8 @@
 
     renderAll();
 
-    // 買収結果・決算・エンディング・ゲームオーバーは秘書、それ以外は各担当キャラが報告
-    const resultRole = (cmdId === 1 || engine.phase === "settlement" || engine.phase === "ending" || engine.phase === "game_over")
+    // 決算・エンディング・ゲームオーバーは秘書、それ以外は各カテゴリ担当キャラが報告
+    const resultRole = (engine.phase === "settlement" || engine.phase === "ending" || engine.phase === "game_over")
       ? "secretary"
       : (CMD_ROLE_MAP[cmdId] || "secretary");
     const speakerName = CHARACTER_META[resultRole].name;
@@ -6039,7 +6389,7 @@
       card.className = "comp-card";
       card.innerHTML = `
         <div class="comp-logo-wrap"><canvas width="140" height="14"></canvas></div>
-        <div style="font-size:12px;font-weight:800;text-align:center;color:#1e3a8a;">${i}. ${COMPANY_NAMES[i]} <span style="font-size:10px;color:#64748b;">${COMPANY_DIFF[i]}</span></div>
+        <div style="font-size:12px;font-weight:800;text-align:center;color:#1e3a8a;">${COMPANY_NAMES[i]} <span style="font-size:10px;color:#64748b;">${COMPANY_DIFF[i]}</span></div>
         <dl class="mini-dl num">
           <dt>運営金</dt><dd>${formatManYenShort(st[0])}</dd>
           <dt>社員/月給</dt><dd>${st[4].toLocaleString()}人 / ${st[5]}万</dd>
@@ -6217,8 +6567,10 @@
 
     if (engine.phase === "title") {
       drawDotLogo($("titleLogoCanvas"), 5);
+      renderModalCharacter("secretary", "normal", "秘書");
     } else if (engine.phase === "select") {
       renderSelectCards();
+      renderModalCharacter("secretary", "normal", "秘書");
     } else if (engine.phase === "settlement") {
       renderSettlement();
       renderCharacter("secretary", determineCharacterMood({ phase: "settlement", settlement: engine.lastSettlement }));
@@ -6270,7 +6622,7 @@
     closeModal();
   });
   $("ovModal").addEventListener("click", (e) => {
-    if (e.target === $("ovModal")) {
+    if (e.target === $("ovModal") || e.target === $("modalUnit")) {
       audio.playSE("cancel");
       closeModal();
     }
@@ -6283,7 +6635,7 @@
     audio.startBGM();
     engine.goToSelect();
     renderAll();
-    setDialogue("案内", "ｶｲｼｬｦ ｴﾗﾝﾃﾞｸﾀﾞｻｲ — 社長となる1社を選んでください。", "秘書");
+    setDialogue("秘書", "ｶｲｼｬｦ ｴﾗﾝﾃﾞｸﾀﾞｻｲ — 社長となる1社を選んでください。", "secretary");
   });
 
   $("btnContinueAuto").addEventListener("click", () => {
@@ -6295,6 +6647,7 @@
     audio.stopBGM();
     engine.resetToTitle();
     renderAll();
+    setDialogue("秘書", "HARD MAKER へようこそ！ゲームスタートを押してください。", "secretary");
   });
 
   $("btnEndingContinue").addEventListener("click", () => {
@@ -6436,11 +6789,12 @@
     FM7Audio, JupiterArrangeAudio, RemakeAudio, SEASON_STYLE_DEFAULTS,
     ASSET_MANIFEST, CHARACTER_META, CMD_ROLE_MAP,
     formatManYen, formatManYenShort, formatYen,
-    determineCharacterMood, renderCharacter, renderPcIcon, buildCharacterSvg, buildPcIconSvg, applyManifestBackground,
+    determineCharacterMood, normalizeRoleId, renderCharacter, renderModalCharacter, renderPcIcon, buildCharacterSvg, buildPcIconSvg, applyManifestBackground,
     CATEGORIES, openCategoryMenu, closeCategoryMenu, openCommandForm, openPcQuickActionModal, renderPcDock, saveAutosave, loadGameFromData, closeModal, renderAll
   };
 
   applyManifestBackground();
+  stateUI.lastDialogueText = "HARD MAKER へようこそ！ゲームスタートを押してください。";
   renderAll();
 })();
 </script>
